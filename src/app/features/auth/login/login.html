@@ -1,0 +1,58 @@
+<div class="auth-page">
+  <div class="auth-grid">
+    <div class="auth-intro">
+      <span class="brand">
+        <span>📊</span>
+        MeuFinanceiro
+      </span>
+      <p>Controle seus gastos com simplicidade.</p>
+    </div>
+
+    <div class="auth-card card">
+      <h1>Entrar na conta</h1>
+      <p>Acesse sua conta para continuar</p>
+
+      <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="seu@email.com"
+            [class.is-invalid]="form.controls.email.invalid && form.controls.email.touched"
+          />
+          @if (form.controls.email.invalid && form.controls.email.touched) {
+            <span class="field-error">Informe um e-mail válido.</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="password">Senha</label>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            placeholder="••••••••"
+            [class.is-invalid]="form.controls.password.invalid && form.controls.password.touched"
+          />
+          @if (form.controls.password.invalid && form.controls.password.touched) {
+            <span class="field-error">Informe sua senha.</span>
+          }
+        </div>
+
+        @if (errorMessage()) {
+          <div class="banner banner-error">{{ errorMessage() }}</div>
+        }
+
+        <button type="submit" class="btn btn-primary btn-block" [disabled]="loading()">
+          {{ loading() ? 'Entrando...' : 'Entrar' }}
+        </button>
+      </form>
+
+      <p class="auth-footer">
+        Não tem uma conta? <a routerLink="/cadastro">Cadastre-se</a>
+      </p>
+    </div>
+  </div>
+</div>

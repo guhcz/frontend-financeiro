@@ -1,0 +1,6 @@
+<span class="badge" [style.background]="color() ? color() + '1a' : null" [style.color]="color() || null">
+  @if (icon()) {
+    <span>{{ icon() }}</span>
+  }
+  {{ label() }}
+</span>

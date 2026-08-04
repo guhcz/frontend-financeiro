@@ -1,0 +1,9 @@
+:host {
+  display: inline-flex;
+}
+
+.badge {
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}

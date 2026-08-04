@@ -1,0 +1,37 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-icon">📊</span>
+      <span class="brand-name">MeuFinanceiro</span>
+    </div>
+
+    <nav class="nav">
+      <a routerLink="/despesas" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">🧾</span>
+        Despesas
+      </a>
+      <a routerLink="/categorias" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">🏷️</span>
+        Categorias
+      </a>
+      <a routerLink="/limite-mensal" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">🎯</span>
+        Limite mensal
+      </a>
+      <span class="nav-item disabled" title="Em breve">
+        <span class="nav-icon">📈</span>
+        Gráficos
+        <span class="nav-tag">Em breve</span>
+      </span>
+    </nav>
+
+    <button type="button" class="nav-item logout" (click)="logout()">
+      <span class="nav-icon">🚪</span>
+      Sair
+    </button>
+  </aside>
+
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

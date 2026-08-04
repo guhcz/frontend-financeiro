@@ -1,0 +1,11 @@
+<div class="modal-overlay" (click)="onOverlayClick($event)">
+  <div class="modal-panel" role="dialog" aria-modal="true">
+    <header class="modal-header">
+      <h2>{{ title() }}</h2>
+      <button type="button" class="icon-btn" (click)="closed.emit()" aria-label="Fechar">✕</button>
+    </header>
+    <div class="modal-body">
+      <ng-content></ng-content>
+    </div>
+  </div>
+</div>

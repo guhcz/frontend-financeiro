@@ -1,0 +1,83 @@
+<div class="page-header">
+  <div>
+    <h1>Limite mensal</h1>
+    <p>Defina e acompanhe seus gastos de cada mês</p>
+  </div>
+  <button type="button" class="btn btn-primary" (click)="openCreate()">+ Novo limite</button>
+</div>
+
+<div class="banner banner-info top-banner">
+  <span>💡</span>
+  <div>
+    <strong>Dica</strong>
+    Você pode comparar seus gastos com o limite definido nos filtros de período na tela de Despesas.
+  </div>
+</div>
+
+<div class="card list-card">
+  @if (loading()) {
+    <div class="list-loading">Carregando limites...</div>
+  } @else if (listError()) {
+    <div class="banner banner-error top-banner" style="margin: var(--space-4)">{{ listError() }}</div>
+  } @else if (limits().length === 0) {
+    <app-empty-state
+      icon="🎯"
+      title="Você ainda não definiu limites"
+      description="Defina seus limites mensais para ter mais controle dos seus gastos."
+      actionLabel="Definir limite"
+      (action)="openCreate()"
+    ></app-empty-state>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Mês/Ano</th>
+            <th>Limite (R$)</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (limit of limits(); track limit.id) {
+            <tr>
+              <td>{{ monthName(limit.month) }} / {{ limit.year }}</td>
+              <td>{{ limit.amount | currency: 'BRL' }}</td>
+              <td>
+                <button type="button" class="icon-btn" (click)="openEdit(limit)" aria-label="Editar limite">
+                  ✏️
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn danger"
+                  (click)="requestDelete(limit)"
+                  aria-label="Excluir limite"
+                >
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+@if (modalOpen()) {
+  <app-monthly-limit-form-modal
+    [limit]="editingLimit()"
+    [saving]="saving()"
+    [errorMessage]="saveError()"
+    (save)="save($event)"
+    (closed)="closeModal()"
+  ></app-monthly-limit-form-modal>
+}
+
+@if (limitPendingDelete(); as limit) {
+  <app-confirm-dialog
+    title="Excluir limite"
+    [message]="'Tem certeza que deseja excluir o limite de ' + monthName(limit.month) + '/' + limit.year + '?'"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()"
+  ></app-confirm-dialog>
+}

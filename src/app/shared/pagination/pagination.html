@@ -1,0 +1,38 @@
+<div class="pagination">
+  <span class="pagination-summary">
+    @if (totalElements() === 0) {
+      Nenhum resultado
+    } @else {
+      Mostrando {{ rangeStart() }} a {{ rangeEnd() }} de {{ totalElements() }} {{ itemLabel() }}
+    }
+  </span>
+
+  <div class="pagination-controls">
+    <button type="button" class="btn btn-secondary" [disabled]="first()" (click)="goTo(page() - 1)">
+      ‹ Anterior
+    </button>
+
+    @for (p of pageNumbers(); track $index) {
+      @if (p === 'ellipsis') {
+        <span class="pagination-ellipsis">…</span>
+      } @else {
+        <button type="button" class="pagination-page" [class.active]="p === page()" (click)="goTo(p)">
+          {{ p + 1 }}
+        </button>
+      }
+    }
+
+    <button type="button" class="btn btn-secondary" [disabled]="last()" (click)="goTo(page() + 1)">
+      Próxima ›
+    </button>
+  </div>
+
+  <label class="pagination-size">
+    Itens por página
+    <select (change)="onSizeChange($event)">
+      @for (opt of pageSizeOptions; track opt) {
+        <option [value]="opt" [selected]="opt === size()">{{ opt }}</option>
+      }
+    </select>
+  </label>
+</div>

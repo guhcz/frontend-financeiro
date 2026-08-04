@@ -1,0 +1,57 @@
+<app-modal [title]="title()" (closed)="closed.emit()">
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="form-group">
+      <label for="cat-name">Nome</label>
+      <input
+        id="cat-name"
+        type="text"
+        formControlName="name"
+        placeholder="Ex.: Alimentação"
+        [class.is-invalid]="form.controls.name.invalid && form.controls.name.touched"
+      />
+      @if (form.controls.name.invalid && form.controls.name.touched) {
+        <span class="field-error">Informe um nome para a categoria.</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="cat-color">Cor</label>
+      <div class="color-field">
+        <input id="cat-color" type="color" formControlName="color" />
+        <input
+          type="text"
+          formControlName="color"
+          placeholder="#RRGGBB"
+          maxlength="7"
+          [class.is-invalid]="form.controls.color.invalid && form.controls.color.touched"
+        />
+      </div>
+      @if (form.controls.color.invalid && form.controls.color.touched) {
+        <span class="field-error">Informe uma cor válida no formato #RRGGBB.</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="cat-icon">Ícone <span class="optional-tag">(opcional)</span></label>
+      <input id="cat-icon" type="text" formControlName="icon" placeholder="Ex.: 🍔 ou food" />
+      <span class="field-hint">Um emoji ou palavra-chave para identificar a categoria.</span>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="banner banner-error">
+        <span>⚠️</span>
+        <div>
+          <strong>Conflito</strong>
+          {{ errorMessage() }}
+        </div>
+      </div>
+    }
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn-secondary" (click)="closed.emit()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="saving()">
+        {{ saving() ? 'Salvando...' : 'Salvar alterações' }}
+      </button>
+    </div>
+  </form>
+</app-modal>
