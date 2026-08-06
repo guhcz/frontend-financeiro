@@ -1,9 +1,9 @@
 <app-modal [title]="title()" (closed)="closed.emit()">
   <form [formGroup]="form" (ngSubmit)="submit()">
     <div class="form-group">
-      <label for="exp-category">Categoria</label>
+      <label for="rec-category">Categoria</label>
       <select
-        id="exp-category"
+        id="rec-category"
         formControlName="categoryId"
         [class.is-invalid]="form.controls.categoryId.invalid && form.controls.categoryId.touched"
       >
@@ -13,43 +13,19 @@
         }
       </select>
       @if (!hasCategories()) {
-        <span class="field-hint">Você ainda não tem categorias. Crie uma antes de registrar despesas.</span>
+        <span class="field-hint">Você ainda não tem categorias. Crie uma antes de registrar despesas fixas.</span>
       } @else if (form.controls.categoryId.invalid && form.controls.categoryId.touched) {
         <span class="field-error">Selecione uma categoria.</span>
       }
     </div>
 
-    @if (!isEditMode()) {
-      <div class="form-group">
-        <label>Tipo de despesa</label>
-        <div class="segmented-toggle">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            [class.active]="expenseType() === 'single'"
-            (click)="expenseType.set('single')"
-          >
-            Despesa única
-          </button>
-          <button
-            type="button"
-            class="btn btn-secondary"
-            [class.active]="expenseType() === 'fixed'"
-            (click)="expenseType.set('fixed')"
-          >
-            Despesa fixa
-          </button>
-        </div>
-      </div>
-    }
-
     <div class="form-group">
-      <label for="exp-description">Descrição</label>
+      <label for="rec-description">Descrição</label>
       <input
-        id="exp-description"
+        id="rec-description"
         type="text"
         formControlName="description"
-        placeholder="Ex.: Almoço com cliente"
+        placeholder="Ex.: Internet residencial"
         [class.is-invalid]="form.controls.description.invalid && form.controls.description.touched"
       />
       @if (form.controls.description.invalid && form.controls.description.touched) {
@@ -58,9 +34,9 @@
     </div>
 
     <div class="form-group">
-      <label for="exp-amount">Valor</label>
+      <label for="rec-amount">Valor</label>
       <input
-        id="exp-amount"
+        id="rec-amount"
         type="text"
         inputmode="decimal"
         appCurrencyMask
@@ -73,25 +49,10 @@
       }
     </div>
 
-    @if (expenseType() === 'single' || isEditMode()) {
-      <div class="form-group">
-        <label for="exp-date">Data</label>
-        <input
-          id="exp-date"
-          type="date"
-          formControlName="expenseDate"
-          [class.is-invalid]="form.controls.expenseDate.invalid && form.controls.expenseDate.touched"
-        />
-        @if (form.controls.expenseDate.invalid && form.controls.expenseDate.touched) {
-          <span class="field-error">Data é obrigatória.</span>
-        }
-      </div>
-    }
-
     <div class="form-group">
-      <label for="exp-payment">Forma de pagamento</label>
+      <label for="rec-payment">Forma de pagamento</label>
       <select
-        id="exp-payment"
+        id="rec-payment"
         formControlName="paymentMethod"
         [class.is-invalid]="form.controls.paymentMethod.invalid && form.controls.paymentMethod.touched"
       >
@@ -105,23 +66,22 @@
       }
     </div>
 
-    @if (expenseType() === 'fixed' && !isEditMode()) {
-      <app-recurring-expense-fields
-        [dueDayControl]="form.controls.dueDay"
-        [startMonthControl]="form.controls.startMonth"
-        [startYearControl]="form.controls.startYear"
-        [endTypeControl]="form.controls.endType"
-        [endMonthControl]="form.controls.endMonth"
-        [endYearControl]="form.controls.endYear"
-        mode="create"
-        [endDateError]="endDateError()"
-      ></app-recurring-expense-fields>
-    }
+    <app-recurring-expense-fields
+      [dueDayControl]="form.controls.dueDay"
+      [startMonthControl]="form.controls.startMonth"
+      [startYearControl]="form.controls.startYear"
+      [endTypeControl]="form.controls.endType"
+      [endMonthControl]="form.controls.endMonth"
+      [endYearControl]="form.controls.endYear"
+      [mode]="isEditMode() ? 'edit' : 'create'"
+      [existingStartDateLabel]="existingStartDateLabel()"
+      [endDateError]="endDateError()"
+    ></app-recurring-expense-fields>
 
     <div class="form-group">
-      <label for="exp-notes">Observações <span class="optional-tag">(opcional)</span></label>
+      <label for="rec-notes">Observações <span class="optional-tag">(opcional)</span></label>
       <textarea
-        id="exp-notes"
+        id="rec-notes"
         formControlName="notes"
         maxlength="500"
         placeholder="Alguma observação sobre esse gasto..."
@@ -132,14 +92,14 @@
     @if (errorMessage()) {
       <div class="banner banner-error">
         <span>⚠️</span>
-        <div>{{ errorMessage() }}</div>
+        <div><strong>Não foi possível salvar</strong> {{ errorMessage() }}</div>
       </div>
     }
 
     <div class="modal-actions">
       <button type="button" class="btn btn-secondary" (click)="closed.emit()">Cancelar</button>
       <button type="submit" class="btn btn-primary" [disabled]="saving() || !hasCategories()">
-        {{ saving() ? 'Salvando...' : expenseType() === 'fixed' && !isEditMode() ? 'Salvar despesa fixa' : 'Salvar despesa' }}
+        {{ saving() ? 'Salvando...' : isEditMode() ? 'Salvar alterações' : 'Salvar despesa fixa' }}
       </button>
     </div>
   </form>

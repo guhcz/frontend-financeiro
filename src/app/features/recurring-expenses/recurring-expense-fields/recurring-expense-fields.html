@@ -1,0 +1,81 @@
+<div class="form-group">
+  <label for="rec-frequency">Frequência</label>
+  <select id="rec-frequency" disabled>
+    @for (freq of frequencies; track freq) {
+      <option [value]="freq">{{ frequencyLabels[freq] }}</option>
+    }
+  </select>
+</div>
+
+<div class="form-group">
+  <label for="rec-due-day">Dia do vencimento</label>
+  <input
+    id="rec-due-day"
+    type="number"
+    min="1"
+    max="31"
+    [formControl]="dueDayControl()"
+    placeholder="Ex.: 10"
+    [class.is-invalid]="dueDayControl().invalid && dueDayControl().touched"
+  />
+  <span class="field-hint">Se o mês não tiver esse dia, a despesa será criada no último dia do mês.</span>
+  @if (dueDayControl().invalid && dueDayControl().touched) {
+    @if (dueDayControl().errors?.['required']) {
+      <span class="field-error">Informe o dia do vencimento.</span>
+    } @else {
+      <span class="field-error">O dia do vencimento deve estar entre 1 e 31.</span>
+    }
+  }
+</div>
+
+@if (mode() === 'create') {
+  <div class="form-group">
+    <label>Início da recorrência</label>
+    <div class="month-year-inputs">
+      <select [formControl]="startMonthControl()" aria-label="Mês de início">
+        @for (month of months; track month.value) {
+          <option [value]="month.value">{{ month.name }}</option>
+        }
+      </select>
+      <select [formControl]="startYearControl()" aria-label="Ano de início">
+        @for (year of years; track year) {
+          <option [value]="year">{{ year }}</option>
+        }
+      </select>
+    </div>
+  </div>
+} @else {
+  <div class="form-group">
+    <label>Início da recorrência</label>
+    <p class="static-value">Iniciado em {{ existingStartDateLabel() }}</p>
+  </div>
+}
+
+<div class="form-group">
+  <label>Término</label>
+  <label class="radio-option">
+    <input type="radio" [formControl]="endTypeControl()" value="none" />
+    Sem data para terminar
+  </label>
+  <label class="radio-option">
+    <input type="radio" [formControl]="endTypeControl()" value="specific" />
+    Terminar em uma data específica
+  </label>
+  @if (endTypeControl().value === 'specific') {
+    <div class="month-year-inputs">
+      <select [formControl]="endMonthControl()" aria-label="Mês de término">
+        @for (month of months; track month.value) {
+          <option [value]="month.value">{{ month.name }}</option>
+        }
+      </select>
+      <select [formControl]="endYearControl()" aria-label="Ano de término">
+        @for (year of years; track year) {
+          <option [value]="year">{{ year }}</option>
+        }
+      </select>
+    </div>
+  }
+  @if (endDateError()) {
+    <span class="field-error">{{ endDateError() }}</span>
+  }
+</div>

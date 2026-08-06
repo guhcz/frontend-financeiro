@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
 import { Expense, ExpenseFilters, ExpenseRequest } from '../models/expense.model';
 import { Page } from '../models/page.model';
+import { RecurringUpdateScope } from '../models/recurring-update-scope.model';
 
 @Injectable({ providedIn: 'root' })
 export class ExpenseService {
@@ -29,11 +30,13 @@ export class ExpenseService {
     return this.http.post<Expense>(this.baseUrl, request);
   }
 
-  update(id: number, request: ExpenseRequest): Observable<Expense> {
-    return this.http.put<Expense>(`${this.baseUrl}/${id}`, request);
+  update(id: number, request: ExpenseRequest, scope: RecurringUpdateScope = 'ONLY_THIS'): Observable<Expense> {
+    const params = new HttpParams().set('scope', scope);
+    return this.http.put<Expense>(`${this.baseUrl}/${id}`, request, { params });
   }
 
-  delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  delete(id: number, scope: RecurringUpdateScope = 'ONLY_THIS'): Observable<void> {
+    const params = new HttpParams().set('scope', scope);
+    return this.http.delete<void>(`${this.baseUrl}/${id}`, { params });
   }
 }

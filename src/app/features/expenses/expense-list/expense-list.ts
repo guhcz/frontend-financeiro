@@ -5,15 +5,20 @@ import { Category } from '../../../core/models/category.model';
 import { Expense, ExpenseFilters, ExpenseRequest } from '../../../core/models/expense.model';
 import { Page } from '../../../core/models/page.model';
 import { PAYMENT_METHODS, PAYMENT_METHOD_LABELS, PaymentMethod } from '../../../core/models/payment-method.model';
+import { RecurringExpenseRequest } from '../../../core/models/recurring-expense.model';
+import { RecurringUpdateScope } from '../../../core/models/recurring-update-scope.model';
 import { CategoryService } from '../../../core/services/category.service';
 import { ExpenseService } from '../../../core/services/expense.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { RecurringExpenseService } from '../../../core/services/recurring-expense.service';
 import { getErrorDetail } from '../../../core/utils/http-error.util';
 import { Badge } from '../../../shared/badge/badge';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { Pagination } from '../../../shared/pagination/pagination';
 import { ExpenseFormModal } from '../expense-form-modal/expense-form-modal';
+import { RecurringDeleteScopeModal } from '../recurring-delete-scope-modal/recurring-delete-scope-modal';
+import { RecurringEditScopeModal } from '../recurring-edit-scope-modal/recurring-edit-scope-modal';
 
 const DEFAULT_SIZE = 10;
 
@@ -28,6 +33,8 @@ const DEFAULT_SIZE = 10;
     EmptyState,
     ConfirmDialog,
     ExpenseFormModal,
+    RecurringEditScopeModal,
+    RecurringDeleteScopeModal,
   ],
   templateUrl: './expense-list.html',
   styleUrls: ['../../list-page.scss', './expense-list.scss'],
@@ -36,6 +43,7 @@ export class ExpenseList implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly expenseService = inject(ExpenseService);
   private readonly categoryService = inject(CategoryService);
+  private readonly recurringExpenseService = inject(RecurringExpenseService);
   private readonly notificationService = inject(NotificationService);
 
   readonly categories = signal<Category[]>([]);
@@ -43,6 +51,7 @@ export class ExpenseList implements OnInit {
   readonly loading = signal(true);
   readonly listError = signal<string | null>(null);
   readonly filtersActive = signal(false);
+  readonly filtersOpen = signal(false);
 
   readonly paymentMethods = PAYMENT_METHODS;
   readonly paymentMethodLabels = PAYMENT_METHOD_LABELS;
@@ -54,6 +63,9 @@ export class ExpenseList implements OnInit {
 
   readonly expensePendingDelete = signal<Expense | null>(null);
 
+  readonly editScopeRequest = signal<ExpenseRequest | null>(null);
+  readonly deleteScopeExpense = signal<Expense | null>(null);
+
   private filters: ExpenseFilters = { page: 0, size: DEFAULT_SIZE, sort: 'expenseDate,desc' };
 
   readonly filterForm = this.fb.nonNullable.group({
@@ -62,6 +74,7 @@ export class ExpenseList implements OnInit {
     startDate: [''],
     endDate: [''],
     description: [''],
+    recurring: [''],
     sort: ['expenseDate,desc'],
   });
 
@@ -96,12 +109,20 @@ export class ExpenseList implements OnInit {
       startDate: value.startDate || undefined,
       endDate: value.endDate || undefined,
       description: value.description || undefined,
+      recurring: value.recurring ? value.recurring === 'true' : undefined,
       sort: value.sort,
       page: 0,
       size: this.filters.size,
     };
     this.filtersActive.set(
-      !!(value.categoryId || value.paymentMethod || value.startDate || value.endDate || value.description),
+      !!(
+        value.categoryId ||
+        value.paymentMethod ||
+        value.startDate ||
+        value.endDate ||
+        value.description ||
+        value.recurring
+      ),
     );
     this.fetch();
   }
@@ -113,11 +134,16 @@ export class ExpenseList implements OnInit {
       startDate: '',
       endDate: '',
       description: '',
+      recurring: '',
       sort: 'expenseDate,desc',
     });
     this.filtersActive.set(false);
     this.filters = { page: 0, size: this.filters.size, sort: 'expenseDate,desc' };
     this.fetch();
+  }
+
+  toggleFilters(): void {
+    this.filtersOpen.update((open) => !open);
   }
 
   onPageChange(page: number): void {
@@ -147,19 +173,24 @@ export class ExpenseList implements OnInit {
   }
 
   save(request: ExpenseRequest): void {
-    this.saving.set(true);
-    this.saveError.set(null);
     const editing = this.editingExpense();
 
-    const operation = editing
-      ? this.expenseService.update(editing.id, request)
-      : this.expenseService.create(request);
+    if (editing && editing.recurring) {
+      this.editScopeRequest.set(request);
+      return;
+    }
 
-    operation.subscribe({
+    this.persistSave(request, 'ONLY_THIS');
+  }
+
+  saveRecurring(request: RecurringExpenseRequest): void {
+    this.saving.set(true);
+    this.saveError.set(null);
+    this.recurringExpenseService.create(request).subscribe({
       next: () => {
         this.saving.set(false);
         this.modalOpen.set(false);
-        this.notificationService.success(editing ? 'Despesa atualizada.' : 'Despesa criada.');
+        this.notificationService.success('Despesa fixa criada com sucesso.');
         this.fetch();
       },
       error: (err: unknown) => {
@@ -169,7 +200,56 @@ export class ExpenseList implements OnInit {
     });
   }
 
+  cancelEditScope(): void {
+    this.editScopeRequest.set(null);
+  }
+
+  confirmEditScope(scope: RecurringUpdateScope): void {
+    const request = this.editScopeRequest();
+    if (!request) {
+      return;
+    }
+    this.editScopeRequest.set(null);
+    this.persistSave(request, scope);
+  }
+
+  private persistSave(request: ExpenseRequest, scope: RecurringUpdateScope): void {
+    this.saving.set(true);
+    this.saveError.set(null);
+    const editing = this.editingExpense();
+
+    const operation = editing
+      ? this.expenseService.update(editing.id, request, scope)
+      : this.expenseService.create(request);
+
+    operation.subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.modalOpen.set(false);
+        this.notificationService.success(this.saveSuccessMessage(!!editing, scope));
+        this.fetch();
+      },
+      error: (err: unknown) => {
+        this.saving.set(false);
+        this.saveError.set(getErrorDetail(err));
+      },
+    });
+  }
+
+  private saveSuccessMessage(isEdit: boolean, scope: RecurringUpdateScope): string {
+    if (!isEdit) {
+      return 'Despesa criada com sucesso.';
+    }
+    return scope === 'THIS_AND_FUTURE'
+      ? 'A alteração será aplicada às próximas despesas.'
+      : 'Despesa atualizada com sucesso.';
+  }
+
   requestDelete(expense: Expense): void {
+    if (expense.recurring) {
+      this.deleteScopeExpense.set(expense);
+      return;
+    }
     this.expensePendingDelete.set(expense);
   }
 
@@ -177,15 +257,32 @@ export class ExpenseList implements OnInit {
     this.expensePendingDelete.set(null);
   }
 
+  cancelDeleteScope(): void {
+    this.deleteScopeExpense.set(null);
+  }
+
+  confirmDeleteScope(scope: RecurringUpdateScope): void {
+    const expense = this.deleteScopeExpense();
+    if (!expense) {
+      return;
+    }
+    this.deleteScopeExpense.set(null);
+    this.performDelete(expense, scope);
+  }
+
   confirmDelete(): void {
     const expense = this.expensePendingDelete();
     if (!expense) {
       return;
     }
-    this.expenseService.delete(expense.id).subscribe({
+    this.expensePendingDelete.set(null);
+    this.performDelete(expense, 'ONLY_THIS');
+  }
+
+  private performDelete(expense: Expense, scope: RecurringUpdateScope): void {
+    this.expenseService.delete(expense.id, scope).subscribe({
       next: () => {
-        this.expensePendingDelete.set(null);
-        this.notificationService.success('Despesa excluída.');
+        this.notificationService.success('Despesa excluída com sucesso.');
         const page = this.pageData();
         if (page && page.content.length === 1 && this.filters.page && this.filters.page > 0) {
           this.filters = { ...this.filters, page: this.filters.page - 1 };
@@ -193,7 +290,6 @@ export class ExpenseList implements OnInit {
         this.fetch();
       },
       error: (err: unknown) => {
-        this.expensePendingDelete.set(null);
         this.notificationService.error(getErrorDetail(err));
       },
     });

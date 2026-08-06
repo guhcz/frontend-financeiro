@@ -12,6 +12,7 @@ export class ConfirmDialog {
   message = input.required<string>();
   confirmLabel = input<string>('Excluir');
   cancelLabel = input<string>('Cancelar');
+  variant = input<'danger' | 'primary'>('danger');
   confirmed = output<void>();
   cancelled = output<void>();
 }

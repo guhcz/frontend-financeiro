@@ -26,6 +26,13 @@ export const routes: Routes = [
           import('./features/expenses/expense-list/expense-list').then((m) => m.ExpenseList),
       },
       {
+        path: 'despesas-fixas',
+        loadComponent: () =>
+          import('./features/recurring-expenses/recurring-expense-list/recurring-expense-list').then(
+            (m) => m.RecurringExpenseList,
+          ),
+      },
+      {
         path: 'categorias',
         loadComponent: () =>
           import('./features/categories/category-list/category-list').then((m) => m.CategoryList),

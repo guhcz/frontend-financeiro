@@ -1,0 +1,27 @@
+<app-modal title="O que você deseja alterar?" (closed)="cancelled.emit()">
+  <label class="scope-option">
+    <input type="radio" name="edit-scope" [checked]="scope() === 'ONLY_THIS'" (change)="scope.set('ONLY_THIS')" />
+    <div>
+      <strong>Somente esta despesa</strong>
+      <p>Altera apenas o lançamento selecionado. Os próximos meses continuarão com os dados atuais da recorrência.</p>
+    </div>
+  </label>
+
+  <label class="scope-option">
+    <input
+      type="radio"
+      name="edit-scope"
+      [checked]="scope() === 'THIS_AND_FUTURE'"
+      (change)="scope.set('THIS_AND_FUTURE')"
+    />
+    <div>
+      <strong>Esta e as próximas despesas</strong>
+      <p>Altera este lançamento e atualiza a regra usada para gerar os próximos meses.</p>
+    </div>
+  </label>
+
+  <div class="modal-actions">
+    <button type="button" class="btn btn-secondary" (click)="cancelled.emit()">Cancelar</button>
+    <button type="button" class="btn btn-primary" (click)="confirm()">Confirmar</button>
+  </div>
+</app-modal>

@@ -1,24 +1,60 @@
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.page-header-actions .btn-secondary {
+  position: relative;
+}
+
+.page-header-actions .btn-secondary.active {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.filters-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-primary);
+}
+
 .filters-card {
   padding: var(--space-5);
   margin-bottom: var(--space-5);
 }
 
-.filters-card h2 {
-  font-size: 15px;
-  font-weight: 700;
-  margin-bottom: var(--space-4);
+.filters-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
 }
 
-.filters-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--space-4);
+.filters-grid .form-group {
+  flex: 1 1 180px;
+  min-width: 180px;
+}
+
+.filters-grid .filter-period {
+  flex: 1 1 260px;
+  min-width: 260px;
 }
 
 .period-inputs {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-2);
+}
+
+.period-inputs input[type='date'] {
+  flex: 1 1 130px;
+  min-width: 130px;
 }
 
 .period-inputs span {

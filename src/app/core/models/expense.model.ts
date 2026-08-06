@@ -10,6 +10,9 @@ export interface Expense {
   paymentMethod: PaymentMethod;
   notes: string | null;
   active: boolean;
+  generatedAutomatically: boolean;
+  recurring: boolean;
+  recurringExpenseId: number | null;
 }
 
 export interface ExpenseRequest {
@@ -27,6 +30,7 @@ export interface ExpenseFilters {
   startDate?: string;
   endDate?: string;
   description?: string;
+  recurring?: boolean;
   page?: number;
   size?: number;
   sort?: string;

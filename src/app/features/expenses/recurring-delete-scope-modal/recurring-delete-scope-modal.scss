@@ -1,0 +1,33 @@
+.scope-option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-3);
+  cursor: pointer;
+}
+
+.scope-option input {
+  width: auto;
+  margin-top: 3px;
+}
+
+.scope-option strong {
+  font-size: 14px;
+  display: block;
+  margin-bottom: var(--space-1);
+}
+
+.scope-option p {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
