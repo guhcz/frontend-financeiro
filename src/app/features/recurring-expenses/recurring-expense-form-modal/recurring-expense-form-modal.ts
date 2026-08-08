@@ -55,10 +55,7 @@ export class RecurringExpenseFormModal {
     amount: [this.rule()?.amount ?? null, [Validators.required, Validators.min(0.01)]],
     paymentMethod: [this.rule()?.paymentMethod ?? '', [Validators.required]],
     notes: [this.rule()?.notes ?? '', [Validators.maxLength(NOTES_MAX_LENGTH)]],
-    dueDay: [
-      this.rule()?.dueDay ?? (null as number | null),
-      [Validators.required, Validators.min(1), Validators.max(31)],
-    ],
+    dueDay: [this.rule()?.dueDay ?? (null as number | null), [Validators.min(1), Validators.max(31)]],
     startMonth: [this.now.getMonth() + 1],
     startYear: [this.now.getFullYear()],
     endType: [(this.rule()?.endDate ? 'specific' : 'none') as 'none' | 'specific'],
@@ -97,7 +94,7 @@ export class RecurringExpenseFormModal {
       paymentMethod: value.paymentMethod as RecurringExpenseRequest['paymentMethod'],
       notes: value.notes || null,
       frequency: 'MONTHLY',
-      dueDay: Number(value.dueDay),
+      dueDay: value.dueDay ? Number(value.dueDay) : null,
       startDate,
       endDate,
     });

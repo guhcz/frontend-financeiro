@@ -46,7 +46,7 @@
               <td>
                 <app-badge [label]="paymentMethodLabels[rule.paymentMethod]"></app-badge>
               </td>
-              <td>Dia {{ rule.dueDay }}</td>
+              <td>{{ rule.dueDay ? 'Dia ' + rule.dueDay : '—' }}</td>
               <td>{{ rule.nextGenerationDate ? (rule.nextGenerationDate | date: 'dd/MM/yyyy') : '—' }}</td>
               <td>{{ periodLabel(rule) }}</td>
               <td>

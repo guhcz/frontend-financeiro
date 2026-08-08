@@ -8,7 +8,7 @@
 </div>
 
 <div class="form-group">
-  <label for="rec-due-day">Dia do vencimento</label>
+  <label for="rec-due-day">Dia do vencimento <span class="optional-tag">(opcional)</span></label>
   <input
     id="rec-due-day"
     type="number"
@@ -20,11 +20,7 @@
   />
   <span class="field-hint">Se o mês não tiver esse dia, a despesa será criada no último dia do mês.</span>
   @if (dueDayControl().invalid && dueDayControl().touched) {
-    @if (dueDayControl().errors?.['required']) {
-      <span class="field-error">Informe o dia do vencimento.</span>
-    } @else {
-      <span class="field-error">O dia do vencimento deve estar entre 1 e 31.</span>
-    }
+    <span class="field-error">O dia do vencimento deve estar entre 1 e 31.</span>
   }
 </div>
 
@@ -64,13 +60,15 @@
   @if (endTypeControl().value === 'specific') {
     <div class="month-year-inputs">
       <select [formControl]="endMonthControl()" aria-label="Mês de término">
+        <option [ngValue]="null" disabled>Mês</option>
         @for (month of months; track month.value) {
-          <option [value]="month.value">{{ month.name }}</option>
+          <option [ngValue]="month.value">{{ month.name }}</option>
         }
       </select>
       <select [formControl]="endYearControl()" aria-label="Ano de término">
+        <option [ngValue]="null" disabled>Ano</option>
         @for (year of years; track year) {
-          <option [value]="year">{{ year }}</option>
+          <option [ngValue]="year">{{ year }}</option>
         }
       </select>
     </div>

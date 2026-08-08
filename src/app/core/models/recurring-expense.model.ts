@@ -12,7 +12,7 @@ export interface RecurringExpense {
   paymentMethod: PaymentMethod;
   notes: string | null;
   frequency: RecurrenceFrequency;
-  dueDay: number;
+  dueDay: number | null;
   startDate: string;
   endDate: string | null;
   nextGenerationDate: string | null;
@@ -27,7 +27,7 @@ export interface RecurringExpenseRequest {
   paymentMethod: PaymentMethod;
   notes: string | null;
   frequency: RecurrenceFrequency;
-  dueDay: number;
+  dueDay: number | null;
   startDate: string;
   endDate: string | null;
 }
@@ -38,7 +38,7 @@ export interface RecurringExpenseUpdateRequest {
   amount: number;
   paymentMethod: PaymentMethod;
   notes: string | null;
-  dueDay: number;
+  dueDay: number | null;
   endDate: string | null;
 }
 

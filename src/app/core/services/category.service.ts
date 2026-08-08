@@ -1,8 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
-import { Category, CategoryRequest } from '../models/category.model';
+import { Category, CategoryFilters, CategoryRequest } from '../models/category.model';
+import { Page } from '../models/page.model';
 
 @Injectable({ providedIn: 'root' })
 export class CategoryService {
@@ -11,7 +12,17 @@ export class CategoryService {
   constructor(private readonly http: HttpClient) {}
 
   list(): Observable<Category[]> {
-    return this.http.get<Category[]>(this.baseUrl);
+    return this.http.get<Category[]>(`${this.baseUrl}/all`);
+  }
+
+  listPage(filters: CategoryFilters): Observable<Page<Category>> {
+    let params = new HttpParams();
+    for (const [key, value] of Object.entries(filters)) {
+      if (value !== undefined && value !== null && value !== '') {
+        params = params.set(key, String(value));
+      }
+    }
+    return this.http.get<Page<Category>>(this.baseUrl, { params });
   }
 
   create(request: CategoryRequest): Observable<Category> {

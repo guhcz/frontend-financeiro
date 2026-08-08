@@ -11,3 +11,9 @@ export interface CategoryRequest {
   color: string;
   icon: string | null;
 }
+
+export interface CategoryFilters {
+  page?: number;
+  size?: number;
+  sort?: string;
+}

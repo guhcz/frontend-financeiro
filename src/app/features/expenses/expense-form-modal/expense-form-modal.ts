@@ -51,7 +51,7 @@ export class ExpenseFormModal {
     expenseDate: [this.expense()?.expenseDate ?? '', [Validators.required]],
     paymentMethod: [this.expense()?.paymentMethod ?? '', [Validators.required]],
     notes: [this.expense()?.notes ?? '', [Validators.maxLength(NOTES_MAX_LENGTH)]],
-    dueDay: [null as number | null, [Validators.required, Validators.min(1), Validators.max(31)]],
+    dueDay: [null as number | null, [Validators.min(1), Validators.max(31)]],
     startMonth: [this.now.getMonth() + 1],
     startYear: [this.now.getFullYear()],
     endType: ['none' as 'none' | 'specific'],
@@ -129,7 +129,7 @@ export class ExpenseFormModal {
       paymentMethod: value.paymentMethod as RecurringExpenseRequest['paymentMethod'],
       notes: value.notes || null,
       frequency: 'MONTHLY',
-      dueDay: Number(value.dueDay),
+      dueDay: value.dueDay ? Number(value.dueDay) : null,
       startDate,
       endDate,
     });

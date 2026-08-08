@@ -21,7 +21,7 @@
     <div class="list-loading">Carregando categorias...</div>
   } @else if (listError()) {
     <div class="banner banner-error top-banner" style="margin: var(--space-4)">{{ listError() }}</div>
-  } @else if (categories().length === 0) {
+  } @else if (pageData()?.content?.length === 0) {
     <app-empty-state
       icon="🏷️"
       title="Você ainda não tem categorias"
@@ -29,7 +29,7 @@
       actionLabel="Criar categoria"
       (action)="openCreate()"
     ></app-empty-state>
-  } @else {
+  } @else if (pageData(); as page) {
     <div class="table-wrap">
       <table>
         <thead>
@@ -41,7 +41,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (category of categories(); track category.id) {
+          @for (category of page.content; track category.id) {
             <tr>
               <td>{{ category.name }}</td>
               <td>{{ category.icon || '—' }}</td>
@@ -67,6 +67,18 @@
         </tbody>
       </table>
     </div>
+
+    <app-pagination
+      [page]="page.number"
+      [totalPages]="page.totalPages"
+      [totalElements]="page.totalElements"
+      [size]="page.size"
+      [first]="page.first"
+      [last]="page.last"
+      itemLabel="categorias"
+      (pageChange)="onPageChange($event)"
+      (sizeChange)="onSizeChange($event)"
+    ></app-pagination>
   }
 </div>
 
