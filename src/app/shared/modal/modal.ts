@@ -1,8 +1,9 @@
 import { Component, input, output } from '@angular/core';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-modal',
-  imports: [],
+  imports: [LucideAngularModule],
   templateUrl: './modal.html',
   styleUrl: './modal.scss',
 })

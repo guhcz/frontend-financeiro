@@ -1,0 +1,53 @@
+@if (loading()) {
+  <div class="chart-loading">Carregando gráfico...</div>
+} @else if (error()) {
+  <div class="banner banner-error">{{ error() }}</div>
+} @else if (data().length === 0) {
+  <div class="chart-empty">
+    <lucide-icon name="chart-pie" [size]="32" class="chart-empty-icon"></lucide-icon>
+    <p>Você ainda não possui gastos neste período.</p>
+  </div>
+} @else {
+  <div class="donut-layout">
+    <div class="donut-wrap">
+      <svg viewBox="0 0 200 200" class="donut-svg" role="img" aria-label="Gastos por categoria">
+        <g class="donut-rotated">
+          @for (seg of segments(); track seg.name) {
+            <circle
+              cx="100"
+              cy="100"
+              [attr.r]="radius"
+              fill="none"
+              [attr.stroke]="seg.color"
+              [attr.stroke-width]="strokeWidth"
+              [attr.stroke-dasharray]="seg.length + ' ' + (circumference - seg.length)"
+              [attr.stroke-dashoffset]="-seg.offsetLength"
+              class="donut-segment"
+            >
+              <title
+                >{{ seg.name }}: {{ seg.amount | currency: 'BRL' }} ({{
+                  seg.percentage | number: '1.0-0'
+                }}%)</title
+              >
+            </circle>
+          }
+        </g>
+      </svg>
+      <div class="donut-center">
+        <span class="donut-total">{{ totalSpent() | currency: 'BRL' }}</span>
+        <span class="donut-total-label">Total gasto</span>
+      </div>
+    </div>
+
+    <ul class="donut-legend">
+      @for (seg of segments(); track seg.name) {
+        <li>
+          <span class="legend-swatch" [style.background]="seg.color"></span>
+          <span class="legend-name">{{ seg.name }}</span>
+          <span class="legend-value">{{ seg.amount | currency: 'BRL' }}</span>
+          <span class="legend-percentage">{{ seg.percentage | number: '1.0-0' }}%</span>
+        </li>
+      }
+    </ul>
+  </div>
+}

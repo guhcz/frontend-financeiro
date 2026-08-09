@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Category } from '../../../core/models/category.model';
 import { Expense, ExpenseRequest } from '../../../core/models/expense.model';
@@ -19,7 +19,7 @@ type ExpenseType = 'single' | 'fixed';
   templateUrl: './expense-form-modal.html',
   styleUrl: './expense-form-modal.scss',
 })
-export class ExpenseFormModal {
+export class ExpenseFormModal implements OnInit {
   private readonly fb = inject(FormBuilder);
 
   expense = input<Expense | null>(null);
@@ -45,12 +45,12 @@ export class ExpenseFormModal {
   private readonly now = new Date();
 
   readonly form = this.fb.nonNullable.group({
-    categoryId: [this.expense()?.category.id ?? '', [Validators.required]],
-    description: [this.expense()?.description ?? '', [Validators.required, Validators.maxLength(255)]],
-    amount: [this.expense()?.amount ?? null, [Validators.required, Validators.min(0.01)]],
-    expenseDate: [this.expense()?.expenseDate ?? '', [Validators.required]],
-    paymentMethod: [this.expense()?.paymentMethod ?? '', [Validators.required]],
-    notes: [this.expense()?.notes ?? '', [Validators.maxLength(NOTES_MAX_LENGTH)]],
+    categoryId: ['' as number | string, [Validators.required]],
+    description: ['', [Validators.required, Validators.maxLength(255)]],
+    amount: [null as number | null, [Validators.required, Validators.min(0.01)]],
+    expenseDate: ['', [Validators.required]],
+    paymentMethod: ['' as string, [Validators.required]],
+    notes: ['', [Validators.maxLength(NOTES_MAX_LENGTH)]],
     dueDay: [null as number | null, [Validators.min(1), Validators.max(31)]],
     startMonth: [this.now.getMonth() + 1],
     startYear: [this.now.getFullYear()],
@@ -58,6 +58,21 @@ export class ExpenseFormModal {
     endMonth: [null as number | null],
     endYear: [null as number | null],
   });
+
+  ngOnInit(): void {
+    const expense = this.expense();
+    if (!expense) {
+      return;
+    }
+    this.form.patchValue({
+      categoryId: expense.category.id,
+      description: expense.description,
+      amount: expense.amount,
+      expenseDate: expense.expenseDate,
+      paymentMethod: expense.paymentMethod,
+      notes: expense.notes ?? '',
+    });
+  }
 
   submit(): void {
     if (this.expenseType() === 'fixed' && !this.isEditMode()) {

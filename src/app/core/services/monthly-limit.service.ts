@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
@@ -12,6 +12,11 @@ export class MonthlyLimitService {
 
   list(): Observable<MonthlyLimit[]> {
     return this.http.get<MonthlyLimit[]>(this.baseUrl);
+  }
+
+  getByPeriod(month: number, year: number): Observable<MonthlyLimit | null> {
+    const params = new HttpParams().set('month', month).set('year', year);
+    return this.http.get<MonthlyLimit | null>(`${this.baseUrl}/by-period`, { params });
   }
 
   create(request: MonthlyLimitRequest): Observable<MonthlyLimit> {

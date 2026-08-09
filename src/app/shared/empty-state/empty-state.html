@@ -1,5 +1,11 @@
 <div class="empty-state">
-  <div class="empty-state-icon">{{ icon() }}</div>
+  <div class="empty-state-icon">
+    @if (lucideIcon(); as name) {
+      <lucide-icon [name]="name" [size]="28"></lucide-icon>
+    } @else {
+      {{ icon() }}
+    }
+  </div>
   <h3>{{ title() }}</h3>
   @if (description()) {
     <p>{{ description() }}</p>

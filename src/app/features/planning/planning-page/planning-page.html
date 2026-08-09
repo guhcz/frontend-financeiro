@@ -1,0 +1,106 @@
+<div class="page-header">
+  <div>
+    <h1>Planejamento</h1>
+    <p>Acompanhe seu limite, distribua seus gastos por categoria e visualize seu progresso no mês.</p>
+  </div>
+  <div class="page-header-actions">
+    <input
+      type="month"
+      class="period-input"
+      [value]="periodValue()"
+      (change)="onPeriodChange($event)"
+      aria-label="Selecionar mês"
+    />
+    <button type="button" class="btn btn-primary" (click)="openLimitModal()">
+      {{ hasLimit() ? 'Editar limite' : 'Definir limite' }}
+    </button>
+  </div>
+</div>
+
+<app-planning-summary-cards
+  [summary]="summary()"
+  [loading]="summaryLoading()"
+  (editLimit)="openLimitModal()"
+></app-planning-summary-cards>
+
+<div class="banner banner-info top-banner">
+  <lucide-icon name="lightbulb" [size]="18"></lucide-icon>
+  <div>
+    <strong>Dica</strong>
+    O planejamento por categoria não cria despesas automaticamente; ele serve como referência para acompanhar seus
+    gastos reais.
+  </div>
+</div>
+
+<app-monthly-planning-table
+  [page]="planningPage()"
+  [totalPlanned]="summary()?.totalPlanned ?? null"
+  [unplannedAmount]="summary()?.unplannedAmount ?? null"
+  [loading]="tableLoading()"
+  [error]="tableError()"
+  (add)="openCreatePlanning()"
+  (edit)="openEditPlanning($event)"
+  (delete)="requestDeletePlanning($event)"
+  (pageChange)="onTablePageChange($event)"
+  (sizeChange)="onTableSizeChange($event)"
+></app-monthly-planning-table>
+
+<div class="charts-row">
+  <div class="card chart-card">
+    <h2>Gastos por categoria</h2>
+    <app-expenses-by-category-chart
+      [data]="expensesByCategory()"
+      [totalSpent]="summary()?.totalSpent ?? 0"
+      [loading]="categoryChartLoading()"
+      [error]="categoryChartError()"
+    ></app-expenses-by-category-chart>
+  </div>
+
+  <div class="card chart-card">
+    <h2>Evolução dos gastos no mês</h2>
+    <app-expense-evolution-chart
+      [data]="evolution()"
+      [monthlyLimit]="summary()?.monthlyLimit ?? null"
+      [month]="month()"
+      [year]="year()"
+      [loading]="evolutionLoading()"
+      [error]="evolutionError()"
+    ></app-expense-evolution-chart>
+  </div>
+</div>
+
+@if (limitModalOpen()) {
+  <app-monthly-limit-form-modal
+    [limit]="currentLimit()"
+    [saving]="limitSaving()"
+    [errorMessage]="limitError()"
+    [periodLocked]="true"
+    [defaultMonth]="month()"
+    [defaultYear]="year()"
+    (save)="saveLimit($event)"
+    (closed)="closeLimitModal()"
+  ></app-monthly-limit-form-modal>
+}
+
+@if (planningModalOpen()) {
+  <app-monthly-planning-form-modal
+    [planning]="editingPlanning()"
+    [categories]="categories()"
+    [month]="month()"
+    [year]="year()"
+    [saving]="planningSaving()"
+    [errorMessage]="planningSaveError()"
+    (save)="savePlanning($event)"
+    (closed)="closePlanningModal()"
+  ></app-monthly-planning-form-modal>
+}
+
+@if (planningPendingDelete()) {
+  <app-confirm-dialog
+    title="Excluir planejamento?"
+    message="Este planejamento será removido, mas nenhuma despesa será excluída."
+    confirmLabel="Excluir"
+    (confirmed)="confirmDeletePlanning()"
+    (cancelled)="cancelDeletePlanning()"
+  ></app-confirm-dialog>
+}

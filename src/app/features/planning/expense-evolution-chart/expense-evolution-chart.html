@@ -1,0 +1,95 @@
+@if (loading()) {
+  <div class="chart-loading">Carregando gráfico...</div>
+} @else if (error()) {
+  <div class="banner banner-error">{{ error() }}</div>
+} @else if (data().length === 0) {
+  <div class="chart-empty">
+    <lucide-icon name="trending-up" [size]="32" class="chart-empty-icon"></lucide-icon>
+    <p>Não há movimentações para exibir neste mês.</p>
+  </div>
+} @else {
+  @if (monthlyLimit() !== null) {
+    <div class="evolution-legend">
+      <span class="legend-item"><span class="legend-line solid"></span>Gasto acumulado</span>
+      <span class="legend-item"
+        ><span class="legend-line dashed"></span>Limite mensal ({{
+          monthlyLimit() | currency: 'BRL'
+        }})</span
+      >
+    </div>
+  }
+
+  <div
+    class="evolution-chart-wrap"
+    (pointermove)="onPointerMove($event)"
+    (pointerleave)="onPointerLeave()"
+  >
+    <svg
+      [attr.viewBox]="'0 0 ' + viewWidth + ' ' + viewHeight"
+      class="evolution-svg"
+      role="img"
+      aria-label="Evolução dos gastos no mês"
+    >
+      @for (tick of yTicks(); track tick) {
+        <line
+          [attr.x1]="margin.left"
+          [attr.x2]="viewWidth - margin.right"
+          [attr.y1]="yForTick(tick)"
+          [attr.y2]="yForTick(tick)"
+          class="grid-line"
+        ></line>
+        <text [attr.x]="margin.left - 8" [attr.y]="yForTick(tick) + 4" class="axis-label y-label">
+          {{ tick | currency: 'BRL' : 'symbol' : '1.0-0' }}
+        </text>
+      }
+
+      @for (day of xTicks(); track day) {
+        <text
+          [attr.x]="xForTick(day)"
+          [attr.y]="viewHeight - margin.bottom + 20"
+          class="axis-label x-label"
+          text-anchor="middle"
+        >
+          {{ xLabel(day) }}
+        </text>
+      }
+
+      @if (limitY(); as ly) {
+        <line
+          [attr.x1]="margin.left"
+          [attr.x2]="viewWidth - margin.right"
+          [attr.y1]="ly"
+          [attr.y2]="ly"
+          class="limit-line"
+        ></line>
+      }
+
+      <path [attr.d]="linePath()" class="line-path" fill="none"></path>
+
+      @if (lastPoint(); as last) {
+        <circle [attr.cx]="last.x" [attr.cy]="last.y" r="5" class="end-marker"></circle>
+        <text [attr.x]="last.x" [attr.y]="last.y - 12" text-anchor="end" class="end-label">
+          {{ last.accumulatedAmount | currency: 'BRL' }}
+        </text>
+      }
+
+      @if (hoveredPoint(); as hp) {
+        <line
+          [attr.x1]="hp.x"
+          [attr.x2]="hp.x"
+          [attr.y1]="margin.top"
+          [attr.y2]="viewHeight - margin.bottom"
+          class="crosshair"
+        ></line>
+        <circle [attr.cx]="hp.x" [attr.cy]="hp.y" r="5" class="hover-dot"></circle>
+      }
+    </svg>
+
+    @if (hoveredPoint(); as hp) {
+      <div class="evolution-tooltip" [style.left.%]="hp.xPct" [style.top.%]="hp.yPct">
+        <strong>{{ hp.accumulatedAmount | currency: 'BRL' }}</strong>
+        <span>{{ xLabel(hp.day) }}</span>
+      </div>
+    }
+  </div>
+}

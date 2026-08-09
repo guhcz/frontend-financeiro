@@ -1,0 +1,31 @@
+import {
+  Calculator,
+  ChartPie,
+  CircleArrowDown,
+  Folder,
+  Gauge,
+  Lightbulb,
+  Pencil,
+  Plus,
+  Trash2,
+  TrendingUp,
+  TriangleAlert,
+  Wallet,
+  X,
+} from 'lucide-angular';
+
+export const APP_LUCIDE_ICONS = {
+  Wallet,
+  CircleArrowDown,
+  Folder,
+  Gauge,
+  Pencil,
+  Trash2,
+  Lightbulb,
+  TriangleAlert,
+  ChartPie,
+  TrendingUp,
+  X,
+  Plus,
+  Calculator,
+};

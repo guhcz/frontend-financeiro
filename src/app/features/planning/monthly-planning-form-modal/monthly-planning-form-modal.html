@@ -1,0 +1,54 @@
+<app-modal [title]="title()" (closed)="closed.emit()">
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="form-group">
+      <label for="planning-category">Categoria</label>
+      @if (isEditMode()) {
+        <p class="locked-field">{{ planning()!.category.name }}</p>
+      } @else {
+        <select
+          id="planning-category"
+          formControlName="categoryId"
+          [class.is-invalid]="form.controls.categoryId.invalid && form.controls.categoryId.touched"
+        >
+          <option [value]="null" disabled>Selecione uma categoria</option>
+          @for (category of categories(); track category.id) {
+            <option [value]="category.id">{{ category.name }}</option>
+          }
+        </select>
+        @if (form.controls.categoryId.invalid && form.controls.categoryId.touched) {
+          <span class="field-error">Selecione uma categoria.</span>
+        }
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="planning-amount">Valor planejado</label>
+      <input
+        id="planning-amount"
+        type="text"
+        inputmode="decimal"
+        appCurrencyMask
+        formControlName="amount"
+        placeholder="R$ 0,00"
+        [class.is-invalid]="form.controls.amount.invalid && form.controls.amount.touched"
+      />
+      @if (form.controls.amount.invalid && form.controls.amount.touched) {
+        <span class="field-error">Informe um valor maior que zero.</span>
+      }
+    </div>
+
+    @if (errorMessage()) {
+      <div class="banner banner-error">
+        <lucide-icon name="triangle-alert" [size]="18"></lucide-icon>
+        <div>{{ errorMessage() }}</div>
+      </div>
+    }
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn-secondary" (click)="closed.emit()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="saving()">
+        {{ saving() ? 'Salvando...' : saveLabel() }}
+      </button>
+    </div>
+  </form>
+</app-modal>

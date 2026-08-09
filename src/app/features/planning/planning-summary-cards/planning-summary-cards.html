@@ -1,0 +1,72 @@
+<div class="summary-cards">
+  <div class="card summary-card">
+    <span class="summary-icon summary-icon-primary"
+      ><lucide-icon name="wallet" [size]="26"></lucide-icon
+    ></span>
+    <div class="summary-card-body">
+      <span class="summary-label">Limite mensal</span>
+      @if (loading() && !summary()) {
+        <span class="summary-value skeleton">&nbsp;</span>
+      } @else if (hasLimit()) {
+        <span class="summary-value">{{ summary()!.monthlyLimit | currency: 'BRL' }}</span>
+      } @else {
+        <span class="summary-value summary-value-muted">Não definido</span>
+        <button type="button" class="btn btn-secondary" (click)="editLimit.emit()">Definir limite</button>
+      }
+    </div>
+  </div>
+
+  <div class="card summary-card">
+    <span class="summary-icon summary-icon-success"
+      ><lucide-icon name="circle-arrow-down" [size]="26"></lucide-icon
+    ></span>
+    <div class="summary-card-body">
+      <span class="summary-label">Gasto atual</span>
+      @if (loading() && !summary()) {
+        <span class="summary-value skeleton">&nbsp;</span>
+      } @else {
+        <span class="summary-value">{{ summary()?.totalSpent ?? 0 | currency: 'BRL' }}</span>
+      }
+    </div>
+  </div>
+
+  <div class="card summary-card">
+    <span class="summary-icon summary-icon-warning"
+      ><lucide-icon name="folder" [size]="26"></lucide-icon
+    ></span>
+    <div class="summary-card-body">
+      <span class="summary-label">Disponível</span>
+      @if (loading() && !summary()) {
+        <span class="summary-value skeleton">&nbsp;</span>
+      } @else if (hasLimit()) {
+        <span
+          class="summary-value"
+          [class.summary-value-success]="availableState() === 'good'"
+          [class.summary-value-warning]="availableState() === 'warning'"
+          [class.summary-value-danger]="availableState() === 'danger'"
+        >
+          {{ summary()!.availableAmount | currency: 'BRL' }}
+        </span>
+      } @else {
+        <span class="summary-value summary-value-muted">—</span>
+      }
+    </div>
+  </div>
+
+  <div class="card summary-card">
+    <span class="summary-icon summary-icon-violet"
+      ><lucide-icon name="gauge" [size]="26"></lucide-icon
+    ></span>
+    <div class="summary-card-body">
+      <span class="summary-label">Utilizado</span>
+      @if (loading() && !summary()) {
+        <span class="summary-value skeleton">&nbsp;</span>
+      } @else if (hasLimit()) {
+        <span class="summary-value">{{ summary()!.percentageUsed | number: '1.0-0' }}%</span>
+        <app-progress-bar [percentage]="summary()!.percentageUsed ?? 0" variant="violet"></app-progress-bar>
+      } @else {
+        <span class="summary-value summary-value-muted">—</span>
+      }
+    </div>
+  </div>
+</div>

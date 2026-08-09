@@ -1,0 +1,94 @@
+<div class="card list-card">
+  <div class="table-card-header">
+    <h2>Planejamento por categoria</h2>
+    <button type="button" class="btn btn-primary" (click)="add.emit()">
+      <lucide-icon name="plus" [size]="16"></lucide-icon>
+      Adicionar planejamento
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="list-loading">Carregando planejamento...</div>
+  } @else if (error()) {
+    <div class="banner banner-error top-banner" style="margin: var(--space-4)">{{ error() }}</div>
+  } @else if (!page() || page()!.content.length === 0) {
+    <app-empty-state
+      lucideIcon="calculator"
+      title="Você ainda não criou nenhum planejamento para este mês."
+      description="Defina quanto pretende gastar em cada categoria para acompanhar seu orçamento."
+      actionLabel="+ Adicionar planejamento"
+      (action)="add.emit()"
+    ></app-empty-state>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Categoria</th>
+            <th>Planejado</th>
+            <th>Gasto</th>
+            <th>Restante</th>
+            <th>Progresso</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of page()!.content; track item.id) {
+            <tr>
+              <td>
+                <app-badge
+                  [label]="item.category.name"
+                  [color]="item.category.color"
+                  [icon]="item.category.icon"
+                ></app-badge>
+              </td>
+              <td>{{ item.plannedAmount | currency: 'BRL' }}</td>
+              <td>{{ item.spentAmount | currency: 'BRL' }}</td>
+              <td [class.remaining-negative]="item.remainingAmount < 0">
+                {{ item.remainingAmount | currency: 'BRL' }}
+              </td>
+              <td class="progress-cell">
+                <span class="progress-text" [class.progress-text-exceeded]="item.percentageUsed > 100">
+                  {{ item.percentageUsed | number: '1.0-0' }}%
+                </span>
+                <app-progress-bar [percentage]="item.percentageUsed" size="sm"></app-progress-bar>
+              </td>
+              <td>
+                <button type="button" class="icon-btn" (click)="edit.emit(item)" aria-label="Editar planejamento">
+                  <lucide-icon name="pencil" [size]="16"></lucide-icon>
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn danger"
+                  (click)="delete.emit(item)"
+                  aria-label="Excluir planejamento"
+                >
+                  <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-summary">
+      <span>Total planejado: <strong>{{ totalPlanned() ?? 0 | currency: 'BRL' }}</strong></span>
+      @if (unplannedAmount() !== null) {
+        <span>Ainda não planejado: <strong>{{ unplannedAmount() | currency: 'BRL' }}</strong></span>
+      }
+    </div>
+
+    <app-pagination
+      [page]="page()!.number"
+      [totalPages]="page()!.totalPages"
+      [totalElements]="page()!.totalElements"
+      [size]="page()!.size"
+      [first]="page()!.first"
+      [last]="page()!.last"
+      itemLabel="categorias"
+      (pageChange)="pageChange.emit($event)"
+      (sizeChange)="sizeChange.emit($event)"
+    ></app-pagination>
+  }
+</div>

@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { monthName } from '../../../core/constants/months';
 import { Category } from '../../../core/models/category.model';
@@ -17,7 +17,7 @@ const NOTES_MAX_LENGTH = 500;
   templateUrl: './recurring-expense-form-modal.html',
   styleUrl: './recurring-expense-form-modal.scss',
 })
-export class RecurringExpenseFormModal {
+export class RecurringExpenseFormModal implements OnInit {
   private readonly fb = inject(FormBuilder);
 
   rule = input<RecurringExpense | null>(null);
@@ -50,18 +50,36 @@ export class RecurringExpenseFormModal {
   private readonly now = new Date();
 
   readonly form = this.fb.nonNullable.group({
-    categoryId: [this.rule()?.category.id ?? '', [Validators.required]],
-    description: [this.rule()?.description ?? '', [Validators.required, Validators.maxLength(255)]],
-    amount: [this.rule()?.amount ?? null, [Validators.required, Validators.min(0.01)]],
-    paymentMethod: [this.rule()?.paymentMethod ?? '', [Validators.required]],
-    notes: [this.rule()?.notes ?? '', [Validators.maxLength(NOTES_MAX_LENGTH)]],
-    dueDay: [this.rule()?.dueDay ?? (null as number | null), [Validators.min(1), Validators.max(31)]],
+    categoryId: ['' as number | string, [Validators.required]],
+    description: ['', [Validators.required, Validators.maxLength(255)]],
+    amount: [null as number | null, [Validators.required, Validators.min(0.01)]],
+    paymentMethod: ['' as string, [Validators.required]],
+    notes: ['', [Validators.maxLength(NOTES_MAX_LENGTH)]],
+    dueDay: [null as number | null, [Validators.min(1), Validators.max(31)]],
     startMonth: [this.now.getMonth() + 1],
     startYear: [this.now.getFullYear()],
-    endType: [(this.rule()?.endDate ? 'specific' : 'none') as 'none' | 'specific'],
-    endMonth: [this.initialEndMonth()],
-    endYear: [this.initialEndYear()],
+    endType: ['none' as 'none' | 'specific'],
+    endMonth: [null as number | null],
+    endYear: [null as number | null],
   });
+
+  ngOnInit(): void {
+    const rule = this.rule();
+    if (!rule) {
+      return;
+    }
+    this.form.patchValue({
+      categoryId: rule.category.id,
+      description: rule.description,
+      amount: rule.amount,
+      paymentMethod: rule.paymentMethod,
+      notes: rule.notes ?? '',
+      dueDay: rule.dueDay ?? null,
+      endType: rule.endDate ? 'specific' : 'none',
+      endMonth: this.initialEndMonth(),
+      endYear: this.initialEndYear(),
+    });
+  }
 
   submit(): void {
     this.endDateError.set(null);

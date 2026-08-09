@@ -1,34 +1,41 @@
 <app-modal [title]="title()" (closed)="closed.emit()">
   <form [formGroup]="form" (ngSubmit)="submit()">
-    <div class="form-row">
+    @if (periodLocked()) {
       <div class="form-group">
-        <label for="limit-month">Mês</label>
-        <select id="limit-month" formControlName="month">
-          @for (month of months; track month.value) {
-            <option [value]="month.value">{{ month.name }}</option>
-          }
-        </select>
+        <label>Mês/Ano</label>
+        <p class="locked-period">{{ monthName(form.controls.month.value) }} de {{ form.controls.year.value }}</p>
       </div>
+    } @else {
+      <div class="form-row">
+        <div class="form-group">
+          <label for="limit-month">Mês</label>
+          <select id="limit-month" formControlName="month">
+            @for (month of months; track month.value) {
+              <option [value]="month.value">{{ month.name }}</option>
+            }
+          </select>
+        </div>
 
-      <div class="form-group">
-        <label for="limit-year">Ano</label>
-        <select id="limit-year" formControlName="year">
-          @for (year of years; track year) {
-            <option [value]="year">{{ year }}</option>
-          }
-        </select>
+        <div class="form-group">
+          <label for="limit-year">Ano</label>
+          <select id="limit-year" formControlName="year">
+            @for (year of years(); track year) {
+              <option [value]="year">{{ year }}</option>
+            }
+          </select>
+        </div>
       </div>
-    </div>
+    }
 
     <div class="form-group">
-      <label for="limit-amount">Valor do limite (R$)</label>
+      <label for="limit-amount">Valor do limite</label>
       <input
         id="limit-amount"
-        type="number"
-        step="0.01"
-        min="0.01"
+        type="text"
+        inputmode="decimal"
+        appCurrencyMask
         formControlName="amount"
-        placeholder="1500,00"
+        placeholder="R$ 0,00"
         [class.is-invalid]="form.controls.amount.invalid && form.controls.amount.touched"
       />
       @if (form.controls.amount.invalid && form.controls.amount.touched) {
@@ -38,7 +45,7 @@
 
     @if (errorMessage()) {
       <div class="banner banner-error">
-        <span>⚠️</span>
+        <lucide-icon name="triangle-alert" [size]="18"></lucide-icon>
         <div>
           <strong>Conflito</strong>
           {{ errorMessage() }}
@@ -49,7 +56,7 @@
     <div class="modal-actions">
       <button type="button" class="btn btn-secondary" (click)="closed.emit()">Cancelar</button>
       <button type="submit" class="btn btn-primary" [disabled]="saving()">
-        {{ saving() ? 'Salvando...' : 'Salvar alterações' }}
+        {{ saving() ? 'Salvando...' : saveLabel() }}
       </button>
     </div>
   </form>

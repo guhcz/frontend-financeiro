@@ -1,0 +1,132 @@
+:host {
+  display: block;
+}
+
+.chart-loading,
+.chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.chart-empty-icon {
+  font-size: 28px;
+}
+
+.evolution-legend {
+  display: flex;
+  gap: var(--space-4);
+  margin-bottom: var(--space-2);
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.legend-line {
+  width: 16px;
+  height: 0;
+  border-top: 2px solid;
+  display: inline-block;
+}
+
+.legend-line.solid {
+  border-color: var(--color-primary);
+}
+
+.legend-line.dashed {
+  border-color: var(--color-text-subtle);
+  border-top-style: dashed;
+}
+
+.evolution-chart-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.evolution-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.grid-line {
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+
+.axis-label {
+  fill: var(--color-text-muted);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.y-label {
+  text-anchor: end;
+}
+
+.limit-line {
+  stroke: var(--color-text-subtle);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+
+.line-path {
+  stroke: var(--color-primary);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.end-marker {
+  fill: var(--color-primary);
+  stroke: var(--color-surface);
+  stroke-width: 2;
+}
+
+.end-label {
+  fill: var(--color-text);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.crosshair {
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+
+.hover-dot {
+  fill: var(--color-primary);
+  stroke: var(--color-surface);
+  stroke-width: 2;
+}
+
+.evolution-tooltip {
+  position: absolute;
+  transform: translate(-50%, -130%);
+  background: var(--color-text);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.evolution-tooltip strong {
+  font-size: 13px;
+}

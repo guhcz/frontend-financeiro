@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output } from '@angular/core';
+import { Component, OnInit, computed, inject, input, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Category, CategoryRequest } from '../../../core/models/category.model';
 import { Modal } from '../../../shared/modal/modal';
@@ -11,7 +11,7 @@ const HEX_COLOR_PATTERN = /^#[0-9A-Fa-f]{6}$/;
   templateUrl: './category-form-modal.html',
   styleUrl: './category-form-modal.scss',
 })
-export class CategoryFormModal {
+export class CategoryFormModal implements OnInit {
   private readonly fb = inject(FormBuilder);
 
   category = input<Category | null>(null);
@@ -25,10 +25,22 @@ export class CategoryFormModal {
   readonly title = computed(() => (this.isEditMode() ? 'Editar categoria' : 'Nova categoria'));
 
   readonly form = this.fb.nonNullable.group({
-    name: [this.category()?.name ?? '', [Validators.required, Validators.maxLength(100)]],
-    color: [this.category()?.color ?? '#2563EB', [Validators.required, Validators.pattern(HEX_COLOR_PATTERN)]],
-    icon: [this.category()?.icon ?? '', [Validators.maxLength(50)]],
+    name: ['', [Validators.required, Validators.maxLength(100)]],
+    color: ['#2563EB', [Validators.required, Validators.pattern(HEX_COLOR_PATTERN)]],
+    icon: ['', [Validators.maxLength(50)]],
   });
+
+  ngOnInit(): void {
+    const category = this.category();
+    if (!category) {
+      return;
+    }
+    this.form.patchValue({
+      name: category.name,
+      color: category.color,
+      icon: category.icon ?? '',
+    });
+  }
 
   submit(): void {
     if (this.form.invalid) {

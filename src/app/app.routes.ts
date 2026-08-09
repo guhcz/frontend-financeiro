@@ -44,6 +44,11 @@ export const routes: Routes = [
             (m) => m.MonthlyLimitList,
           ),
       },
+      {
+        path: 'planejamento',
+        loadComponent: () =>
+          import('./features/planning/planning-page/planning-page').then((m) => m.PlanningPage),
+      },
     ],
   },
   { path: '**', redirectTo: 'despesas' },
