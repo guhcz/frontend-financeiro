@@ -4,8 +4,22 @@
   gap: var(--space-3);
 }
 
-.period-input {
-  width: auto;
+.top-banner lucide-icon {
+  align-self: center;
+}
+
+.banner-close {
+  align-self: center;
+  margin-left: auto;
+  flex-shrink: 0;
+  color: inherit;
+  opacity: 0.7;
+}
+
+.banner-close:hover {
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 1;
+  color: inherit;
 }
 
 .charts-row {

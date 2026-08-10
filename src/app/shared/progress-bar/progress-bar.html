@@ -1,10 +1,10 @@
 <div class="progress-track" [class.sm]="size() === 'sm'">
   <div
     class="progress-fill"
-    [class.violet]="variant() === 'violet'"
+    [class.violet]="variant() === 'violet' && state() !== 'exceeded'"
     [class.warning]="variant() === 'auto' && state() === 'warning'"
     [class.reached]="variant() === 'auto' && state() === 'reached'"
-    [class.exceeded]="variant() === 'auto' && state() === 'exceeded'"
+    [class.exceeded]="state() === 'exceeded'"
     [style.width.%]="clampedWidth()"
   ></div>
 </div>

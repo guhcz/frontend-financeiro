@@ -4,14 +4,18 @@
     <p>Acompanhe seu limite, distribua seus gastos por categoria e visualize seu progresso no mês.</p>
   </div>
   <div class="page-header-actions">
-    <input
-      type="month"
-      class="period-input"
-      [value]="periodValue()"
-      (change)="onPeriodChange($event)"
-      aria-label="Selecionar mês"
-    />
+    <app-month-switcher [month]="month()" [year]="year()" (periodChange)="onPeriodChange($event)"></app-month-switcher>
+    <button
+      type="button"
+      class="btn btn-secondary"
+      (click)="requestCopyFromPreviousMonth()"
+      title="Copiar limite e planejamento do mês anterior"
+    >
+      <lucide-icon name="copy" [size]="16"></lucide-icon>
+      Copiar do mês anterior
+    </button>
     <button type="button" class="btn btn-primary" (click)="openLimitModal()">
+      <lucide-icon name="square-pen" [size]="16"></lucide-icon>
       {{ hasLimit() ? 'Editar limite' : 'Definir limite' }}
     </button>
   </div>
@@ -23,14 +27,19 @@
   (editLimit)="openLimitModal()"
 ></app-planning-summary-cards>
 
-<div class="banner banner-info top-banner">
-  <lucide-icon name="lightbulb" [size]="18"></lucide-icon>
-  <div>
-    <strong>Dica</strong>
-    O planejamento por categoria não cria despesas automaticamente; ele serve como referência para acompanhar seus
-    gastos reais.
+@if (!tipDismissed()) {
+  <div class="banner banner-info top-banner">
+    <lucide-icon name="lightbulb" [size]="24"></lucide-icon>
+    <div>
+      <strong>Dica</strong>
+      O planejamento por categoria não cria despesas automaticamente; ele serve como referência para acompanhar seus
+      gastos reais.
+    </div>
+    <button type="button" class="icon-btn banner-close" (click)="dismissTip()" aria-label="Fechar dica">
+      <lucide-icon name="x" [size]="16"></lucide-icon>
+    </button>
   </div>
-</div>
+}
 
 <app-monthly-planning-table
   [page]="planningPage()"
@@ -102,5 +111,16 @@
     confirmLabel="Excluir"
     (confirmed)="confirmDeletePlanning()"
     (cancelled)="cancelDeletePlanning()"
+  ></app-confirm-dialog>
+}
+
+@if (copyPending()) {
+  <app-confirm-dialog
+    title="Copiar do mês anterior?"
+    [message]="copyDialogMessage()"
+    [confirmLabel]="copying() ? 'Copiando...' : 'Copiar'"
+    variant="primary"
+    (confirmed)="confirmCopy()"
+    (cancelled)="cancelCopy()"
   ></app-confirm-dialog>
 }

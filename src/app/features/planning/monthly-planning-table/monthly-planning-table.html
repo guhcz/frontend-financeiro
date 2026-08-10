@@ -44,7 +44,11 @@
               </td>
               <td>{{ item.plannedAmount | currency: 'BRL' }}</td>
               <td>{{ item.spentAmount | currency: 'BRL' }}</td>
-              <td [class.remaining-negative]="item.remainingAmount < 0">
+              <td
+                [class.remaining-good]="remainingState(item) === 'good'"
+                [class.remaining-warning]="remainingState(item) === 'warning'"
+                [class.remaining-danger]="remainingState(item) === 'danger'"
+              >
                 {{ item.remainingAmount | currency: 'BRL' }}
               </td>
               <td class="progress-cell">

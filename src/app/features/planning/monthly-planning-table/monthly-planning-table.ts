@@ -26,4 +26,11 @@ export class MonthlyPlanningTable {
   delete = output<MonthlyPlanningItem>();
   pageChange = output<number>();
   sizeChange = output<number>();
+
+  remainingState(item: MonthlyPlanningItem): 'good' | 'warning' | 'danger' {
+    const pct = item.percentageUsed;
+    if (pct > 100) return 'danger';
+    if (pct >= 80) return 'warning';
+    return 'good';
+  }
 }

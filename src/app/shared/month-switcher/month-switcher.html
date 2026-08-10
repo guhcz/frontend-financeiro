@@ -1,0 +1,22 @@
+<div class="month-switcher">
+  <button type="button" class="icon-btn" (click)="previous()" aria-label="Mês anterior">
+    <lucide-icon name="chevron-left" [size]="18"></lucide-icon>
+  </button>
+
+  <div class="period-picker" (click)="openPicker(periodInput)">
+    <lucide-icon name="calendar" [size]="16"></lucide-icon>
+    <span>{{ periodLabel() }}</span>
+    <input
+      #periodInput
+      type="month"
+      class="period-input"
+      [value]="periodValue()"
+      (change)="onPeriodInputChange($event)"
+      aria-label="Selecionar mês"
+    />
+  </div>
+
+  <button type="button" class="icon-btn" (click)="next()" aria-label="Próximo mês">
+    <lucide-icon name="chevron-right" [size]="18"></lucide-icon>
+  </button>
+</div>

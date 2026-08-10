@@ -11,10 +11,12 @@ import { CategoryService } from '../../../core/services/category.service';
 import { ExpenseService } from '../../../core/services/expense.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { RecurringExpenseService } from '../../../core/services/recurring-expense.service';
+import { firstDayOfMonth, lastDayOfMonth } from '../../../core/utils/recurrence-date.util';
 import { getErrorDetail } from '../../../core/utils/http-error.util';
 import { Badge } from '../../../shared/badge/badge';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
+import { MonthPeriod, MonthSwitcher } from '../../../shared/month-switcher/month-switcher';
 import { Pagination } from '../../../shared/pagination/pagination';
 import { ExpenseFormModal } from '../expense-form-modal/expense-form-modal';
 import { RecurringDeleteScopeModal } from '../recurring-delete-scope-modal/recurring-delete-scope-modal';
@@ -35,6 +37,7 @@ const DEFAULT_SIZE = 10;
     ExpenseFormModal,
     RecurringEditScopeModal,
     RecurringDeleteScopeModal,
+    MonthSwitcher,
   ],
   templateUrl: './expense-list.html',
   styleUrls: ['../../list-page.scss', './expense-list.scss'],
@@ -45,6 +48,10 @@ export class ExpenseList implements OnInit {
   private readonly categoryService = inject(CategoryService);
   private readonly recurringExpenseService = inject(RecurringExpenseService);
   private readonly notificationService = inject(NotificationService);
+
+  private readonly today = new Date();
+  readonly month = signal(this.today.getMonth() + 1);
+  readonly year = signal(this.today.getFullYear());
 
   readonly categories = signal<Category[]>([]);
   readonly pageData = signal<Page<Expense> | null>(null);
@@ -71,8 +78,6 @@ export class ExpenseList implements OnInit {
   readonly filterForm = this.fb.nonNullable.group({
     categoryId: [''],
     paymentMethod: [''],
-    startDate: [''],
-    endDate: [''],
     description: [''],
     recurring: [''],
     sort: ['expenseDate,desc'],
@@ -86,10 +91,22 @@ export class ExpenseList implements OnInit {
     this.fetch();
   }
 
+  onPeriodChange(period: MonthPeriod): void {
+    this.month.set(period.month);
+    this.year.set(period.year);
+    this.filters = { ...this.filters, page: 0 };
+    this.fetch();
+  }
+
   private fetch(): void {
     this.loading.set(true);
     this.listError.set(null);
-    this.expenseService.list(this.filters).subscribe({
+    const request: ExpenseFilters = {
+      ...this.filters,
+      startDate: firstDayOfMonth(this.year(), this.month()),
+      endDate: lastDayOfMonth(this.year(), this.month()),
+    };
+    this.expenseService.list(request).subscribe({
       next: (page) => {
         this.pageData.set(page);
         this.loading.set(false);
@@ -106,24 +123,13 @@ export class ExpenseList implements OnInit {
     this.filters = {
       categoryId: value.categoryId ? Number(value.categoryId) : undefined,
       paymentMethod: (value.paymentMethod as PaymentMethod) || undefined,
-      startDate: value.startDate || undefined,
-      endDate: value.endDate || undefined,
       description: value.description || undefined,
       recurring: value.recurring ? value.recurring === 'true' : undefined,
       sort: value.sort,
       page: 0,
       size: this.filters.size,
     };
-    this.filtersActive.set(
-      !!(
-        value.categoryId ||
-        value.paymentMethod ||
-        value.startDate ||
-        value.endDate ||
-        value.description ||
-        value.recurring
-      ),
-    );
+    this.filtersActive.set(!!(value.categoryId || value.paymentMethod || value.description || value.recurring));
     this.fetch();
   }
 
@@ -131,8 +137,6 @@ export class ExpenseList implements OnInit {
     this.filterForm.reset({
       categoryId: '',
       paymentMethod: '',
-      startDate: '',
-      endDate: '',
       description: '',
       recurring: '',
       sort: 'expenseDate,desc',

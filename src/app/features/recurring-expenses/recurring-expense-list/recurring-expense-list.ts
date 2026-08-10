@@ -17,6 +17,7 @@ import { getErrorDetail } from '../../../core/utils/http-error.util';
 import { Badge } from '../../../shared/badge/badge';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
+import { MonthPeriod, MonthSwitcher } from '../../../shared/month-switcher/month-switcher';
 import { Pagination } from '../../../shared/pagination/pagination';
 import { RecurringExpenseFormModal } from '../recurring-expense-form-modal/recurring-expense-form-modal';
 
@@ -64,7 +65,16 @@ const PENDING_ACTION_CONFIG: Record<PendingActionKind, { title: string; message:
 
 @Component({
   selector: 'app-recurring-expense-list',
-  imports: [CurrencyPipe, DatePipe, Badge, Pagination, EmptyState, ConfirmDialog, RecurringExpenseFormModal],
+  imports: [
+    CurrencyPipe,
+    DatePipe,
+    Badge,
+    Pagination,
+    EmptyState,
+    ConfirmDialog,
+    RecurringExpenseFormModal,
+    MonthSwitcher,
+  ],
   templateUrl: './recurring-expense-list.html',
   styleUrls: ['../../list-page.scss', './recurring-expense-list.scss'],
 })
@@ -72,6 +82,10 @@ export class RecurringExpenseList implements OnInit {
   private readonly recurringExpenseService = inject(RecurringExpenseService);
   private readonly categoryService = inject(CategoryService);
   private readonly notificationService = inject(NotificationService);
+
+  private readonly today = new Date();
+  readonly month = signal(this.today.getMonth() + 1);
+  readonly year = signal(this.today.getFullYear());
 
   readonly categories = signal<Category[]>([]);
   readonly pageData = signal<Page<RecurringExpense> | null>(null);
@@ -99,10 +113,18 @@ export class RecurringExpenseList implements OnInit {
     this.fetch();
   }
 
+  onPeriodChange(period: MonthPeriod): void {
+    this.month.set(period.month);
+    this.year.set(period.year);
+    this.page = 0;
+    this.fetch();
+  }
+
   private fetch(): void {
     this.loading.set(true);
     this.listError.set(null);
-    this.recurringExpenseService.list({ page: this.page, size: this.size }).subscribe({
+    const params = { page: this.page, size: this.size, referenceMonth: this.month(), referenceYear: this.year() };
+    this.recurringExpenseService.list(params).subscribe({
       next: (page) => {
         this.pageData.set(page);
         this.loading.set(false);
@@ -121,7 +143,8 @@ export class RecurringExpenseList implements OnInit {
 
   onSizeChange(size: number): void {
     this.page = 0;
-    this.recurringExpenseService.list({ page: 0, size }).subscribe({
+    const params = { page: 0, size, referenceMonth: this.month(), referenceYear: this.year() };
+    this.recurringExpenseService.list(params).subscribe({
       next: (page) => this.pageData.set(page),
       error: (err: unknown) => this.listError.set(getErrorDetail(err)),
     });

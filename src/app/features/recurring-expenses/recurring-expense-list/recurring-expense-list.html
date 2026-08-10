@@ -3,7 +3,10 @@
     <h1>Despesas fixas</h1>
     <p>Gerencie os gastos que se repetem automaticamente.</p>
   </div>
-  <button type="button" class="btn btn-primary" (click)="openCreate()">+ Nova despesa fixa</button>
+  <div class="page-header-actions">
+    <app-month-switcher [month]="month()" [year]="year()" (periodChange)="onPeriodChange($event)"></app-month-switcher>
+    <button type="button" class="btn btn-primary" (click)="openCreate()">+ Nova despesa fixa</button>
+  </div>
 </div>
 
 <div class="card list-card">
@@ -14,7 +17,7 @@
   } @else if (pageData()?.content?.length === 0) {
     <app-empty-state
       icon="🔁"
-      title="Você ainda não cadastrou despesas fixas."
+      title="Nenhuma despesa fixa vigente neste mês."
       description="Cadastre gastos recorrentes, como aluguel, internet ou assinaturas, para que sejam adicionados automaticamente todos os meses."
       actionLabel="Criar primeira despesa fixa"
       (action)="openCreate()"

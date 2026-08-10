@@ -62,7 +62,9 @@
       @if (loading() && !summary()) {
         <span class="summary-value skeleton">&nbsp;</span>
       } @else if (hasLimit()) {
-        <span class="summary-value">{{ summary()!.percentageUsed | number: '1.0-0' }}%</span>
+        <span class="summary-value" [class.summary-value-danger]="(summary()!.percentageUsed ?? 0) > 100">
+          {{ summary()!.percentageUsed | number: '1.0-0' }}%
+        </span>
         <app-progress-bar [percentage]="summary()!.percentageUsed ?? 0" variant="violet"></app-progress-bar>
       } @else {
         <span class="summary-value summary-value-muted">—</span>
