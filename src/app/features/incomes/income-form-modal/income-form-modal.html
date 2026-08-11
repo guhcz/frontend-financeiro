@@ -1,0 +1,150 @@
+<app-modal [title]="title()" (closed)="closed.emit()">
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="form-group">
+      <label for="inc-category">Categoria</label>
+      <select
+        id="inc-category"
+        formControlName="categoryId"
+        [class.is-invalid]="form.controls.categoryId.invalid && form.controls.categoryId.touched"
+      >
+        <option value="" disabled>Selecione uma categoria</option>
+        @for (category of categories(); track category.id) {
+          <option [value]="category.id">{{ category.name }}</option>
+        }
+      </select>
+      @if (!hasCategories()) {
+        <span class="field-hint">Você ainda não tem categorias. Crie uma antes de registrar receitas.</span>
+      } @else if (form.controls.categoryId.invalid && form.controls.categoryId.touched) {
+        <span class="field-error">Selecione uma categoria.</span>
+      }
+    </div>
+
+    @if (!isEditMode()) {
+      <div class="form-group">
+        <label>Tipo da receita</label>
+        <div class="segmented-toggle">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            [class.active]="incomeType() === 'single'"
+            (click)="incomeType.set('single')"
+          >
+            Receita única
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            [class.active]="incomeType() === 'recurring'"
+            (click)="incomeType.set('recurring')"
+          >
+            Receita recorrente
+          </button>
+        </div>
+      </div>
+    }
+
+    <div class="form-group">
+      <label for="inc-description">Descrição</label>
+      <input
+        id="inc-description"
+        type="text"
+        formControlName="description"
+        placeholder="Ex.: Salário"
+        [class.is-invalid]="form.controls.description.invalid && form.controls.description.touched"
+      />
+      @if (form.controls.description.invalid && form.controls.description.touched) {
+        <span class="field-error">Informe uma descrição.</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="inc-amount">Valor</label>
+      <input
+        id="inc-amount"
+        type="text"
+        inputmode="decimal"
+        appCurrencyMask
+        formControlName="amount"
+        placeholder="R$ 0,00"
+        [class.is-invalid]="form.controls.amount.invalid && form.controls.amount.touched"
+      />
+      @if (form.controls.amount.invalid && form.controls.amount.touched) {
+        <span class="field-error">Informe um valor maior que zero.</span>
+      }
+    </div>
+
+    @if (incomeType() === 'single' || isEditMode()) {
+      <div class="form-group">
+        <label for="inc-date">Data de recebimento</label>
+        <input
+          id="inc-date"
+          type="date"
+          formControlName="incomeDate"
+          [class.is-invalid]="form.controls.incomeDate.invalid && form.controls.incomeDate.touched"
+        />
+        @if (form.controls.incomeDate.invalid && form.controls.incomeDate.touched) {
+          <span class="field-error">Data é obrigatória.</span>
+        }
+      </div>
+    }
+
+    <div class="form-group">
+      <label for="inc-receipt-method">Forma de recebimento</label>
+      <select
+        id="inc-receipt-method"
+        formControlName="receiptMethod"
+        [class.is-invalid]="form.controls.receiptMethod.invalid && form.controls.receiptMethod.touched"
+      >
+        <option value="" disabled>Selecione</option>
+        @for (method of receiptMethods; track method) {
+          <option [value]="method">{{ receiptMethodLabels[method] }}</option>
+        }
+      </select>
+      @if (form.controls.receiptMethod.invalid && form.controls.receiptMethod.touched) {
+        <span class="field-error">Selecione uma forma de recebimento.</span>
+      }
+    </div>
+
+    @if (incomeType() === 'recurring' && !isEditMode()) {
+      <app-recurring-expense-fields
+        [dueDayControl]="form.controls.receiptDay"
+        [startMonthControl]="form.controls.startMonth"
+        [startYearControl]="form.controls.startYear"
+        [endTypeControl]="form.controls.endType"
+        [endMonthControl]="form.controls.endMonth"
+        [endYearControl]="form.controls.endYear"
+        mode="create"
+        [endDateError]="endDateError()"
+        dayFieldLabel="Data de recebimento"
+        dayFieldHint="Informe apenas se esta receita costuma ser recebida em uma data específica."
+      ></app-recurring-expense-fields>
+    }
+
+    <div class="form-group">
+      <label for="inc-notes">Observações <span class="optional-tag">(opcional)</span></label>
+      <textarea
+        id="inc-notes"
+        formControlName="notes"
+        maxlength="500"
+        placeholder="Alguma observação sobre essa receita..."
+      ></textarea>
+      <span class="field-hint">{{ form.controls.notes.value.length }}/{{ notesMaxLength }} caracteres</span>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="banner banner-error">
+        <span>⚠️</span>
+        <div>{{ errorMessage() }}</div>
+      </div>
+    }
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn-secondary" (click)="closed.emit()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="saving() || !hasCategories()">
+        {{
+          saving() ? 'Salvando...' : incomeType() === 'recurring' && !isEditMode() ? 'Salvar receita recorrente' : 'Salvar receita'
+        }}
+      </button>
+    </div>
+  </form>
+</app-modal>

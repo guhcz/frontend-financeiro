@@ -1,9 +1,9 @@
-<app-modal title="O que você deseja alterar?" (closed)="cancelled.emit()">
+<app-modal [title]="title()" (closed)="cancelled.emit()">
   <label class="scope-option">
     <input type="radio" name="edit-scope" [checked]="scope() === 'ONLY_THIS'" (change)="scope.set('ONLY_THIS')" />
     <div>
-      <strong>Somente esta despesa</strong>
-      <p>Altera apenas o lançamento selecionado. Os próximos meses continuarão com os dados atuais da recorrência.</p>
+      <strong>{{ onlyThisLabel() }}</strong>
+      <p>{{ onlyThisDescription() }}</p>
     </div>
   </label>
 
@@ -15,8 +15,8 @@
       (change)="scope.set('THIS_AND_FUTURE')"
     />
     <div>
-      <strong>Esta e as próximas despesas</strong>
-      <p>Altera este lançamento e atualiza a regra usada para gerar os próximos meses.</p>
+      <strong>{{ thisAndFutureLabel() }}</strong>
+      <p>{{ thisAndFutureDescription() }}</p>
     </div>
   </label>
 

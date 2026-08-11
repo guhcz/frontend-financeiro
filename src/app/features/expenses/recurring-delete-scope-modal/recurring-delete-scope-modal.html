@@ -1,9 +1,9 @@
-<app-modal title="Como deseja excluir esta despesa?" (closed)="cancelled.emit()">
+<app-modal [title]="title()" (closed)="cancelled.emit()">
   <label class="scope-option">
     <input type="radio" name="delete-scope" [checked]="scope() === 'ONLY_THIS'" (change)="scope.set('ONLY_THIS')" />
     <div>
-      <strong>Excluir somente esta despesa</strong>
-      <p>Remove apenas o lançamento deste mês.</p>
+      <strong>{{ onlyThisLabel() }}</strong>
+      <p>{{ onlyThisDescription() }}</p>
     </div>
   </label>
 
@@ -15,8 +15,8 @@
       (change)="scope.set('THIS_AND_FUTURE')"
     />
     <div>
-      <strong>Excluir esta e encerrar as próximas</strong>
-      <p>Remove este lançamento e impede que novas despesas sejam geradas.</p>
+      <strong>{{ thisAndFutureLabel() }}</strong>
+      <p>{{ thisAndFutureDescription() }}</p>
     </div>
   </label>
 

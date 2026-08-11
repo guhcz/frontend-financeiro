@@ -1,6 +1,6 @@
 <div class="section-header">
   <h2>Últimas despesas</h2>
-  <a routerLink="/despesas" class="section-link">Ver todas</a>
+  <a routerLink="/movimentacoes" class="section-link">Ver todas</a>
 </div>
 
 @if (loading() && expenses().length === 0) {
@@ -38,5 +38,5 @@
     }
   </ul>
 
-  <button type="button" class="btn btn-secondary btn-block view-all" routerLink="/despesas">Ver todas as despesas</button>
+  <button type="button" class="btn btn-secondary btn-block view-all" routerLink="/movimentacoes">Ver todas as despesas</button>
 }

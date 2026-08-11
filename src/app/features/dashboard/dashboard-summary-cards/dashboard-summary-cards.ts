@@ -12,7 +12,6 @@ import { ProgressBar } from '../../../shared/progress-bar/progress-bar';
 })
 export class DashboardSummaryCards {
   summary = input<DashboardSummary | null>(null);
-  activeRecurringCount = input<number | null>(null);
   loading = input(false);
 
   defineLimit = output<void>();

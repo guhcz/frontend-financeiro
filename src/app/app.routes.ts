@@ -26,10 +26,11 @@ export const routes: Routes = [
           import('./features/dashboard/dashboard-page/dashboard-page').then((m) => m.DashboardPage),
       },
       {
-        path: 'despesas',
+        path: 'movimentacoes',
         loadComponent: () =>
-          import('./features/expenses/expense-list/expense-list').then((m) => m.ExpenseList),
+          import('./features/transactions/transaction-list/transaction-list').then((m) => m.TransactionList),
       },
+      { path: 'despesas', redirectTo: 'movimentacoes' },
       {
         path: 'despesas-fixas',
         loadComponent: () =>

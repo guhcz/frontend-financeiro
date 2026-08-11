@@ -52,6 +52,11 @@
   color: var(--color-violet);
 }
 
+.summary-icon-success {
+  background: var(--color-success-light);
+  color: var(--color-success);
+}
+
 .summary-label {
   font-size: 13px;
   color: var(--color-text-muted);

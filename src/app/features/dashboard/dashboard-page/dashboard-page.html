@@ -21,7 +21,6 @@
 } @else {
   <app-dashboard-summary-cards
     [summary]="data()?.summary ?? null"
-    [activeRecurringCount]="data()?.recurringExpensesSummary?.activeCount ?? null"
     [loading]="loading()"
     (defineLimit)="openLimitModal()"
   ></app-dashboard-summary-cards>
@@ -96,28 +95,36 @@
         <h2>Resumo rápido</h2>
         <ul class="quick-summary">
           <li>
-            <lucide-icon name="repeat-2" [size]="18"></lucide-icon>
+            <span class="quick-summary-icon quick-summary-icon-violet">
+              <lucide-icon name="repeat-2" [size]="16"></lucide-icon>
+            </span>
             <div>
               <span class="quick-summary-label">Contas fixas ativas</span>
               <span class="quick-summary-value">{{ data()?.recurringExpensesSummary?.activeCount ?? 0 }} contas</span>
             </div>
           </li>
           <li>
-            <lucide-icon name="calendar-days" [size]="18"></lucide-icon>
+            <span class="quick-summary-icon quick-summary-icon-warning">
+              <lucide-icon name="calendar-days" [size]="16"></lucide-icon>
+            </span>
             <div>
               <span class="quick-summary-label">Vencem nos próximos 7 dias</span>
               <span class="quick-summary-value">{{ data()?.recurringExpensesSummary?.dueInNext7DaysCount ?? 0 }} contas</span>
             </div>
           </li>
           <li>
-            <lucide-icon name="trending-down" [size]="18"></lucide-icon>
+            <span class="quick-summary-icon quick-summary-icon-danger">
+              <lucide-icon name="trending-down" [size]="16"></lucide-icon>
+            </span>
             <div>
               <span class="quick-summary-label">Despesas de hoje</span>
               <span class="quick-summary-value">{{ todayExpensesTotal() | currency: 'BRL' }}</span>
             </div>
           </li>
           <li>
-            <lucide-icon name="wallet" [size]="18"></lucide-icon>
+            <span class="quick-summary-icon quick-summary-icon-primary">
+              <lucide-icon name="wallet" [size]="16"></lucide-icon>
+            </span>
             <div>
               <span class="quick-summary-label">Média diária de gastos</span>
               <span class="quick-summary-value">{{ data()?.averageDailyExpense ?? 0 | currency: 'BRL' }}</span>

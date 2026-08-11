@@ -1,0 +1,239 @@
+<div class="page-header">
+  <div>
+    <h1>Movimentações</h1>
+    <p>Acompanhe suas receitas e despesas em um só lugar.</p>
+  </div>
+  <div class="page-header-actions">
+    <app-month-switcher [month]="month()" [year]="year()" (periodChange)="onPeriodChange($event)"></app-month-switcher>
+    <button type="button" class="btn btn-secondary" [class.active]="filtersOpen()" (click)="toggleFilters()">
+      Filtros
+      @if (filtersActive()) {
+        <span class="filters-badge"></span>
+      }
+    </button>
+    <button type="button" class="btn btn-primary" (click)="openCreateExpense()">+ Nova despesa</button>
+    <button type="button" class="btn btn-success" (click)="openCreateIncome()">+ Nova receita</button>
+  </div>
+</div>
+
+@if (filtersOpen()) {
+  <div class="card filters-card">
+    <form [formGroup]="filterForm" (ngSubmit)="applyFilters()">
+      <div class="filters-grid">
+        <div class="form-group">
+          <label for="filter-category">Categoria</label>
+          <select id="filter-category" formControlName="categoryId">
+            <option value="">Todas</option>
+            @for (category of categories(); track category.id) {
+              <option [value]="category.id">{{ category.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="filter-type">Tipo</label>
+          <select id="filter-type" formControlName="type">
+            <option value="">Todos</option>
+            <option value="INCOME">Receitas</option>
+            <option value="EXPENSE">Despesas</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="filter-description">Descrição</label>
+          <input
+            id="filter-description"
+            type="search"
+            formControlName="description"
+            placeholder="Buscar na descrição"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="filter-sort">Ordenar por</label>
+          <select id="filter-sort" formControlName="sort">
+            <option value="date,desc">Data (mais recente)</option>
+            <option value="date,asc">Data (mais antiga)</option>
+            <option value="amount,desc">Valor (maior)</option>
+            <option value="amount,asc">Valor (menor)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="filter-recurring">Recorrência</label>
+          <select id="filter-recurring" formControlName="recurring">
+            <option value="">Todos</option>
+            <option value="false">Únicos</option>
+            <option value="true">Recorrentes</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filters-actions">
+        <button type="button" class="btn btn-secondary" (click)="clearFilters()">Limpar filtros</button>
+        <button type="submit" class="btn btn-primary">Aplicar filtros</button>
+      </div>
+    </form>
+  </div>
+}
+
+<div class="card list-card">
+  @if (loading()) {
+    <div class="list-loading">Carregando movimentações...</div>
+  } @else if (listError()) {
+    <div class="banner banner-error top-banner" style="margin: var(--space-4)">{{ listError() }}</div>
+  } @else if (pageData()?.content?.length === 0) {
+    @if (filtersActive()) {
+      <app-empty-state
+        icon="🧾"
+        title="Nenhuma movimentação encontrada para os filtros selecionados."
+        actionLabel="Limpar filtros"
+        (action)="clearFilters()"
+      ></app-empty-state>
+    } @else {
+      <app-empty-state
+        icon="🧾"
+        title="Nenhuma movimentação encontrada."
+        description="Registre sua primeira receita ou despesa para começar."
+      ></app-empty-state>
+      <div class="empty-state-actions">
+        <button type="button" class="btn btn-primary" (click)="openCreateExpense()">+ Nova despesa</button>
+        <button type="button" class="btn btn-success" (click)="openCreateIncome()">+ Nova receita</button>
+      </div>
+    }
+  } @else if (pageData(); as page) {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Descrição</th>
+            <th>Categoria</th>
+            <th>Tipo</th>
+            <th class="col-method">Forma</th>
+            <th class="col-recurring">Recorrência</th>
+            <th>Valor</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of page.content; track trackByTransaction(item)) {
+            <tr>
+              <td>{{ item.date | date: 'dd/MM/yyyy' }}</td>
+              <td>{{ item.description }}</td>
+              <td>
+                <app-badge
+                  [label]="item.category.name"
+                  [color]="item.category.color"
+                  [icon]="item.category.icon"
+                ></app-badge>
+              </td>
+              <td>
+                <app-badge [label]="typeInfo[item.type].label" [color]="typeInfo[item.type].color"></app-badge>
+              </td>
+              <td class="col-method">
+                <app-badge [label]="methodLabels[item.method] || item.method"></app-badge>
+              </td>
+              <td class="col-recurring">
+                @if (item.recurring) {
+                  <app-badge
+                    label="Recorrente"
+                    color="#2563eb"
+                    title="Esta movimentação foi gerada automaticamente por uma recorrência."
+                  ></app-badge>
+                } @else {
+                  —
+                }
+              </td>
+              <td [style.color]="typeInfo[item.type].color" class="amount-cell">
+                {{ item.type === 'INCOME' ? '+ ' : '- ' }}{{ item.amount | currency: 'BRL' }}
+              </td>
+              <td>
+                <button type="button" class="icon-btn" (click)="openEdit(item)" aria-label="Editar movimentação">
+                  ✏️
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn danger"
+                  (click)="requestDelete(item)"
+                  aria-label="Excluir movimentação"
+                >
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-pagination
+      [page]="page.number"
+      [totalPages]="page.totalPages"
+      [totalElements]="page.totalElements"
+      [size]="page.size"
+      [first]="page.first"
+      [last]="page.last"
+      itemLabel="movimentações"
+      (pageChange)="onPageChange($event)"
+      (sizeChange)="onSizeChange($event)"
+    ></app-pagination>
+  }
+</div>
+
+@if (activeModal() === 'expense') {
+  <app-expense-form-modal
+    [expense]="editingExpense()"
+    [categories]="categories()"
+    [saving]="saving()"
+    [errorMessage]="saveError()"
+    (save)="saveExpense($event)"
+    (saveRecurring)="saveRecurringExpense($event)"
+    (closed)="closeModal()"
+  ></app-expense-form-modal>
+}
+
+@if (activeModal() === 'income') {
+  <app-income-form-modal
+    [income]="editingIncome()"
+    [categories]="categories()"
+    [saving]="saving()"
+    [errorMessage]="saveError()"
+    (save)="saveIncome($event)"
+    (saveRecurring)="saveRecurringIncome($event)"
+    (closed)="closeModal()"
+  ></app-income-form-modal>
+}
+
+@if (pendingDelete(); as item) {
+  <app-confirm-dialog
+    title="Excluir movimentação"
+    [message]="'Tem certeza que deseja excluir \'' + item.description + '\'?'"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()"
+  ></app-confirm-dialog>
+}
+
+@if (editScopeRequest()) {
+  <app-recurring-edit-scope-modal
+    [title]="editScopeTexts().title"
+    [onlyThisLabel]="editScopeTexts().onlyThisLabel"
+    [onlyThisDescription]="editScopeTexts().onlyThisDescription"
+    [thisAndFutureLabel]="editScopeTexts().thisAndFutureLabel"
+    [thisAndFutureDescription]="editScopeTexts().thisAndFutureDescription"
+    (confirmed)="confirmEditScope($event)"
+    (cancelled)="cancelEditScope()"
+  ></app-recurring-edit-scope-modal>
+}
+
+@if (deleteScopeItem()) {
+  <app-recurring-delete-scope-modal
+    [title]="deleteScopeTexts().title"
+    [onlyThisLabel]="deleteScopeTexts().onlyThisLabel"
+    [onlyThisDescription]="deleteScopeTexts().onlyThisDescription"
+    [thisAndFutureLabel]="deleteScopeTexts().thisAndFutureLabel"
+    [thisAndFutureDescription]="deleteScopeTexts().thisAndFutureDescription"
+    (confirmed)="confirmDeleteScope($event)"
+    (cancelled)="cancelDeleteScope()"
+  ></app-recurring-delete-scope-modal>
+}

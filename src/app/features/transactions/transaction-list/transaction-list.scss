@@ -2,6 +2,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  flex-wrap: wrap;
 }
 
 .page-header-actions .btn-secondary {
@@ -12,6 +13,15 @@
   background: var(--color-primary-light);
   border-color: var(--color-primary);
   color: var(--color-primary);
+}
+
+.btn-success {
+  background: var(--color-success);
+  color: #fff;
+}
+
+.btn-success:hover:not(:disabled) {
+  background: #15803d;
 }
 
 .filters-badge {
@@ -47,6 +57,25 @@
   margin-top: var(--space-4);
 }
 
+.amount-cell {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 td .icon-btn {
   margin-right: var(--space-1);
+}
+
+.empty-state-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-3);
+  padding-bottom: var(--space-6);
+}
+
+@media (max-width: 900px) {
+  .col-method,
+  .col-recurring {
+    display: none;
+  }
 }

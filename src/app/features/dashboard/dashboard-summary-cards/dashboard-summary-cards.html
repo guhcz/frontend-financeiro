@@ -23,15 +23,16 @@
   </div>
 
   <div class="card summary-card">
-    <span class="summary-icon summary-icon-violet"
-      ><lucide-icon name="repeat-2" [size]="26"></lucide-icon
+    <span class="summary-icon summary-icon-success"
+      ><lucide-icon name="trending-up" [size]="26"></lucide-icon
     ></span>
     <div class="summary-card-body">
-      <span class="summary-label">Despesas fixas ativas</span>
-      @if (loading() && activeRecurringCount() == null) {
+      <span class="summary-label">Receitas no mês</span>
+      @if (loading() && !summary()) {
         <span class="summary-value skeleton">&nbsp;</span>
       } @else {
-        <span class="summary-value">{{ activeRecurringCount() ?? 0 }} {{ (activeRecurringCount() ?? 0) === 1 ? 'conta' : 'contas' }}</span>
+        <span class="summary-value summary-value-success">{{ summary()?.totalIncome ?? 0 | currency: 'BRL' }}</span>
+        <span class="summary-hint">Total recebido</span>
       }
     </div>
   </div>
