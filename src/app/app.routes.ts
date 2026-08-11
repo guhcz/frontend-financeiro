@@ -19,12 +19,18 @@ export const routes: Routes = [
     component: Shell,
     canActivate: [authGuard],
     children: [
-      { path: '', redirectTo: 'despesas', pathMatch: 'full' },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
-        path: 'despesas',
+        path: 'dashboard',
         loadComponent: () =>
-          import('./features/expenses/expense-list/expense-list').then((m) => m.ExpenseList),
+          import('./features/dashboard/dashboard-page/dashboard-page').then((m) => m.DashboardPage),
       },
+      {
+        path: 'movimentacoes',
+        loadComponent: () =>
+          import('./features/transactions/transaction-list/transaction-list').then((m) => m.TransactionList),
+      },
+      { path: 'despesas', redirectTo: 'movimentacoes' },
       {
         path: 'despesas-fixas',
         loadComponent: () =>
@@ -51,5 +57,5 @@ export const routes: Routes = [
       },
     ],
   },
-  { path: '**', redirectTo: 'despesas' },
+  { path: '**', redirectTo: 'dashboard' },
 ];

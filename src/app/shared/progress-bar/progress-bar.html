@@ -2,6 +2,7 @@
   <div
     class="progress-fill"
     [class.violet]="variant() === 'violet' && state() !== 'exceeded'"
+    [class.amber]="variant() === 'amber' && state() !== 'exceeded'"
     [class.warning]="variant() === 'auto' && state() === 'warning'"
     [class.reached]="variant() === 'auto' && state() === 'reached'"
     [class.exceeded]="state() === 'exceeded'"

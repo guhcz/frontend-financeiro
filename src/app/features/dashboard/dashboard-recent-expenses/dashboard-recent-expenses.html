@@ -1,0 +1,42 @@
+<div class="section-header">
+  <h2>Últimas despesas</h2>
+  <a routerLink="/movimentacoes" class="section-link">Ver todas</a>
+</div>
+
+@if (loading() && expenses().length === 0) {
+  <ul class="expense-rows">
+    @for (i of [1, 2, 3]; track i) {
+      <li class="expense-row">
+        <span class="expense-dot skeleton"></span>
+        <div class="expense-main">
+          <span class="skeleton skeleton-line"></span>
+        </div>
+      </li>
+    }
+  </ul>
+} @else if (expenses().length === 0) {
+  <app-empty-state
+    icon="🧾"
+    title="Nenhuma despesa registrada neste mês."
+    actionLabel="Registrar primeira despesa"
+    (action)="registerFirst.emit()"
+  ></app-empty-state>
+} @else {
+  <ul class="expense-rows">
+    @for (expense of expenses(); track expense.id) {
+      <li class="expense-row">
+        <span class="expense-dot" [style.background]="expense.category.color"></span>
+        <div class="expense-main">
+          <span class="expense-description">{{ expense.description }}</span>
+          <app-badge [label]="expense.category.name" [color]="expense.category.color"></app-badge>
+        </div>
+        <div class="expense-meta">
+          <span class="expense-amount">-{{ expense.amount | currency: 'BRL' }}</span>
+          <span class="expense-date">{{ relativeDate(expense.expenseDate) || (expense.expenseDate | date: 'dd/MM/yyyy') }}</span>
+        </div>
+      </li>
+    }
+  </ul>
+
+  <button type="button" class="btn btn-secondary btn-block view-all" routerLink="/movimentacoes">Ver todas as despesas</button>
+}

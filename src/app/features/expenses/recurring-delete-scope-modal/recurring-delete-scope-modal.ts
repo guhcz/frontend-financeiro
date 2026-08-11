@@ -1,4 +1,4 @@
-import { Component, output, signal } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
 import { RecurringUpdateScope } from '../../../core/models/recurring-update-scope.model';
 import { Modal } from '../../../shared/modal/modal';
 
@@ -9,6 +9,12 @@ import { Modal } from '../../../shared/modal/modal';
   styleUrl: './recurring-delete-scope-modal.scss',
 })
 export class RecurringDeleteScopeModal {
+  title = input('Como deseja excluir esta despesa?');
+  onlyThisLabel = input('Excluir somente esta despesa');
+  onlyThisDescription = input('Remove apenas o lançamento deste mês.');
+  thisAndFutureLabel = input('Excluir esta e encerrar as próximas');
+  thisAndFutureDescription = input('Remove este lançamento e impede que novas despesas sejam geradas.');
+
   confirmed = output<RecurringUpdateScope>();
   cancelled = output<void>();
 

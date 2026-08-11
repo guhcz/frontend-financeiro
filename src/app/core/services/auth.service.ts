@@ -6,6 +6,8 @@ import { API_BASE_URL } from '../config/api.config';
 import { LoginRequest, LoginResponse } from '../models/auth.model';
 import { RegisterRequest, RegisterResponse } from '../models/user.model';
 
+export type CurrentUser = RegisterResponse;
+
 const TOKEN_KEY = 'meufinanceiro.token';
 const EXPIRES_AT_KEY = 'meufinanceiro.expiresAt';
 
@@ -33,6 +35,10 @@ export class AuthService {
   register(name: string, email: string, password: string): Observable<RegisterResponse> {
     const body: RegisterRequest = { name, email, password };
     return this.http.post<RegisterResponse>(`${API_BASE_URL}/users/register`, body);
+  }
+
+  getCurrentUser(): Observable<CurrentUser> {
+    return this.http.get<CurrentUser>(`${API_BASE_URL}/users/me`);
   }
 
   logout(): void {

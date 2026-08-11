@@ -1,0 +1,171 @@
+<div class="page-header">
+  <div>
+    <h1>Olá, {{ userFirstName() ?? '' }}! 👋</h1>
+    <p>Aqui está um panorama da sua vida financeira.</p>
+  </div>
+  <div class="page-header-actions">
+    <app-month-switcher [month]="month()" [year]="year()" (periodChange)="onPeriodChange($event)"></app-month-switcher>
+    <button type="button" class="btn btn-primary" (click)="openCreateExpense()">
+      <lucide-icon name="plus" [size]="16"></lucide-icon>
+      Nova despesa
+    </button>
+  </div>
+</div>
+
+@if (loadError()) {
+  <div class="banner banner-error top-banner">
+    <lucide-icon name="triangle-alert" [size]="20"></lucide-icon>
+    <div>{{ loadError() }}</div>
+    <button type="button" class="btn btn-secondary" (click)="retry()">Tentar novamente</button>
+  </div>
+} @else {
+  <app-dashboard-summary-cards
+    [summary]="data()?.summary ?? null"
+    [loading]="loading()"
+    (defineLimit)="openLimitModal()"
+  ></app-dashboard-summary-cards>
+
+  <div class="dashboard-grid">
+    <div class="dashboard-col">
+      <div class="card dashboard-card">
+        <h2>Visão geral do mês</h2>
+        <app-dashboard-overview
+          [summary]="data()?.summary ?? null"
+          [financialStatus]="data()?.financialStatus ?? null"
+          [loading]="loading()"
+        ></app-dashboard-overview>
+      </div>
+
+      <div class="card dashboard-card">
+        <h2>Gastos dos últimos 6 meses</h2>
+        <app-dashboard-monthly-chart
+          [history]="data()?.monthlyExpenseHistory ?? []"
+          [loading]="loading()"
+        ></app-dashboard-monthly-chart>
+      </div>
+    </div>
+
+    <div class="dashboard-col">
+      <div class="card dashboard-card">
+        <app-dashboard-recent-expenses
+          [expenses]="data()?.recentExpenses ?? []"
+          [loading]="loading()"
+          (registerFirst)="openCreateExpense()"
+        ></app-dashboard-recent-expenses>
+      </div>
+
+      <div class="card dashboard-card">
+        <h2>Despesas por categoria</h2>
+        <p class="card-subtitle">Mês atual</p>
+        <app-dashboard-category-breakdown
+          [data]="data()?.expensesByCategory ?? []"
+          [loading]="loading()"
+        ></app-dashboard-category-breakdown>
+      </div>
+    </div>
+
+    <div class="dashboard-col">
+      <div class="card dashboard-card">
+        <h2>Acesso rápido</h2>
+        <div class="quick-actions">
+          <button type="button" class="quick-action" (click)="openCreateExpense()">
+            <lucide-icon name="plus" [size]="20"></lucide-icon>
+            Nova despesa
+          </button>
+          <button type="button" class="quick-action" routerLink="/despesas-fixas">
+            <lucide-icon name="repeat-2" [size]="20"></lucide-icon>
+            Nova despesa fixa
+          </button>
+          <button type="button" class="quick-action" routerLink="/planejamento">
+            <lucide-icon name="chart-no-axes-combined" [size]="20"></lucide-icon>
+            Planejamento
+          </button>
+          <button type="button" class="quick-action" routerLink="/categorias">
+            <lucide-icon name="shapes" [size]="20"></lucide-icon>
+            Categorias
+          </button>
+          <button type="button" class="quick-action" (click)="openLimitModal()">
+            <lucide-icon name="wallet-cards" [size]="20"></lucide-icon>
+            {{ hasLimit() ? 'Editar limite' : 'Limite mensal' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="card dashboard-card">
+        <h2>Resumo rápido</h2>
+        <ul class="quick-summary">
+          <li>
+            <span class="quick-summary-icon quick-summary-icon-violet">
+              <lucide-icon name="repeat-2" [size]="16"></lucide-icon>
+            </span>
+            <div>
+              <span class="quick-summary-label">Contas fixas ativas</span>
+              <span class="quick-summary-value">{{ data()?.recurringExpensesSummary?.activeCount ?? 0 }} contas</span>
+            </div>
+          </li>
+          <li>
+            <span class="quick-summary-icon quick-summary-icon-warning">
+              <lucide-icon name="calendar-days" [size]="16"></lucide-icon>
+            </span>
+            <div>
+              <span class="quick-summary-label">Vencem nos próximos 7 dias</span>
+              <span class="quick-summary-value">{{ data()?.recurringExpensesSummary?.dueInNext7DaysCount ?? 0 }} contas</span>
+            </div>
+          </li>
+          <li>
+            <span class="quick-summary-icon quick-summary-icon-danger">
+              <lucide-icon name="trending-down" [size]="16"></lucide-icon>
+            </span>
+            <div>
+              <span class="quick-summary-label">Despesas de hoje</span>
+              <span class="quick-summary-value">{{ todayExpensesTotal() | currency: 'BRL' }}</span>
+            </div>
+          </li>
+          <li>
+            <span class="quick-summary-icon quick-summary-icon-primary">
+              <lucide-icon name="wallet" [size]="16"></lucide-icon>
+            </span>
+            <div>
+              <span class="quick-summary-label">Média diária de gastos</span>
+              <span class="quick-summary-value">{{ data()?.averageDailyExpense ?? 0 | currency: 'BRL' }}</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card dashboard-card goals-card">
+        <div class="goals-header">
+          <h2>Metas financeiras</h2>
+          <span class="badge-soon">Em breve</span>
+        </div>
+        <lucide-icon name="sparkles" [size]="28" class="goals-icon"></lucide-icon>
+        <p>Esta funcionalidade estará disponível em breve.</p>
+        <p class="goals-subtext">Estamos trabalhando para ajudar você a acompanhar seus objetivos financeiros.</p>
+      </div>
+    </div>
+  </div>
+}
+
+@if (modalOpen()) {
+  <app-expense-form-modal
+    [categories]="categories()"
+    [saving]="saving()"
+    [errorMessage]="saveError()"
+    (save)="saveExpense($event)"
+    (saveRecurring)="saveRecurringExpense($event)"
+    (closed)="closeModal()"
+  ></app-expense-form-modal>
+}
+
+@if (limitModalOpen()) {
+  <app-monthly-limit-form-modal
+    [limit]="currentLimit()"
+    [saving]="limitSaving()"
+    [errorMessage]="limitError()"
+    [periodLocked]="true"
+    [defaultMonth]="month()"
+    [defaultYear]="year()"
+    (save)="saveLimit($event)"
+    (closed)="closeLimitModal()"
+  ></app-monthly-limit-form-modal>
+}

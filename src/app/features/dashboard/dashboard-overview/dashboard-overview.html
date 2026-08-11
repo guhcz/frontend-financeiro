@@ -1,0 +1,63 @@
+@if (loading() && !summary()) {
+  <div class="overview-loading">Carregando visão geral...</div>
+} @else {
+  <div class="overview-layout">
+    <div class="ring-wrap">
+      <svg viewBox="0 0 180 180" class="ring-svg" role="img" aria-label="Percentual do limite utilizado">
+        <circle cx="90" cy="90" [attr.r]="radius" fill="none" stroke="var(--color-border)" [attr.stroke-width]="strokeWidth" />
+        @if (hasLimit()) {
+          <circle
+            cx="90"
+            cy="90"
+            [attr.r]="radius"
+            fill="none"
+            [attr.stroke-width]="strokeWidth"
+            stroke-linecap="round"
+            [attr.stroke-dasharray]="arcLength() + ' ' + (circumference - arcLength())"
+            class="ring-progress"
+            [class.ring-success]="statusClass() === 'status-success'"
+            [class.ring-warning]="statusClass() === 'status-warning'"
+            [class.ring-danger]="statusClass() === 'status-danger'"
+          />
+        }
+      </svg>
+      <div class="ring-center">
+        @if (hasLimit()) {
+          <span class="ring-value">{{ percentage() | number: '1.0-0' }}%</span>
+          <span class="ring-label">Utilizado</span>
+        } @else {
+          <span class="ring-value ring-value-muted">—</span>
+          <span class="ring-label">Sem limite</span>
+        }
+      </div>
+    </div>
+
+    <div class="overview-details">
+      <div class="overview-row">
+        <span class="overview-label">Limite mensal</span>
+        <span class="overview-value">{{ hasLimit() ? (summary()!.monthlyLimit | currency: 'BRL') : 'Não definido' }}</span>
+      </div>
+      <div class="overview-row">
+        <span class="overview-label">Gasto no mês</span>
+        <span class="overview-value">{{ summary()?.totalExpenses ?? 0 | currency: 'BRL' }}</span>
+      </div>
+      <div class="overview-row">
+        <span class="overview-label">Disponível</span>
+        <span class="overview-value">{{ hasLimit() ? (summary()!.availableAmount | currency: 'BRL') : '—' }}</span>
+      </div>
+    </div>
+  </div>
+
+  @if (financialStatus(); as status) {
+    <div
+      class="overview-status"
+      [class.status-success]="statusClass() === 'status-success'"
+      [class.status-warning]="statusClass() === 'status-warning'"
+      [class.status-danger]="statusClass() === 'status-danger'"
+      [class.status-info]="statusClass() === 'status-info'"
+    >
+      <lucide-icon [name]="statusClass() === 'status-danger' ? 'triangle-alert' : 'lightbulb'" [size]="18"></lucide-icon>
+      <span>{{ status.message }}</span>
+    </div>
+  }
+}

@@ -1,0 +1,14 @@
+@if (loading() && bars().length === 0) {
+  <div class="chart-loading">Carregando gráfico...</div>
+} @else {
+  <div class="bars-row">
+    @for (bar of bars(); track bar.label) {
+      <div class="bar-col">
+        <div class="bar-track">
+          <div class="bar-fill" [style.height.%]="bar.heightPercentage" [title]="bar.amount | currency: 'BRL'"></div>
+        </div>
+        <span class="bar-label">{{ bar.label }}</span>
+      </div>
+    }
+  </div>
+}

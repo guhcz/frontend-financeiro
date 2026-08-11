@@ -1,0 +1,20 @@
+@if (loading() && data().length === 0) {
+  <div class="breakdown-loading">Carregando categorias...</div>
+} @else if (data().length === 0) {
+  <div class="breakdown-empty">Nenhuma despesa para exibir.</div>
+} @else {
+  <ul class="breakdown-list">
+    @for (item of data(); track item.category.id) {
+      <li class="breakdown-row">
+        <div class="breakdown-info">
+          <span class="breakdown-name">{{ item.category.name }}</span>
+          <span class="breakdown-value">{{ item.amount | currency: 'BRL' }}</span>
+        </div>
+        <div class="breakdown-bar-track">
+          <div class="breakdown-bar-fill" [style.width.%]="item.percentage" [style.background]="item.category.color"></div>
+        </div>
+        <span class="breakdown-percentage">{{ item.percentage | number: '1.0-0' }}%</span>
+      </li>
+    }
+  </ul>
+}
