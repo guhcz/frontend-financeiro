@@ -1,0 +1,128 @@
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.summary-card {
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.summary-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.summary-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.summary-icon-primary {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.summary-icon-danger {
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+.summary-icon-warning {
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+.summary-icon-violet {
+  background: var(--color-violet-light);
+  color: var(--color-violet);
+}
+
+.summary-label {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.summary-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text);
+  width: 100%;
+}
+
+.summary-hint {
+  font-size: 12px;
+  color: var(--color-text-subtle);
+}
+
+.summary-card-body app-progress-bar {
+  display: block;
+  width: 100%;
+  margin-top: 2px;
+}
+
+.summary-value-muted {
+  color: var(--color-text-subtle);
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.summary-value-success {
+  color: var(--color-success);
+}
+
+.summary-value-warning {
+  color: var(--color-warning);
+}
+
+.summary-value-danger {
+  color: var(--color-danger);
+}
+
+.skeleton {
+  display: inline-block;
+  width: 90px;
+  height: 22px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (max-width: 900px) {
+  .summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

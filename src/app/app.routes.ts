@@ -19,7 +19,12 @@ export const routes: Routes = [
     component: Shell,
     canActivate: [authGuard],
     children: [
-      { path: '', redirectTo: 'despesas', pathMatch: 'full' },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./features/dashboard/dashboard-page/dashboard-page').then((m) => m.DashboardPage),
+      },
       {
         path: 'despesas',
         loadComponent: () =>
@@ -51,5 +56,5 @@ export const routes: Routes = [
       },
     ],
   },
-  { path: '**', redirectTo: 'despesas' },
+  { path: '**', redirectTo: 'dashboard' },
 ];

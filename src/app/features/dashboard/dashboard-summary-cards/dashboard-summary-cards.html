@@ -1,0 +1,72 @@
+<div class="summary-cards">
+  <div class="card summary-card">
+    <span class="summary-icon summary-icon-primary"
+      ><lucide-icon name="wallet" [size]="26"></lucide-icon
+    ></span>
+    <div class="summary-card-body">
+      <span class="summary-label">Disponível no limite</span>
+      @if (loading() && !summary()) {
+        <span class="summary-value skeleton">&nbsp;</span>
+      } @else if (hasLimit()) {
+        <span
+          class="summary-value"
+          [class.summary-value-success]="availableState() === 'good'"
+          [class.summary-value-warning]="availableState() === 'warning'"
+          [class.summary-value-danger]="availableState() === 'danger'"
+        >
+          {{ summary()!.availableAmount | currency: 'BRL' }}
+        </span>
+      } @else {
+        <span class="summary-value summary-value-muted">—</span>
+      }
+    </div>
+  </div>
+
+  <div class="card summary-card">
+    <span class="summary-icon summary-icon-violet"
+      ><lucide-icon name="repeat-2" [size]="26"></lucide-icon
+    ></span>
+    <div class="summary-card-body">
+      <span class="summary-label">Despesas fixas ativas</span>
+      @if (loading() && activeRecurringCount() == null) {
+        <span class="summary-value skeleton">&nbsp;</span>
+      } @else {
+        <span class="summary-value">{{ activeRecurringCount() ?? 0 }} {{ (activeRecurringCount() ?? 0) === 1 ? 'conta' : 'contas' }}</span>
+      }
+    </div>
+  </div>
+
+  <div class="card summary-card">
+    <span class="summary-icon summary-icon-danger"
+      ><lucide-icon name="trending-down" [size]="26"></lucide-icon
+    ></span>
+    <div class="summary-card-body">
+      <span class="summary-label">Despesas no mês</span>
+      @if (loading() && !summary()) {
+        <span class="summary-value skeleton">&nbsp;</span>
+      } @else {
+        <span class="summary-value summary-value-danger">{{ summary()?.totalExpenses ?? 0 | currency: 'BRL' }}</span>
+        <span class="summary-hint">Total gasto</span>
+      }
+    </div>
+  </div>
+
+  <div class="card summary-card">
+    <span class="summary-icon summary-icon-warning"
+      ><lucide-icon name="wallet-cards" [size]="26"></lucide-icon
+    ></span>
+    <div class="summary-card-body">
+      <span class="summary-label">Limite mensal</span>
+      @if (loading() && !summary()) {
+        <span class="summary-value skeleton">&nbsp;</span>
+      } @else if (hasLimit()) {
+        <span class="summary-value">{{ summary()!.monthlyLimit | currency: 'BRL' }}</span>
+        <app-progress-bar [percentage]="summary()!.limitPercentageUsed ?? 0" variant="amber"></app-progress-bar>
+        <span class="summary-hint">Utilizado: {{ summary()!.totalExpenses | currency: 'BRL' }}</span>
+      } @else {
+        <span class="summary-value summary-value-muted">Não definido</span>
+        <button type="button" class="btn btn-secondary" (click)="defineLimit.emit()">Definir limite</button>
+      }
+    </div>
+  </div>
+</div>

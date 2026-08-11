@@ -36,7 +36,7 @@ export class Login {
     const { email, password } = this.form.getRawValue();
 
     this.authService.login(email, password).subscribe({
-      next: () => this.router.navigate(['/despesas']),
+      next: () => this.router.navigate(['/dashboard']),
       error: (err: unknown) => {
         this.loading.set(false);
         if (err instanceof HttpErrorResponse && err.status === 401) {

@@ -11,7 +11,7 @@ export type ProgressState = 'normal' | 'warning' | 'reached' | 'exceeded';
 export class ProgressBar {
   percentage = input.required<number>();
   size = input<'sm' | 'md'>('md');
-  variant = input<'auto' | 'violet'>('auto');
+  variant = input<'auto' | 'violet' | 'amber'>('auto');
 
   readonly clampedWidth = computed(() => Math.min(Math.max(this.percentage(), 0), 100));
 
