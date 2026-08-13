@@ -185,6 +185,9 @@
   <app-expense-form-modal
     [expense]="editingExpense()"
     [categories]="categories()"
+    [creditCards]="creditCards()"
+    [defaultMonth]="month()"
+    [defaultYear]="year()"
     [saving]="saving()"
     [errorMessage]="saveError()"
     (save)="saveExpense($event)"
@@ -197,6 +200,8 @@
   <app-income-form-modal
     [income]="editingIncome()"
     [categories]="categories()"
+    [defaultMonth]="month()"
+    [defaultYear]="year()"
     [saving]="saving()"
     [errorMessage]="saveError()"
     (save)="saveIncome($event)"

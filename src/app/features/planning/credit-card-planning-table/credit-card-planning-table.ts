@@ -1,31 +1,30 @@
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { Component, input, output, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
-import { MonthlyPlanningItem } from '../../../core/models/monthly-planning.model';
+import { MonthlyCardPlanningItem } from '../../../core/models/monthly-card-planning.model';
 import { Page } from '../../../core/models/page.model';
-import { Badge } from '../../../shared/badge/badge';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { Pagination } from '../../../shared/pagination/pagination';
 import { ProgressBar } from '../../../shared/progress-bar/progress-bar';
 
-const COLLAPSED_KEY = 'planning-category-table-collapsed';
+const COLLAPSED_KEY = 'planning-card-table-collapsed';
 
 @Component({
-  selector: 'app-monthly-planning-table',
-  imports: [CurrencyPipe, DecimalPipe, Badge, ProgressBar, Pagination, EmptyState, LucideAngularModule],
-  templateUrl: './monthly-planning-table.html',
-  styleUrl: './monthly-planning-table.scss',
+  selector: 'app-credit-card-planning-table',
+  imports: [CurrencyPipe, DecimalPipe, ProgressBar, Pagination, EmptyState, LucideAngularModule],
+  templateUrl: './credit-card-planning-table.html',
+  styleUrl: './credit-card-planning-table.scss',
 })
-export class MonthlyPlanningTable {
-  page = input<Page<MonthlyPlanningItem> | null>(null);
+export class CreditCardPlanningTable {
+  page = input<Page<MonthlyCardPlanningItem> | null>(null);
   totalPlanned = input<number | null>(null);
-  unplannedAmount = input<number | null>(null);
   loading = input(false);
   error = input<string | null>(null);
 
   add = output<void>();
-  edit = output<MonthlyPlanningItem>();
-  delete = output<MonthlyPlanningItem>();
+  manageCards = output<void>();
+  edit = output<MonthlyCardPlanningItem>();
+  delete = output<MonthlyCardPlanningItem>();
   pageChange = output<number>();
   sizeChange = output<number>();
 
@@ -36,7 +35,7 @@ export class MonthlyPlanningTable {
     localStorage.setItem(COLLAPSED_KEY, String(this.collapsed()));
   }
 
-  remainingState(item: MonthlyPlanningItem): 'good' | 'warning' | 'danger' {
+  remainingState(item: MonthlyCardPlanningItem): 'good' | 'warning' | 'danger' {
     const pct = item.percentageUsed;
     if (pct > 100) return 'danger';
     if (pct >= 80) return 'warning';

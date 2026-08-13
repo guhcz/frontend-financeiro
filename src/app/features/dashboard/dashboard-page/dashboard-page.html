@@ -149,6 +149,9 @@
 @if (modalOpen()) {
   <app-expense-form-modal
     [categories]="categories()"
+    [creditCards]="creditCards()"
+    [defaultMonth]="month()"
+    [defaultYear]="year()"
     [saving]="saving()"
     [errorMessage]="saveError()"
     (save)="saveExpense($event)"

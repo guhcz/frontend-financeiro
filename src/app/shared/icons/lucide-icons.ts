@@ -10,6 +10,7 @@ import {
   ChevronRight,
   CircleArrowDown,
   Copy,
+  CreditCard,
   Folder,
   Gauge,
   House,
@@ -60,4 +61,5 @@ export const APP_LUCIDE_ICONS = {
   TrendingDown,
   ArrowRight,
   Sparkles,
+  CreditCard,
 };

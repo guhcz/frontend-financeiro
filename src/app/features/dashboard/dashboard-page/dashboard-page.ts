@@ -4,17 +4,20 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { RouterLink } from '@angular/router';
 import { Category } from '../../../core/models/category.model';
+import { CreditCard } from '../../../core/models/credit-card.model';
 import { DashboardResponse } from '../../../core/models/dashboard.model';
 import { Expense, ExpenseRequest } from '../../../core/models/expense.model';
 import { MonthlyLimit, MonthlyLimitRequest } from '../../../core/models/monthly-limit.model';
 import { RecurringExpenseRequest } from '../../../core/models/recurring-expense.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { CategoryService } from '../../../core/services/category.service';
+import { CreditCardService } from '../../../core/services/credit-card.service';
 import { DashboardService } from '../../../core/services/dashboard.service';
 import { ExpenseService } from '../../../core/services/expense.service';
 import { MonthlyLimitService } from '../../../core/services/monthly-limit.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { RecurringExpenseService } from '../../../core/services/recurring-expense.service';
+import { defaultPeriod } from '../../../core/utils/default-period.util';
 import { getErrorDetail } from '../../../core/utils/http-error.util';
 import { MonthPeriod, MonthSwitcher } from '../../../shared/month-switcher/month-switcher';
 import { ExpenseFormModal } from '../../expenses/expense-form-modal/expense-form-modal';
@@ -55,15 +58,16 @@ const GENERIC_LOAD_ERROR = 'Não foi possível carregar o Dashboard. Tente novam
 export class DashboardPage implements OnInit {
   private readonly dashboardService = inject(DashboardService);
   private readonly categoryService = inject(CategoryService);
+  private readonly creditCardService = inject(CreditCardService);
   private readonly expenseService = inject(ExpenseService);
   private readonly recurringExpenseService = inject(RecurringExpenseService);
   private readonly monthlyLimitService = inject(MonthlyLimitService);
   private readonly authService = inject(AuthService);
   private readonly notificationService = inject(NotificationService);
 
-  private readonly today = new Date();
-  readonly month = signal(this.today.getMonth() + 1);
-  readonly year = signal(this.today.getFullYear());
+  private readonly initialPeriod = defaultPeriod();
+  readonly month = signal(this.initialPeriod.month);
+  readonly year = signal(this.initialPeriod.year);
 
   readonly userFirstName = signal<string | null>(null);
 
@@ -72,6 +76,7 @@ export class DashboardPage implements OnInit {
   readonly loadError = signal<string | null>(null);
 
   readonly categories = signal<Category[]>([]);
+  readonly creditCards = signal<CreditCard[]>([]);
 
   readonly modalOpen = signal(false);
   readonly saving = signal(false);
@@ -94,6 +99,10 @@ export class DashboardPage implements OnInit {
     this.categoryService.list().subscribe({
       next: (categories) => this.categories.set(categories),
       error: () => this.notificationService.error('Não foi possível carregar as categorias.'),
+    });
+    this.creditCardService.list().subscribe({
+      next: (cards) => this.creditCards.set(cards),
+      error: () => this.notificationService.error('Não foi possível carregar os cartões.'),
     });
 
     this.authService.getCurrentUser().subscribe({

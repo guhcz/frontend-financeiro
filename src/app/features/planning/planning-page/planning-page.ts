@@ -2,19 +2,31 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { Observable, forkJoin } from 'rxjs';
 import { Category } from '../../../core/models/category.model';
+import { CreditCard } from '../../../core/models/credit-card.model';
 import { MonthlyLimit, MonthlyLimitRequest } from '../../../core/models/monthly-limit.model';
+import {
+  MonthlyCardPlanningItem,
+  MonthlyCardPlanningRequest,
+} from '../../../core/models/monthly-card-planning.model';
 import { MonthlyPlanningItem, MonthlyPlanningRequest } from '../../../core/models/monthly-planning.model';
 import { CategoryExpense, ExpenseEvolutionPoint, PlanningSummary } from '../../../core/models/planning.model';
 import { Page } from '../../../core/models/page.model';
 import { CategoryService } from '../../../core/services/category.service';
+import { CreditCardService } from '../../../core/services/credit-card.service';
+import { MonthlyCardPlanningService } from '../../../core/services/monthly-card-planning.service';
 import { MonthlyLimitService } from '../../../core/services/monthly-limit.service';
 import { MonthlyPlanningService } from '../../../core/services/monthly-planning.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { PlanningService } from '../../../core/services/planning.service';
+import { defaultPeriod } from '../../../core/utils/default-period.util';
 import { getErrorDetail } from '../../../core/utils/http-error.util';
+import { monthYearLabel } from '../../../core/utils/month-label.util';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { MonthPeriod, MonthSwitcher } from '../../../shared/month-switcher/month-switcher';
 import { MonthlyLimitFormModal } from '../../monthly-limits/monthly-limit-form-modal/monthly-limit-form-modal';
+import { CreditCardManageModal } from '../credit-card-manage-modal/credit-card-manage-modal';
+import { CreditCardPlanningFormModal } from '../credit-card-planning-form-modal/credit-card-planning-form-modal';
+import { CreditCardPlanningTable } from '../credit-card-planning-table/credit-card-planning-table';
 import { ExpenseEvolutionChart } from '../expense-evolution-chart/expense-evolution-chart';
 import { ExpensesByCategoryChart } from '../expenses-by-category-chart/expenses-by-category-chart';
 import { MonthlyPlanningFormModal } from '../monthly-planning-form-modal/monthly-planning-form-modal';
@@ -36,11 +48,6 @@ function formatBRL(value: number): string {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-function monthYearLabel(month: number, year: number): string {
-  const label = new Date(year, month - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-  return label.charAt(0).toUpperCase() + label.slice(1);
-}
-
 @Component({
   selector: 'app-planning-page',
   imports: [
@@ -48,6 +55,9 @@ function monthYearLabel(month: number, year: number): string {
     MonthlyPlanningTable,
     MonthlyPlanningFormModal,
     MonthlyLimitFormModal,
+    CreditCardPlanningTable,
+    CreditCardPlanningFormModal,
+    CreditCardManageModal,
     ExpensesByCategoryChart,
     ExpenseEvolutionChart,
     ConfirmDialog,
@@ -62,13 +72,16 @@ export class PlanningPage implements OnInit {
   private readonly monthlyPlanningService = inject(MonthlyPlanningService);
   private readonly monthlyLimitService = inject(MonthlyLimitService);
   private readonly categoryService = inject(CategoryService);
+  private readonly creditCardService = inject(CreditCardService);
+  private readonly monthlyCardPlanningService = inject(MonthlyCardPlanningService);
   private readonly notificationService = inject(NotificationService);
 
-  private readonly today = new Date();
-  readonly month = signal(this.today.getMonth() + 1);
-  readonly year = signal(this.today.getFullYear());
+  private readonly initialPeriod = defaultPeriod();
+  readonly month = signal(this.initialPeriod.month);
+  readonly year = signal(this.initialPeriod.year);
 
   readonly categories = signal<Category[]>([]);
+  readonly creditCards = signal<CreditCard[]>([]);
 
   readonly summary = signal<PlanningSummary | null>(null);
   readonly summaryLoading = signal(true);
@@ -100,6 +113,24 @@ export class PlanningPage implements OnInit {
   readonly planningSaveError = signal<string | null>(null);
 
   readonly planningPendingDelete = signal<MonthlyPlanningItem | null>(null);
+
+  private readonly cardPageNumber = signal(0);
+  private readonly cardPageSize = signal(DEFAULT_PAGE_SIZE);
+  readonly cardPlanningPage = signal<Page<MonthlyCardPlanningItem> | null>(null);
+  readonly cardTableLoading = signal(true);
+  readonly cardTableError = signal<string | null>(null);
+  readonly cardTotalPlanned = computed(
+    () => this.cardPlanningPage()?.content.reduce((sum, item) => sum + item.plannedAmount, 0) ?? 0,
+  );
+
+  readonly cardPlanningModalOpen = signal(false);
+  readonly editingCardPlanning = signal<MonthlyCardPlanningItem | null>(null);
+  readonly cardPlanningSaving = signal(false);
+  readonly cardPlanningSaveError = signal<string | null>(null);
+
+  readonly cardPlanningPendingDelete = signal<MonthlyCardPlanningItem | null>(null);
+
+  readonly manageCardsOpen = signal(false);
 
   readonly copying = signal(false);
   readonly copyPreview = signal<CopyPreview | null>(null);
@@ -133,6 +164,7 @@ export class PlanningPage implements OnInit {
       next: (categories) => this.categories.set(categories),
       error: () => this.notificationService.error('Não foi possível carregar as categorias.'),
     });
+    this.loadCreditCards();
     this.loadAll();
   }
 
@@ -140,6 +172,7 @@ export class PlanningPage implements OnInit {
     this.month.set(period.month);
     this.year.set(period.year);
     this.pageNumber.set(0);
+    this.cardPageNumber.set(0);
     this.loadAll();
   }
 
@@ -152,6 +185,17 @@ export class PlanningPage implements OnInit {
     this.pageSize.set(size);
     this.pageNumber.set(0);
     this.loadTable();
+  }
+
+  onCardTablePageChange(page: number): void {
+    this.cardPageNumber.set(page);
+    this.loadCardTable();
+  }
+
+  onCardTableSizeChange(size: number): void {
+    this.cardPageSize.set(size);
+    this.cardPageNumber.set(0);
+    this.loadCardTable();
   }
 
   openLimitModal(): void {
@@ -347,10 +391,118 @@ export class PlanningPage implements OnInit {
     });
   }
 
+  openCreateCardPlanning(): void {
+    this.editingCardPlanning.set(null);
+    this.cardPlanningSaveError.set(null);
+    this.cardPlanningModalOpen.set(true);
+  }
+
+  openEditCardPlanning(item: MonthlyCardPlanningItem): void {
+    this.editingCardPlanning.set(item);
+    this.cardPlanningSaveError.set(null);
+    this.cardPlanningModalOpen.set(true);
+  }
+
+  closeCardPlanningModal(): void {
+    this.cardPlanningModalOpen.set(false);
+  }
+
+  saveCardPlanning(request: MonthlyCardPlanningRequest): void {
+    this.cardPlanningSaving.set(true);
+    this.cardPlanningSaveError.set(null);
+    const editing = this.editingCardPlanning();
+    const operation = editing
+      ? this.monthlyCardPlanningService.update(editing.id, request)
+      : this.monthlyCardPlanningService.create(request);
+
+    operation.subscribe({
+      next: () => {
+        this.cardPlanningSaving.set(false);
+        this.cardPlanningModalOpen.set(false);
+        this.notificationService.success(
+          editing ? 'Planejamento de cartão atualizado com sucesso.' : 'Planejamento de cartão adicionado com sucesso.',
+        );
+        this.loadCardTable();
+      },
+      error: (err: unknown) => {
+        this.cardPlanningSaving.set(false);
+        this.cardPlanningSaveError.set(getErrorDetail(err));
+      },
+    });
+  }
+
+  requestDeleteCardPlanning(item: MonthlyCardPlanningItem): void {
+    this.cardPlanningPendingDelete.set(item);
+  }
+
+  cancelDeleteCardPlanning(): void {
+    this.cardPlanningPendingDelete.set(null);
+  }
+
+  confirmDeleteCardPlanning(): void {
+    const item = this.cardPlanningPendingDelete();
+    if (!item) {
+      return;
+    }
+    this.monthlyCardPlanningService.delete(item.id).subscribe({
+      next: () => {
+        this.cardPlanningPendingDelete.set(null);
+        this.notificationService.success('Planejamento de cartão excluído com sucesso.');
+        const page = this.cardPlanningPage();
+        if (page && page.content.length === 1 && this.cardPageNumber() > 0) {
+          this.cardPageNumber.set(this.cardPageNumber() - 1);
+        }
+        this.loadCardTable();
+      },
+      error: (err: unknown) => {
+        this.cardPlanningPendingDelete.set(null);
+        this.notificationService.error(getErrorDetail(err));
+      },
+    });
+  }
+
+  openManageCards(): void {
+    this.manageCardsOpen.set(true);
+  }
+
+  closeManageCards(): void {
+    this.manageCardsOpen.set(false);
+  }
+
+  onCreditCardsChanged(): void {
+    this.loadCreditCards();
+    this.loadCardTable();
+  }
+
+  private loadCreditCards(): void {
+    this.creditCardService.list().subscribe({
+      next: (cards) => this.creditCards.set(cards),
+      error: () => this.notificationService.error('Não foi possível carregar os cartões.'),
+    });
+  }
+
+  private loadCardTable(): void {
+    this.cardTableLoading.set(true);
+    this.cardTableError.set(null);
+    this.monthlyCardPlanningService
+      .list({ month: this.month(), year: this.year(), page: this.cardPageNumber(), size: this.cardPageSize() })
+      .subscribe({
+        next: (page) => {
+          this.cardPlanningPage.set(page);
+          this.cardTableLoading.set(false);
+        },
+        error: (err: unknown) => {
+          this.cardTableError.set(getErrorDetail(err));
+          this.cardTableLoading.set(false);
+        },
+      });
+  }
+
   private loadAll(): void {
     this.loadSummary();
     this.loadLimit();
     this.loadTable();
+    this.loadCardTable();
     this.loadExpensesByCategory();
     this.loadEvolution();
   }

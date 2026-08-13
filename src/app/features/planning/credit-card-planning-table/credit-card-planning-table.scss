@@ -1,3 +1,8 @@
+:host {
+  display: block;
+  margin-top: var(--space-5);
+}
+
 .table-card-header {
   display: flex;
   align-items: center;
@@ -10,6 +15,11 @@
   flex: 1;
   font-size: 18px;
   font-weight: 700;
+}
+
+.table-card-header-actions {
+  display: flex;
+  gap: var(--space-3);
 }
 
 .collapse-toggle lucide-icon {

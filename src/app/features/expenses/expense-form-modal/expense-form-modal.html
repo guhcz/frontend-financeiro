@@ -105,6 +105,29 @@
       }
     </div>
 
+    @if (isCreditCard()) {
+      <div class="form-group">
+        <label for="exp-credit-card">Cartão de crédito</label>
+        @if (hasCreditCards()) {
+          <select
+            id="exp-credit-card"
+            formControlName="creditCardId"
+            [class.is-invalid]="form.controls.creditCardId.invalid && form.controls.creditCardId.touched"
+          >
+            <option [value]="null" disabled>Selecione um cartão</option>
+            @for (card of creditCards(); track card.id) {
+              <option [value]="card.id">{{ card.name }}</option>
+            }
+          </select>
+          @if (form.controls.creditCardId.invalid && form.controls.creditCardId.touched) {
+            <span class="field-error">Selecione um cartão.</span>
+          }
+        } @else {
+          <span class="field-hint">Você ainda não tem cartões cadastrados. Cadastre um em Planejamento.</span>
+        }
+      </div>
+    }
+
     @if (expenseType() === 'fixed' && !isEditMode()) {
       <app-recurring-expense-fields
         [dueDayControl]="form.controls.dueDay"

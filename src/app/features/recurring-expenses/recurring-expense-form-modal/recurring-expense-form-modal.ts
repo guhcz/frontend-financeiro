@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, input, output, signal } from '@ang
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { monthName } from '../../../core/constants/months';
 import { Category } from '../../../core/models/category.model';
+import { CreditCard } from '../../../core/models/credit-card.model';
 import { PAYMENT_METHODS, PAYMENT_METHOD_LABELS } from '../../../core/models/payment-method.model';
 import { RecurringExpense, RecurringExpenseRequest } from '../../../core/models/recurring-expense.model';
 import { firstDayOfMonth, lastDayOfMonth } from '../../../core/utils/recurrence-date.util';
@@ -22,6 +23,7 @@ export class RecurringExpenseFormModal implements OnInit {
 
   rule = input<RecurringExpense | null>(null);
   categories = input.required<Category[]>();
+  creditCards = input<CreditCard[]>([]);
   saving = input(false);
   errorMessage = input<string | null>(null);
 
@@ -35,6 +37,7 @@ export class RecurringExpenseFormModal implements OnInit {
   readonly isEditMode = computed(() => !!this.rule());
   readonly title = computed(() => (this.isEditMode() ? 'Editar despesa fixa' : 'Nova despesa fixa'));
   readonly hasCategories = computed(() => this.categories().length > 0);
+  readonly hasCreditCards = computed(() => this.creditCards().length > 0);
 
   readonly existingStartDateLabel = computed(() => {
     const rule = this.rule();
@@ -54,6 +57,7 @@ export class RecurringExpenseFormModal implements OnInit {
     description: ['', [Validators.required, Validators.maxLength(255)]],
     amount: [null as number | null, [Validators.required, Validators.min(0.01)]],
     paymentMethod: ['' as string, [Validators.required]],
+    creditCardId: [null as number | null],
     notes: ['', [Validators.maxLength(NOTES_MAX_LENGTH)]],
     dueDay: [null as number | null, [Validators.min(1), Validators.max(31)]],
     startMonth: [this.now.getMonth() + 1],
@@ -63,7 +67,26 @@ export class RecurringExpenseFormModal implements OnInit {
     endYear: [null as number | null],
   });
 
+  private readonly formTick = signal(0);
+
+  readonly isCreditCard = computed(() => {
+    this.formTick();
+    return this.form.controls.paymentMethod.value === 'CREDIT_CARD';
+  });
+
   ngOnInit(): void {
+    this.form.valueChanges.subscribe(() => this.formTick.update((n) => n + 1));
+    this.form.controls.paymentMethod.valueChanges.subscribe((method) => {
+      const creditCardIdControl = this.form.controls.creditCardId;
+      if (method === 'CREDIT_CARD') {
+        creditCardIdControl.setValidators([Validators.required]);
+      } else {
+        creditCardIdControl.clearValidators();
+        creditCardIdControl.setValue(null);
+      }
+      creditCardIdControl.updateValueAndValidity({ emitEvent: false });
+    });
+
     const rule = this.rule();
     if (!rule) {
       return;
@@ -73,12 +96,17 @@ export class RecurringExpenseFormModal implements OnInit {
       description: rule.description,
       amount: rule.amount,
       paymentMethod: rule.paymentMethod,
+      creditCardId: rule.creditCard?.id ?? null,
       notes: rule.notes ?? '',
       dueDay: rule.dueDay ?? null,
       endType: rule.endDate ? 'specific' : 'none',
       endMonth: this.initialEndMonth(),
       endYear: this.initialEndYear(),
     });
+    if (rule.paymentMethod === 'CREDIT_CARD') {
+      this.form.controls.creditCardId.setValidators([Validators.required]);
+      this.form.controls.creditCardId.updateValueAndValidity({ emitEvent: false });
+    }
   }
 
   submit(): void {
@@ -110,6 +138,7 @@ export class RecurringExpenseFormModal implements OnInit {
       description: value.description,
       amount: Number(value.amount),
       paymentMethod: value.paymentMethod as RecurringExpenseRequest['paymentMethod'],
+      creditCardId: this.isCreditCard() ? Number(value.creditCardId) : null,
       notes: value.notes || null,
       frequency: 'MONTHLY',
       dueDay: value.dueDay ? Number(value.dueDay) : null,

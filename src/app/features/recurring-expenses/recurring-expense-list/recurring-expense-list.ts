@@ -2,6 +2,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { monthName } from '../../../core/constants/months';
 import { Category } from '../../../core/models/category.model';
+import { CreditCard } from '../../../core/models/credit-card.model';
 import { PAYMENT_METHOD_LABELS } from '../../../core/models/payment-method.model';
 import { Page } from '../../../core/models/page.model';
 import {
@@ -11,8 +12,10 @@ import {
   RecurringExpenseUpdateRequest,
 } from '../../../core/models/recurring-expense.model';
 import { CategoryService } from '../../../core/services/category.service';
+import { CreditCardService } from '../../../core/services/credit-card.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { RecurringExpenseService } from '../../../core/services/recurring-expense.service';
+import { defaultPeriod } from '../../../core/utils/default-period.util';
 import { getErrorDetail } from '../../../core/utils/http-error.util';
 import { Badge } from '../../../shared/badge/badge';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
@@ -81,13 +84,15 @@ const PENDING_ACTION_CONFIG: Record<PendingActionKind, { title: string; message:
 export class RecurringExpenseList implements OnInit {
   private readonly recurringExpenseService = inject(RecurringExpenseService);
   private readonly categoryService = inject(CategoryService);
+  private readonly creditCardService = inject(CreditCardService);
   private readonly notificationService = inject(NotificationService);
 
-  private readonly today = new Date();
-  readonly month = signal(this.today.getMonth() + 1);
-  readonly year = signal(this.today.getFullYear());
+  private readonly initialPeriod = defaultPeriod();
+  readonly month = signal(this.initialPeriod.month);
+  readonly year = signal(this.initialPeriod.year);
 
   readonly categories = signal<Category[]>([]);
+  readonly creditCards = signal<CreditCard[]>([]);
   readonly pageData = signal<Page<RecurringExpense> | null>(null);
   readonly loading = signal(true);
   readonly listError = signal<string | null>(null);
@@ -109,6 +114,10 @@ export class RecurringExpenseList implements OnInit {
     this.categoryService.list().subscribe({
       next: (categories) => this.categories.set(categories),
       error: () => this.notificationService.error('Não foi possível carregar as categorias.'),
+    });
+    this.creditCardService.list().subscribe({
+      next: (cards) => this.creditCards.set(cards),
+      error: () => this.notificationService.error('Não foi possível carregar os cartões.'),
     });
     this.fetch();
   }
@@ -210,6 +219,7 @@ export class RecurringExpenseList implements OnInit {
       description: request.description,
       amount: request.amount,
       paymentMethod: request.paymentMethod,
+      creditCardId: request.creditCardId,
       notes: request.notes,
       dueDay: request.dueDay,
       endDate: request.endDate,

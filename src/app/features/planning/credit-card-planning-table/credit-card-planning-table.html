@@ -4,16 +4,22 @@
       type="button"
       class="icon-btn collapse-toggle"
       (click)="toggleCollapsed()"
-      [attr.aria-label]="collapsed() ? 'Expandir planejamento por categoria' : 'Recolher planejamento por categoria'"
+      [attr.aria-label]="collapsed() ? 'Expandir planejamento por cartão' : 'Recolher planejamento por cartão'"
       [attr.aria-expanded]="!collapsed()"
     >
       <lucide-icon name="chevron-down" [size]="18" [class.collapsed]="collapsed()"></lucide-icon>
     </button>
-    <h2>Planejamento por categoria</h2>
-    <button type="button" class="btn btn-primary" (click)="add.emit()">
-      <lucide-icon name="plus" [size]="16"></lucide-icon>
-      Adicionar planejamento
-    </button>
+    <h2>Planejamento por cartão</h2>
+    <div class="table-card-header-actions">
+      <button type="button" class="btn btn-secondary" (click)="manageCards.emit()">
+        <lucide-icon name="credit-card" [size]="16"></lucide-icon>
+        Gerenciar cartões
+      </button>
+      <button type="button" class="btn btn-primary" (click)="add.emit()">
+        <lucide-icon name="plus" [size]="16"></lucide-icon>
+        Planejar cartão
+      </button>
+    </div>
   </div>
 
   @if (!collapsed()) {
@@ -23,10 +29,10 @@
       <div class="banner banner-error top-banner" style="margin: var(--space-4)">{{ error() }}</div>
     } @else if (!page() || page()!.content.length === 0) {
       <app-empty-state
-        lucideIcon="calculator"
-        title="Você ainda não criou nenhum planejamento para este mês."
-        description="Defina quanto pretende gastar em cada categoria para acompanhar seu orçamento."
-        actionLabel="+ Adicionar planejamento"
+        lucideIcon="credit-card"
+        title="Você ainda não definiu um planejamento para seus cartões neste mês."
+        description="Defina quanto pretende gastar em cada cartão para acompanhar suas próximas faturas."
+        actionLabel="+ Planejar cartão"
         (action)="add.emit()"
       ></app-empty-state>
     } @else {
@@ -34,9 +40,9 @@
         <table>
           <thead>
             <tr>
-              <th>Categoria</th>
+              <th>Cartão</th>
               <th>Planejado</th>
-              <th>Gasto</th>
+              <th>Utilizado</th>
               <th>Restante</th>
               <th>Progresso</th>
               <th>Ações</th>
@@ -45,13 +51,7 @@
           <tbody>
             @for (item of page()!.content; track item.id) {
               <tr>
-                <td>
-                  <app-badge
-                    [label]="item.category.name"
-                    [color]="item.category.color"
-                    [icon]="item.category.icon"
-                  ></app-badge>
-                </td>
+                <td>{{ item.creditCard.name }}</td>
                 <td>{{ item.plannedAmount | currency: 'BRL' }}</td>
                 <td>{{ item.spentAmount | currency: 'BRL' }}</td>
                 <td
@@ -87,10 +87,7 @@
       </div>
 
       <div class="table-summary">
-        <span>Total planejado: <strong>{{ totalPlanned() ?? 0 | currency: 'BRL' }}</strong></span>
-        @if (unplannedAmount() !== null) {
-          <span>Ainda não planejado: <strong>{{ unplannedAmount() | currency: 'BRL' }}</strong></span>
-        }
+        <span>Total planejado em cartões: <strong>{{ totalPlanned() ?? 0 | currency: 'BRL' }}</strong></span>
       </div>
 
       <app-pagination
@@ -100,7 +97,7 @@
         [size]="page()!.size"
         [first]="page()!.first"
         [last]="page()!.last"
-        itemLabel="categorias"
+        itemLabel="cartões"
         (pageChange)="pageChange.emit($event)"
         (sizeChange)="sizeChange.emit($event)"
       ></app-pagination>
