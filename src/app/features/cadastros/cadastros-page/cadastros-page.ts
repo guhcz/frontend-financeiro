@@ -1,8 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
+import { LucideAngularModule } from 'lucide-angular';
+import { Observable } from 'rxjs';
 import { Category, CategoryRequest } from '../../../core/models/category.model';
 import { RECURRENCE_FREQUENCY_LABELS } from '../../../core/models/recurrence-frequency.model';
 import { RecurringExpense } from '../../../core/models/recurring-expense.model';
+import { RecurringExpenseRequest } from '../../../core/models/recurring-expense.model';
+import { RecurringIncome, RecurringIncomeRequest } from '../../../core/models/recurring-income.model';
 import {
   TRANSACTION_METHOD_TYPE_LABELS,
   TransactionMethod,
@@ -11,13 +14,21 @@ import {
 import { CategoryService } from '../../../core/services/category.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { RecurringExpenseService } from '../../../core/services/recurring-expense.service';
+import { RecurringIncomeService } from '../../../core/services/recurring-income.service';
 import { TransactionMethodService } from '../../../core/services/transaction-method.service';
 import { defaultPeriod } from '../../../core/utils/default-period.util';
 import { getErrorDetail } from '../../../core/utils/http-error.util';
 import { CategoryFormModal } from '../../categories/category-form-modal/category-form-modal';
 import { TransactionMethodFormModal } from '../../transaction-methods/transaction-method-form-modal/transaction-method-form-modal';
+import { Modal } from '../../../shared/modal/modal';
+import { Pagination } from '../../../shared/pagination/pagination';
+import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
+import { RecurringExpenseFormModal } from '../../recurring-expenses/recurring-expense-form-modal/recurring-expense-form-modal';
+import { IncomeFormModal } from '../../incomes/income-form-modal/income-form-modal';
 
-const PREVIEW_SIZE = 5;
+const MIN_PREVIEW_SIZE = 4;
+const TABLE_ROW_HEIGHT = 42;
+const PAGE_VERTICAL_OFFSET = 450;
 
 const STATUS_LABELS: Record<string, string> = {
   ACTIVE: 'Ativa',
@@ -25,9 +36,25 @@ const STATUS_LABELS: Record<string, string> = {
   ENDED: 'Encerrada',
 };
 
+const RECURRENCE_STATUS_ORDER: Record<string, number> = {
+  ACTIVE: 0,
+  PAUSED: 1,
+  ENDED: 2,
+};
+
+interface RecurringRegistryItem {
+  key: string;
+  id: number;
+  kind: 'expense' | 'income';
+  description: string;
+  frequency: RecurringExpense['frequency'];
+  dueDay: number | null;
+  status: RecurringExpense['status'];
+}
+
 @Component({
   selector: 'app-cadastros-page',
-  imports: [RouterLink, CategoryFormModal, TransactionMethodFormModal],
+  imports: [LucideAngularModule, CategoryFormModal, TransactionMethodFormModal, Modal, Pagination, ConfirmDialog, RecurringExpenseFormModal, IncomeFormModal],
   templateUrl: './cadastros-page.html',
   styleUrls: ['../../list-page.scss', './cadastros-page.scss'],
 })
@@ -35,6 +62,7 @@ export class CadastrosPage implements OnInit {
   private readonly categoryService = inject(CategoryService);
   private readonly transactionMethodService = inject(TransactionMethodService);
   private readonly recurringExpenseService = inject(RecurringExpenseService);
+  private readonly recurringIncomeService = inject(RecurringIncomeService);
   private readonly notificationService = inject(NotificationService);
 
   readonly typeLabels = TRANSACTION_METHOD_TYPE_LABELS;
@@ -42,22 +70,27 @@ export class CadastrosPage implements OnInit {
   readonly statusLabels = STATUS_LABELS;
 
   readonly searchTerm = signal('');
+  readonly previewSize = signal(this.calculatePreviewSize());
 
   readonly categories = signal<Category[]>([]);
   readonly categoriesLoading = signal(true);
   readonly transactionMethods = signal<TransactionMethod[]>([]);
   readonly methodsLoading = signal(true);
   readonly recurringExpenses = signal<RecurringExpense[]>([]);
+  readonly recurringIncomes = signal<RecurringIncome[]>([]);
   readonly recurringLoading = signal(true);
+  readonly recurringIncomeLoading = signal(true);
 
   readonly filteredCategories = computed(() =>
-    this.filterByTerm(this.categories(), (item) => item.name).slice(0, PREVIEW_SIZE),
+    this.filterByTerm(this.categories(), (item) => item.name).slice(0, this.previewSize()),
   );
   readonly filteredMethods = computed(() =>
-    this.filterByTerm(this.transactionMethods(), (item) => item.name).slice(0, PREVIEW_SIZE),
+    this.filterByTerm(this.transactionMethods(), (item) => item.name).slice(0, this.previewSize()),
   );
   readonly filteredRecurring = computed(() =>
-    this.filterByTerm(this.recurringExpenses(), (item) => item.description).slice(0, PREVIEW_SIZE),
+    this.sortRecurringByStatus(
+      this.filterByTerm(this.allRecurringItems(), (item) => item.description),
+    ).slice(0, this.previewSize()),
   );
 
   readonly categoryModalOpen = signal(false);
@@ -68,14 +101,219 @@ export class CadastrosPage implements OnInit {
   readonly methodSaving = signal(false);
   readonly methodSaveError = signal<string | null>(null);
 
+  readonly listModal = signal<'categories' | 'methods' | 'recurring' | null>(null);
+  readonly modalSearch = signal('');
+  readonly modalStatus = signal('ALL');
+  readonly modalType = signal('ALL');
+  readonly modalPage = signal(0);
+  readonly modalPageSize = signal(5);
+  readonly openActionMenu = signal<string | null>(null);
+  readonly categoryPendingDelete = signal<Category | null>(null);
+  readonly methodPendingDelete = signal<TransactionMethod | null>(null);
+  readonly recurringPendingPause = signal<RecurringRegistryItem | null>(null);
+  readonly recurringTypeModalOpen = signal(false);
+  readonly recurringExpenseModalOpen = signal(false);
+  readonly recurringIncomeModalOpen = signal(false);
+  readonly recurringSaving = signal(false);
+  readonly recurringSaveError = signal<string | null>(null);
+
+  readonly modalCategories = computed(() =>
+    this.filterModalItems(this.categories(), (item) => item.name).filter(
+      (item) => this.modalStatus() === 'ALL' || String(item.active) === this.modalStatus(),
+    ),
+  );
+  readonly modalMethods = computed(() =>
+    this.filterModalItems(this.transactionMethods(), (item) => item.name).filter(
+      (item) =>
+        (this.modalStatus() === 'ALL' || String(item.active) === this.modalStatus()) &&
+        (this.modalType() === 'ALL' || item.type === this.modalType()),
+    ),
+  );
+  readonly modalRecurring = computed(() =>
+    this.sortRecurringByStatus(
+      this.filterModalItems(this.allRecurringItems(), (item) => item.description).filter(
+        (item) =>
+          (this.modalStatus() === 'ALL' || item.status === this.modalStatus()) &&
+          (this.modalType() === 'ALL' || item.kind === this.modalType()),
+      ),
+    ),
+  );
+  readonly modalTotalElements = computed(() => this.activeModalItems().length);
+  readonly modalTotalPages = computed(() => Math.ceil(this.modalTotalElements() / this.modalPageSize()));
+  readonly pagedModalCategories = computed(() => this.paginate(this.modalCategories()));
+  readonly pagedModalMethods = computed(() => this.paginate(this.modalMethods()));
+  readonly pagedModalRecurring = computed(() => this.paginate(this.modalRecurring()));
+
   ngOnInit(): void {
     this.loadCategories();
     this.loadTransactionMethods();
     this.loadRecurringExpenses();
+    this.loadRecurringIncomes();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.previewSize.set(this.calculatePreviewSize());
   }
 
   onSearch(term: string): void {
     this.searchTerm.set(term);
+  }
+
+  openListModal(kind: 'categories' | 'methods' | 'recurring'): void {
+    this.listModal.set(kind);
+    this.modalSearch.set('');
+    this.modalStatus.set('ALL');
+    this.modalType.set('ALL');
+    this.modalPage.set(0);
+  }
+
+  closeListModal(): void {
+    this.listModal.set(null);
+  }
+
+  createFromList(kind: 'categories' | 'methods'): void {
+    this.closeListModal();
+    if (kind === 'categories') {
+      this.openCreateCategory();
+    } else {
+      this.openCreateMethod();
+    }
+  }
+
+  updateModalSearch(term: string): void {
+    this.modalSearch.set(term);
+    this.modalPage.set(0);
+  }
+
+  updateModalStatus(status: string): void {
+    this.modalStatus.set(status);
+    this.modalPage.set(0);
+  }
+
+  updateModalType(type: string): void {
+    this.modalType.set(type);
+    this.modalPage.set(0);
+  }
+
+  onModalPageChange(page: number): void {
+    this.modalPage.set(page);
+  }
+
+  onModalSizeChange(size: number): void {
+    this.modalPageSize.set(size);
+    this.modalPage.set(0);
+  }
+
+  toggleActionMenu(key: string): void {
+    this.openActionMenu.update((current) => (current === key ? null : key));
+  }
+
+  requestCategoryDelete(category: Category): void {
+    this.openActionMenu.set(null);
+    this.categoryPendingDelete.set(category);
+  }
+
+  requestMethodDelete(method: TransactionMethod): void {
+    this.openActionMenu.set(null);
+    this.methodPendingDelete.set(method);
+  }
+
+  requestRecurringPause(rule: RecurringRegistryItem): void {
+    this.openActionMenu.set(null);
+    this.recurringPendingPause.set(rule);
+  }
+
+  openRecurringTypeModal(): void {
+    this.closeListModal();
+    this.recurringTypeModalOpen.set(true);
+  }
+
+  chooseRecurringType(kind: 'expense' | 'income'): void {
+    this.recurringTypeModalOpen.set(false);
+    this.recurringSaveError.set(null);
+    if (kind === 'expense') this.recurringExpenseModalOpen.set(true);
+    else this.recurringIncomeModalOpen.set(true);
+  }
+
+  closeRecurringForm(): void {
+    this.recurringExpenseModalOpen.set(false);
+    this.recurringIncomeModalOpen.set(false);
+    this.recurringSaveError.set(null);
+  }
+
+  saveRecurringExpense(request: RecurringExpenseRequest): void {
+    this.recurringSaving.set(true);
+    this.recurringExpenseService.create(request).subscribe({
+      next: () => this.finishRecurringSave('Despesa fixa criada.'),
+      error: (err: unknown) => this.failRecurringSave(err),
+    });
+  }
+
+  saveRecurringIncome(request: RecurringIncomeRequest): void {
+    this.recurringSaving.set(true);
+    this.recurringIncomeService.create(request).subscribe({
+      next: () => this.finishRecurringSave('Receita fixa criada.'),
+      error: (err: unknown) => this.failRecurringSave(err),
+    });
+  }
+
+  cancelPendingAction(): void {
+    this.categoryPendingDelete.set(null);
+    this.methodPendingDelete.set(null);
+    this.recurringPendingPause.set(null);
+  }
+
+  confirmCategoryDelete(): void {
+    const category = this.categoryPendingDelete();
+    if (!category) return;
+    this.categoryService.delete(category.id).subscribe({
+      next: () => {
+        this.categoryPendingDelete.set(null);
+        this.notificationService.success('Categoria excluída.');
+        this.loadCategories();
+      },
+      error: (err: unknown) => {
+        this.categoryPendingDelete.set(null);
+        this.notificationService.error(getErrorDetail(err));
+      },
+    });
+  }
+
+  confirmMethodDelete(): void {
+    const method = this.methodPendingDelete();
+    if (!method) return;
+    this.transactionMethodService.delete(method.id).subscribe({
+      next: () => {
+        this.methodPendingDelete.set(null);
+        this.notificationService.success('Forma de pagamento excluída.');
+        this.loadTransactionMethods();
+      },
+      error: (err: unknown) => {
+        this.methodPendingDelete.set(null);
+        this.notificationService.error(getErrorDetail(err));
+      },
+    });
+  }
+
+  confirmRecurringPause(): void {
+    const rule = this.recurringPendingPause();
+    if (!rule) return;
+    const operation: Observable<unknown> = rule.kind === 'expense'
+      ? this.recurringExpenseService.pause(rule.id)
+      : this.recurringIncomeService.pause(rule.id);
+    operation.subscribe({
+      next: () => {
+        this.recurringPendingPause.set(null);
+        this.notificationService.success('Recorrência desativada.');
+        this.loadRecurringExpenses();
+        this.loadRecurringIncomes();
+      },
+      error: (err: unknown) => {
+        this.recurringPendingPause.set(null);
+        this.notificationService.error(getErrorDetail(err));
+      },
+    });
   }
 
   openCreateCategory(): void {
@@ -176,11 +414,93 @@ export class CadastrosPage implements OnInit {
       });
   }
 
+  private loadRecurringIncomes(): void {
+    this.recurringIncomeLoading.set(true);
+    const period = defaultPeriod();
+    const params = { page: 0, size: 50, referenceMonth: period.month, referenceYear: period.year };
+    this.recurringIncomeService.list(params).subscribe({
+      next: (page) => {
+        this.recurringIncomes.set(page.content);
+        this.recurringIncomeLoading.set(false);
+      },
+      error: () => {
+        this.notificationService.error('Não foi possível carregar as receitas fixas.');
+        this.recurringIncomeLoading.set(false);
+      },
+    });
+  }
+
+  private allRecurringItems(): RecurringRegistryItem[] {
+    const expenses = this.recurringExpenses().map((item) => ({
+      key: `expense-${item.id}`,
+      id: item.id,
+      kind: 'expense' as const,
+      description: item.description,
+      frequency: item.frequency,
+      dueDay: item.dueDay,
+      status: item.status,
+    }));
+    const incomes = this.recurringIncomes().map((item) => ({
+      key: `income-${item.id}`,
+      id: item.id,
+      kind: 'income' as const,
+      description: item.description,
+      frequency: item.frequency,
+      dueDay: item.receiptDay,
+      status: item.status,
+    }));
+    return [...expenses, ...incomes];
+  }
+
+  private finishRecurringSave(message: string): void {
+    this.recurringSaving.set(false);
+    this.closeRecurringForm();
+    this.notificationService.success(message);
+    this.loadRecurringExpenses();
+    this.loadRecurringIncomes();
+  }
+
+  private failRecurringSave(err: unknown): void {
+    this.recurringSaving.set(false);
+    this.recurringSaveError.set(getErrorDetail(err));
+  }
+
   private filterByTerm<T>(items: T[], getText: (item: T) => string): T[] {
     const term = this.searchTerm().trim().toLowerCase();
     if (!term) {
       return items;
     }
     return items.filter((item) => getText(item).toLowerCase().includes(term));
+  }
+
+  private filterModalItems<T>(items: T[], getText: (item: T) => string): T[] {
+    const term = this.modalSearch().trim().toLowerCase();
+    return term ? items.filter((item) => getText(item).toLowerCase().includes(term)) : items;
+  }
+
+  private activeModalItems(): unknown[] {
+    if (this.listModal() === 'categories') return this.modalCategories();
+    if (this.listModal() === 'methods') return this.modalMethods();
+    return this.modalRecurring();
+  }
+
+  private paginate<T>(items: T[]): T[] {
+    const start = this.modalPage() * this.modalPageSize();
+    return items.slice(start, start + this.modalPageSize());
+  }
+
+  private sortRecurringByStatus(items: RecurringRegistryItem[]): RecurringRegistryItem[] {
+    return [...items].sort(
+      (a, b) => RECURRENCE_STATUS_ORDER[a.status] - RECURRENCE_STATUS_ORDER[b.status],
+    );
+  }
+
+  private calculatePreviewSize(): number {
+    if (typeof window === 'undefined') {
+      return MIN_PREVIEW_SIZE;
+    }
+
+    const availableTableHeight = window.innerHeight - PAGE_VERTICAL_OFFSET;
+    return Math.max(MIN_PREVIEW_SIZE, Math.floor(availableTableHeight / TABLE_ROW_HEIGHT));
   }
 }

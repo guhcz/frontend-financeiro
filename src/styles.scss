@@ -37,6 +37,257 @@ a {
   color: var(--color-primary);
 }
 
+/* Tipografia dos cards da central de cadastros */
+.cadastros-card.cadastros-card-large-text .cadastros-card-header h2 {
+  font-size: 18px;
+}
+
+.cadastros-card.cadastros-card-large-text .cadastros-card-header p,
+.cadastros-card.cadastros-card-large-text .cadastros-card-header .btn,
+.cadastros-card.cadastros-card-large-text table,
+.cadastros-card.cadastros-card-large-text .card-footer-link {
+  font-size: 14px;
+}
+
+.cadastros-card.cadastros-card-large-text thead th,
+.cadastros-card.cadastros-card-large-text .status-badge {
+  font-size: 12px;
+}
+
+@media (min-width: 901px) and (max-width: 1200px) {
+  body .cadastros-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  body .cadastros-grid .cadastros-card:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Modal de listagem completa da Central de Cadastros */
+button.card-footer-link {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.registry-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.registry-toolbar select {
+  width: auto;
+  min-width: 145px;
+}
+
+.registry-add {
+  margin-left: auto;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.registry-search {
+  width: min(280px, 100%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.registry-search input[type='search'] {
+  padding-inline: 0;
+  border: 0;
+  box-shadow: none;
+}
+
+.registry-table-wrap {
+  overflow: visible;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.registry-table {
+  min-width: 650px;
+}
+
+.registry-table thead {
+  background: #f8fafc;
+}
+
+.registry-table th,
+.registry-table td {
+  padding: 11px 14px;
+  font-size: 13px;
+}
+
+.registry-table .item-name {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.row-actions {
+  position: relative;
+  display: inline-flex;
+}
+
+.row-action-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 20;
+  min-width: 110px;
+  padding: 5px;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+}
+
+.row-action-menu button {
+  width: 100%;
+  padding: 8px 10px;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.row-action-menu .danger-action {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.row-action-menu .danger-action:hover {
+  background: var(--color-danger-light);
+}
+
+.recurring-type-description {
+  margin-bottom: 16px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.recurring-type-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.recurring-type-option {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px;
+  text-align: left;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.recurring-type-option strong {
+  font-size: 15px;
+}
+
+.recurring-type-option span {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.cadastros-empty-state {
+  flex: 1;
+  min-height: 170px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  padding: 24px;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.cadastros-empty-state .empty-search-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 3px;
+  color: #64748b;
+  background: #f1f5f9;
+  border-radius: 50%;
+}
+
+.cadastros-empty-state strong {
+  color: var(--color-text);
+  font-size: 15px;
+}
+
+.cadastros-empty-state p {
+  max-width: 300px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.recurring-type-badge {
+  display: inline-flex;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.recurring-type-badge.expense-type {
+  color: #c2413a;
+  background: #fff0ef;
+  border: 1px solid #ffd9d5;
+}
+
+.recurring-type-badge.income-type {
+  color: #078447;
+  background: #e9f8ef;
+  border: 1px solid #d2efde;
+}
+
+.expense-option:hover {
+  border-color: var(--color-danger);
+  background: var(--color-danger-light);
+}
+
+.income-option:hover {
+  border-color: var(--color-success);
+  background: var(--color-success-light);
+}
+
+@media (max-width: 700px) {
+  .registry-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .registry-toolbar select,
+  .registry-search {
+    width: 100%;
+  }
+
+  .registry-add {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .recurring-type-options {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;

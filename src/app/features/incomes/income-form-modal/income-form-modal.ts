@@ -28,6 +28,7 @@ export class IncomeFormModal implements OnInit {
   defaultYear = input<number | null>(null);
   saving = input(false);
   errorMessage = input<string | null>(null);
+  defaultRecurring = input(false);
 
   save = output<IncomeRequest>();
   saveRecurring = output<RecurringIncomeRequest>();
@@ -41,7 +42,9 @@ export class IncomeFormModal implements OnInit {
   readonly endDateError = signal<string | null>(null);
 
   readonly isEditMode = computed(() => !!this.income());
-  readonly title = computed(() => (this.isEditMode() ? 'Editar receita' : 'Nova receita'));
+  readonly title = computed(() =>
+    this.isEditMode() ? 'Editar receita' : this.incomeType() === 'recurring' ? 'Nova receita fixa' : 'Nova receita',
+  );
   readonly hasCategories = computed(() => this.categories().length > 0);
 
   private readonly now = new Date();
@@ -62,6 +65,9 @@ export class IncomeFormModal implements OnInit {
   });
 
   ngOnInit(): void {
+    if (this.defaultRecurring()) {
+      this.incomeType.set('recurring');
+    }
     const income = this.income();
     if (!income) {
       const month = this.defaultMonth();

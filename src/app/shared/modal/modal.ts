@@ -9,6 +9,10 @@ import { LucideAngularModule } from 'lucide-angular';
 })
 export class Modal {
   title = input.required<string>();
+  subtitle = input<string | null>(null);
+  wide = input(false);
+  icon = input<string | null>(null);
+  iconTone = input<'violet' | 'green' | 'orange'>('violet');
   closed = output<void>();
 
   onOverlayClick(event: MouseEvent): void {

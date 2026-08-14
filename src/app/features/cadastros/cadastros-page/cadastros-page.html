@@ -1,33 +1,61 @@
-<div class="page-header">
-  <div>
-    <h1>Central de cadastros</h1>
-    <p>Gerencie categorias, formas de pagamento e recorrências em um único lugar.</p>
+<section class="cadastros-hero">
+  <div class="page-header">
+    <div class="page-heading">
+      <h1>Central de cadastros</h1>
+      <p>Gerencie categorias, cartões, formas de pagamento e outros cadastros em um único lugar.</p>
+    </div>
+
+    <div class="page-header-actions">
+      <label class="search-control">
+        <lucide-icon name="search" [size]="20"></lucide-icon>
+        <input
+          type="search"
+          class="cadastros-search"
+          aria-label="Buscar cadastro"
+          placeholder="Buscar cadastro"
+          [value]="searchTerm()"
+          (input)="onSearch($any($event.target).value)"
+        />
+      </label>
+    </div>
   </div>
-  <div class="page-header-actions">
-    <input
-      type="search"
-      class="cadastros-search"
-      placeholder="Buscar cadastro"
-      [value]="searchTerm()"
-      (input)="onSearch($any($event.target).value)"
-    />
+
+  <div class="organization-card">
+    <div class="organization-message">
+      <span class="organization-icon">
+        <lucide-icon name="folder" [size]="22"></lucide-icon>
+      </span>
+      <div>
+        <h2>Organize seus cadastros</h2>
+        <p>Mantenha suas informações sempre atualizadas para uma gestão financeira mais eficiente e segura.</p>
+      </div>
+    </div>
   </div>
-</div>
+</section>
 
 <div class="cadastros-grid">
-  <div class="card cadastros-card">
+  <div class="card cadastros-card cadastros-card-large-text">
     <div class="cadastros-card-header">
-      <div>
-        <h2>🏷️ Categorias</h2>
-        <p>Gerencie as categorias de receitas e despesas.</p>
+      <div class="card-heading">
+        <span class="card-icon card-icon-violet"><lucide-icon name="shapes" [size]="24"></lucide-icon></span>
+        <div>
+          <h2>Categorias</h2>
+          <p>Gerencie as categorias de receitas e despesas.</p>
+        </div>
       </div>
-      <button type="button" class="btn btn-primary" (click)="openCreateCategory()">+ Nova categoria</button>
+      <button type="button" class="btn btn-primary" (click)="openCreateCategory()">
+        <lucide-icon name="plus" [size]="17"></lucide-icon>Nova categoria
+      </button>
     </div>
 
     @if (categoriesLoading()) {
       <div class="list-loading">Carregando...</div>
     } @else if (filteredCategories().length === 0) {
-      <p class="field-hint">Nenhuma categoria encontrada.</p>
+      <div class="cadastros-empty-state">
+        <span class="empty-search-icon"><lucide-icon name="search" [size]="23"></lucide-icon></span>
+        <strong>{{ searchTerm().trim() ? 'Nenhum resultado encontrado' : 'Nenhuma categoria cadastrada' }}</strong>
+        <p>{{ searchTerm().trim() ? 'Não encontramos categorias para “' + searchTerm().trim() + '”.' : 'Crie uma categoria para começar.' }}</p>
+      </div>
     } @else {
       <div class="table-wrap">
         <table>
@@ -35,15 +63,19 @@
             <tr>
               <th>Nome</th>
               <th>Cor</th>
+              <th>Ícone</th>
               <th>Status</th>
+              <th aria-label="Ações"></th>
             </tr>
           </thead>
           <tbody>
             @for (category of filteredCategories(); track category.id) {
               <tr>
-                <td>{{ category.icon || '' }} {{ category.name }}</td>
+                <td class="item-name">{{ category.name }}</td>
                 <td><span class="color-swatch" [style.background]="category.color"></span></td>
-                <td>{{ category.active ? 'Ativa' : 'Inativa' }}</td>
+                <td class="item-icon">{{ category.icon || '—' }}</td>
+                <td><span class="status-badge" [class.status-inactive]="!category.active">{{ category.active ? 'Ativa' : 'Inativa' }}</span></td>
+                <td class="actions-cell"><div class="row-actions"><button type="button" class="row-menu" aria-label="Ações da categoria" (click)="toggleActionMenu('category-' + category.id)"><lucide-icon name="more-horizontal" [size]="18"></lucide-icon></button>@if (openActionMenu() === 'category-' + category.id) {<div class="row-action-menu"><button type="button" class="danger-action" (click)="requestCategoryDelete(category)">Excluir</button></div>}</div></td>
               </tr>
             }
           </tbody>
@@ -51,22 +83,31 @@
       </div>
     }
 
-    <a class="link-btn" routerLink="/categorias">Ver todas</a>
+    <button type="button" class="card-footer-link" (click)="openListModal('categories')">Ver todas as categorias</button>
   </div>
 
-  <div class="card cadastros-card">
+  <div class="card cadastros-card cadastros-card-large-text">
     <div class="cadastros-card-header">
-      <div>
-        <h2>💳 Formas de pagamento</h2>
-        <p>Cartões, Pix, dinheiro e outras formas que você utiliza.</p>
+      <div class="card-heading">
+        <span class="card-icon card-icon-green"><lucide-icon name="wallet" [size]="24"></lucide-icon></span>
+        <div>
+          <h2>Formas de pagamento</h2>
+          <p>Gerencie suas formas de pagamento.</p>
+        </div>
       </div>
-      <button type="button" class="btn btn-primary" (click)="openCreateMethod()">+ Nova forma de pagamento</button>
+      <button type="button" class="btn btn-primary" (click)="openCreateMethod()">
+        <lucide-icon name="plus" [size]="17"></lucide-icon>Nova forma de pagamento
+      </button>
     </div>
 
     @if (methodsLoading()) {
       <div class="list-loading">Carregando...</div>
     } @else if (filteredMethods().length === 0) {
-      <p class="field-hint">Nenhuma forma de pagamento encontrada.</p>
+      <div class="cadastros-empty-state">
+        <span class="empty-search-icon"><lucide-icon name="search" [size]="23"></lucide-icon></span>
+        <strong>{{ searchTerm().trim() ? 'Nenhum resultado encontrado' : 'Nenhuma forma de pagamento cadastrada' }}</strong>
+        <p>{{ searchTerm().trim() ? 'Não encontramos formas de pagamento para “' + searchTerm().trim() + '”.' : 'Cadastre uma forma de pagamento para começar.' }}</p>
+      </div>
     } @else {
       <div class="table-wrap">
         <table>
@@ -74,15 +115,19 @@
             <tr>
               <th>Nome</th>
               <th>Tipo</th>
+              <th>Uso</th>
               <th>Status</th>
+              <th aria-label="Ações"></th>
             </tr>
           </thead>
           <tbody>
             @for (method of filteredMethods(); track method.id) {
               <tr>
-                <td>{{ method.name }}</td>
+                <td class="item-name">{{ method.name }}</td>
                 <td>{{ typeLabels[method.type] }}</td>
-                <td>{{ method.active ? 'Ativa' : 'Inativa' }}</td>
+                <td>Pessoal</td>
+                <td><span class="status-badge" [class.status-inactive]="!method.active">{{ method.active ? 'Ativa' : 'Inativa' }}</span></td>
+                <td class="actions-cell"><div class="row-actions"><button type="button" class="row-menu" aria-label="Ações da forma de pagamento" (click)="toggleActionMenu('method-' + method.id)"><lucide-icon name="more-horizontal" [size]="18"></lucide-icon></button>@if (openActionMenu() === 'method-' + method.id) {<div class="row-action-menu"><button type="button" class="danger-action" (click)="requestMethodDelete(method)">Excluir</button></div>}</div></td>
               </tr>
             }
           </tbody>
@@ -90,37 +135,43 @@
       </div>
     }
 
-    <a class="link-btn" routerLink="/cadastros/formas-de-pagamento">Ver todas</a>
+    <button type="button" class="card-footer-link" (click)="openListModal('methods')">Ver todas as formas de pagamento</button>
   </div>
 
-  <div class="card cadastros-card">
+  <div class="card cadastros-card cadastros-card-large-text">
     <div class="cadastros-card-header">
-      <div>
-        <h2>🔁 Recorrências</h2>
-        <p>Despesas fixas deste mês (receitas recorrentes em breve).</p>
+      <div class="card-heading">
+        <span class="card-icon card-icon-orange"><lucide-icon name="repeat-2" [size]="24"></lucide-icon></span>
+        <div>
+          <h2>Recorrências</h2>
+          <p>Gerencie receitas e despesas recorrentes.</p>
+        </div>
       </div>
+      <button type="button" class="btn btn-primary" (click)="openRecurringTypeModal()">
+        <lucide-icon name="plus" [size]="17"></lucide-icon>Novo cadastro
+      </button>
     </div>
 
-    @if (recurringLoading()) {
+    @if (recurringLoading() || recurringIncomeLoading()) {
       <div class="list-loading">Carregando...</div>
     } @else if (filteredRecurring().length === 0) {
-      <p class="field-hint">Nenhuma recorrência encontrada.</p>
+      <div class="cadastros-empty-state">
+        <span class="empty-search-icon"><lucide-icon name="search" [size]="23"></lucide-icon></span>
+        <strong>{{ searchTerm().trim() ? 'Nenhum resultado encontrado' : 'Nenhuma recorrência cadastrada' }}</strong>
+        <p>{{ searchTerm().trim() ? 'Não encontramos recorrências para “' + searchTerm().trim() + '”.' : 'Cadastre uma receita ou despesa recorrente para começar.' }}</p>
+      </div>
     } @else {
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Frequência</th>
-              <th>Status</th>
-            </tr>
-          </thead>
+          <thead><tr><th>Nome</th><th>Tipo</th><th>Frequência</th><th>Status</th><th aria-label="Ações"></th></tr></thead>
           <tbody>
-            @for (rule of filteredRecurring(); track rule.id) {
+            @for (rule of filteredRecurring(); track rule.key) {
               <tr>
-                <td>{{ rule.description }}</td>
+                <td class="item-name">{{ rule.description }}</td>
+                <td><span class="recurring-type-badge" [class.expense-type]="rule.kind === 'expense'" [class.income-type]="rule.kind === 'income'">{{ rule.kind === 'expense' ? 'Despesa' : 'Receita' }}</span></td>
                 <td>{{ frequencyLabels[rule.frequency] }}</td>
-                <td>{{ statusLabels[rule.status] }}</td>
+                <td><span class="status-badge" [class.status-paused]="rule.status === 'PAUSED'" [class.status-inactive]="rule.status === 'ENDED'">{{ statusLabels[rule.status] }}</span></td>
+                <td class="actions-cell"><div class="row-actions"><button type="button" class="row-menu" aria-label="Ações da recorrência" (click)="toggleActionMenu('recurring-' + rule.key)"><lucide-icon name="more-horizontal" [size]="18"></lucide-icon></button>@if (openActionMenu() === 'recurring-' + rule.key && rule.status === 'ACTIVE') {<div class="row-action-menu"><button type="button" class="danger-action" (click)="requestRecurringPause(rule)">Desativar</button></div>}</div></td>
               </tr>
             }
           </tbody>
@@ -128,9 +179,97 @@
       </div>
     }
 
-    <a class="link-btn" routerLink="/despesas-fixas">Ver todos os cadastros</a>
+    <button type="button" class="card-footer-link" (click)="openListModal('recurring')">Ver todos os cadastros</button>
   </div>
 </div>
+
+@if (listModal(); as modalKind) {
+  <app-modal
+    [title]="modalKind === 'categories' ? 'Categorias' : modalKind === 'methods' ? 'Formas de pagamento' : 'Recorrências'"
+    [subtitle]="modalKind === 'categories' ? 'Gerencie as categorias de receitas e despesas.' : modalKind === 'methods' ? 'Gerencie suas formas de pagamento.' : 'Gerencie receitas e despesas recorrentes.'"
+    [icon]="modalKind === 'categories' ? 'shapes' : modalKind === 'methods' ? 'wallet' : 'repeat-2'"
+    [iconTone]="modalKind === 'categories' ? 'violet' : modalKind === 'methods' ? 'green' : 'orange'"
+    [wide]="true"
+    (closed)="closeListModal()"
+  >
+    <div class="registry-toolbar">
+      <label class="registry-search">
+        <lucide-icon name="search" [size]="17"></lucide-icon>
+        <input type="search" placeholder="Buscar por nome..." [value]="modalSearch()" (input)="updateModalSearch($any($event.target).value)" />
+      </label>
+
+      @if (modalKind === 'methods') {
+        <select aria-label="Filtrar por tipo" [value]="modalType()" (change)="updateModalType($any($event.target).value)">
+          <option value="ALL">Tipo: Todos</option>
+          <option value="PIX">Pix</option><option value="CASH">Dinheiro</option><option value="CARD">Cartão</option>
+          <option value="BANK_TRANSFER">Transferência</option><option value="BOLETO">Boleto</option><option value="OTHER">Outro</option>
+        </select>
+      } @else if (modalKind === 'recurring') {
+        <select aria-label="Filtrar por tipo" [value]="modalType()" (change)="updateModalType($any($event.target).value)">
+          <option value="ALL">Tipo: Todos</option>
+          <option value="expense">Despesas</option>
+          <option value="income">Receitas</option>
+        </select>
+      }
+
+      <select aria-label="Filtrar por status" [value]="modalStatus()" (change)="updateModalStatus($any($event.target).value)">
+        <option value="ALL">Status: Todos</option>
+        @if (modalKind === 'recurring') {
+          <option value="ACTIVE">Ativa</option><option value="PAUSED">Pausada</option><option value="ENDED">Encerrada</option>
+        } @else {
+          <option value="true">Ativa</option><option value="false">Inativa</option>
+        }
+      </select>
+
+      @if (modalKind === 'categories') {
+        <button type="button" class="btn btn-primary registry-add" (click)="createFromList('categories')">
+          <lucide-icon name="plus" [size]="17"></lucide-icon>Nova categoria
+        </button>
+      } @else if (modalKind === 'methods') {
+        <button type="button" class="btn btn-primary registry-add" (click)="createFromList('methods')">
+          <lucide-icon name="plus" [size]="17"></lucide-icon>Nova forma de pagamento
+        </button>
+      } @else {
+        <button type="button" class="btn btn-primary registry-add" (click)="openRecurringTypeModal()">
+          <lucide-icon name="plus" [size]="17"></lucide-icon>Novo cadastro
+        </button>
+      }
+    </div>
+
+    <div class="registry-table-wrap">
+      <table class="registry-table">
+        @if (modalKind === 'categories') {
+          <thead><tr><th>Nome</th><th>Cor</th><th>Ícone</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody>@for (item of pagedModalCategories(); track item.id) {
+            <tr><td class="item-name">{{ item.name }}</td><td><span class="color-swatch" [style.background]="item.color"></span></td><td>{{ item.icon || '—' }}</td><td><span class="status-badge" [class.status-inactive]="!item.active">{{ item.active ? 'Ativa' : 'Inativa' }}</span></td><td><div class="row-actions"><button class="row-menu" type="button" aria-label="Ações" (click)="toggleActionMenu('modal-category-' + item.id)"><lucide-icon name="more-horizontal" [size]="18"></lucide-icon></button>@if (openActionMenu() === 'modal-category-' + item.id) {<div class="row-action-menu"><button type="button" class="danger-action" (click)="requestCategoryDelete(item)">Excluir</button></div>}</div></td></tr>
+          }</tbody>
+        } @else if (modalKind === 'methods') {
+          <thead><tr><th>Nome</th><th>Tipo</th><th>Fechamento</th><th>Vencimento</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody>@for (item of pagedModalMethods(); track item.id) {
+            <tr><td class="item-name">{{ item.name }}</td><td>{{ typeLabels[item.type] }}</td><td>{{ item.card?.closingDay ?? '—' }}</td><td>{{ item.card?.dueDay ?? '—' }}</td><td><span class="status-badge" [class.status-inactive]="!item.active">{{ item.active ? 'Ativa' : 'Inativa' }}</span></td><td><div class="row-actions"><button class="row-menu" type="button" aria-label="Ações" (click)="toggleActionMenu('modal-method-' + item.id)"><lucide-icon name="more-horizontal" [size]="18"></lucide-icon></button>@if (openActionMenu() === 'modal-method-' + item.id) {<div class="row-action-menu"><button type="button" class="danger-action" (click)="requestMethodDelete(item)">Excluir</button></div>}</div></td></tr>
+          }</tbody>
+        } @else {
+          <thead><tr><th>Nome</th><th>Tipo</th><th>Frequência</th><th>Vencimento</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody>@for (item of pagedModalRecurring(); track item.key) {
+            <tr><td class="item-name">{{ item.description }}</td><td><span class="recurring-type-badge" [class.expense-type]="item.kind === 'expense'" [class.income-type]="item.kind === 'income'">{{ item.kind === 'expense' ? 'Despesa' : 'Receita' }}</span></td><td>{{ frequencyLabels[item.frequency] }}</td><td>{{ item.dueDay ?? '—' }}</td><td><span class="status-badge" [class.status-paused]="item.status === 'PAUSED'" [class.status-inactive]="item.status === 'ENDED'">{{ statusLabels[item.status] }}</span></td><td><div class="row-actions"><button class="row-menu" type="button" aria-label="Ações" (click)="toggleActionMenu('modal-recurring-' + item.key)"><lucide-icon name="more-horizontal" [size]="18"></lucide-icon></button>@if (openActionMenu() === 'modal-recurring-' + item.key && item.status === 'ACTIVE') {<div class="row-action-menu"><button type="button" class="danger-action" (click)="requestRecurringPause(item)">Desativar</button></div>}</div></td></tr>
+          }</tbody>
+        }
+      </table>
+    </div>
+
+    <app-pagination
+      [page]="modalPage()"
+      [totalPages]="modalTotalPages()"
+      [totalElements]="modalTotalElements()"
+      [size]="modalPageSize()"
+      [first]="modalPage() === 0"
+      [last]="modalPage() >= modalTotalPages() - 1"
+      itemLabel="registros"
+      (pageChange)="onModalPageChange($event)"
+      (sizeChange)="onModalSizeChange($event)"
+    ></app-pagination>
+  </app-modal>
+}
 
 @if (categoryModalOpen()) {
   <app-category-form-modal
@@ -148,4 +287,73 @@
     (save)="saveMethod($event)"
     (closed)="closeMethodModal()"
   ></app-transaction-method-form-modal>
+}
+
+@if (recurringTypeModalOpen()) {
+  <app-modal title="Novo cadastro recorrente" (closed)="recurringTypeModalOpen.set(false)">
+    <p class="recurring-type-description">O que você deseja cadastrar?</p>
+    <div class="recurring-type-options">
+      <button type="button" class="recurring-type-option expense-option" (click)="chooseRecurringType('expense')">
+        <strong>Despesa fixa</strong>
+        <span>Contas, assinaturas e outros gastos recorrentes.</span>
+      </button>
+      <button type="button" class="recurring-type-option income-option" (click)="chooseRecurringType('income')">
+        <strong>Receita fixa</strong>
+        <span>Salário, aluguel e outros recebimentos recorrentes.</span>
+      </button>
+    </div>
+  </app-modal>
+}
+
+@if (recurringExpenseModalOpen()) {
+  <app-recurring-expense-form-modal
+    [categories]="categories()"
+    [transactionMethods]="transactionMethods()"
+    [saving]="recurringSaving()"
+    [errorMessage]="recurringSaveError()"
+    (save)="saveRecurringExpense($event)"
+    (closed)="closeRecurringForm()"
+  ></app-recurring-expense-form-modal>
+}
+
+@if (recurringIncomeModalOpen()) {
+  <app-income-form-modal
+    [categories]="categories()"
+    [defaultRecurring]="true"
+    [saving]="recurringSaving()"
+    [errorMessage]="recurringSaveError()"
+    (saveRecurring)="saveRecurringIncome($event)"
+    (closed)="closeRecurringForm()"
+  ></app-income-form-modal>
+}
+
+@if (categoryPendingDelete(); as category) {
+  <app-confirm-dialog
+    title="Excluir categoria?"
+    [message]="'Tem certeza de que deseja excluir a categoria \'' + category.name + '\'? Esta ação não poderá ser desfeita.'"
+    confirmLabel="Excluir categoria"
+    (confirmed)="confirmCategoryDelete()"
+    (cancelled)="cancelPendingAction()"
+  ></app-confirm-dialog>
+}
+
+@if (methodPendingDelete(); as method) {
+  <app-confirm-dialog
+    title="Excluir forma de pagamento?"
+    [message]="'Tem certeza de que deseja excluir \'' + method.name + '\'? Esta ação não poderá ser desfeita.'"
+    confirmLabel="Excluir"
+    (confirmed)="confirmMethodDelete()"
+    (cancelled)="cancelPendingAction()"
+  ></app-confirm-dialog>
+}
+
+@if (recurringPendingPause(); as rule) {
+  <app-confirm-dialog
+    title="Desativar recorrência?"
+    [message]="'Deseja desativar a recorrência \'' + rule.description + '\'? Novas despesas não serão geradas enquanto ela estiver desativada.'"
+    confirmLabel="Desativar"
+    variant="primary"
+    (confirmed)="confirmRecurringPause()"
+    (cancelled)="cancelPendingAction()"
+  ></app-confirm-dialog>
 }

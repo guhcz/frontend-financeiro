@@ -32,18 +32,6 @@ export const routes: Routes = [
       },
       { path: 'despesas', redirectTo: 'movimentacoes' },
       {
-        path: 'despesas-fixas',
-        loadComponent: () =>
-          import('./features/recurring-expenses/recurring-expense-list/recurring-expense-list').then(
-            (m) => m.RecurringExpenseList,
-          ),
-      },
-      {
-        path: 'categorias',
-        loadComponent: () =>
-          import('./features/categories/category-list/category-list').then((m) => m.CategoryList),
-      },
-      {
         path: 'limite-mensal',
         loadComponent: () =>
           import('./features/monthly-limits/monthly-limit-list/monthly-limit-list').then(

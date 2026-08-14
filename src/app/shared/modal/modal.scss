@@ -21,6 +21,10 @@
   overflow: hidden;
 }
 
+.modal-panel-wide {
+  max-width: 900px;
+}
+
 .modal-header {
   display: flex;
   align-items: center;
@@ -32,6 +36,42 @@
 .modal-header h2 {
   font-size: 18px;
   font-weight: 700;
+}
+
+.modal-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-title-icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+}
+
+.modal-title-icon-violet {
+  color: #7c3aed;
+  background: #f2eaff;
+}
+
+.modal-title-icon-green {
+  color: #059669;
+  background: #e8f8f0;
+}
+
+.modal-title-icon-orange {
+  color: #f59e0b;
+  background: #fff4df;
+}
+
+.modal-subtitle {
+  margin-top: 4px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 400;
 }
 
 .modal-body {

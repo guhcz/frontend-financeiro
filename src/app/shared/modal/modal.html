@@ -1,7 +1,19 @@
 <div class="modal-overlay" (click)="onOverlayClick($event)">
-  <div class="modal-panel" role="dialog" aria-modal="true">
+  <div class="modal-panel" [class.modal-panel-wide]="wide()" role="dialog" aria-modal="true">
     <header class="modal-header">
-      <h2>{{ title() }}</h2>
+      <div class="modal-title-group">
+        @if (icon(); as iconName) {
+          <span class="modal-title-icon" [class]="'modal-title-icon modal-title-icon-' + iconTone()">
+            <lucide-icon [name]="iconName" [size]="22"></lucide-icon>
+          </span>
+        }
+        <div>
+          <h2>{{ title() }}</h2>
+          @if (subtitle(); as subtitleText) {
+            <p class="modal-subtitle">{{ subtitleText }}</p>
+          }
+        </div>
+      </div>
       <button type="button" class="icon-btn" (click)="closed.emit()" aria-label="Fechar">
         <lucide-icon name="x" [size]="18"></lucide-icon>
       </button>
