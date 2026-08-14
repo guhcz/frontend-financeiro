@@ -32,13 +32,6 @@ export const routes: Routes = [
       },
       { path: 'despesas', redirectTo: 'movimentacoes' },
       {
-        path: 'limite-mensal',
-        loadComponent: () =>
-          import('./features/monthly-limits/monthly-limit-list/monthly-limit-list').then(
-            (m) => m.MonthlyLimitList,
-          ),
-      },
-      {
         path: 'planejamento',
         loadComponent: () =>
           import('./features/planning/planning-page/planning-page').then((m) => m.PlanningPage),

@@ -12,7 +12,7 @@ export class Modal {
   subtitle = input<string | null>(null);
   wide = input(false);
   icon = input<string | null>(null);
-  iconTone = input<'violet' | 'green' | 'orange'>('violet');
+  iconTone = input<'violet' | 'green' | 'orange' | 'blue'>('violet');
   closed = output<void>();
 
   onOverlayClick(event: MouseEvent): void {

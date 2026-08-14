@@ -1,7 +1,10 @@
-import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
+import { CurrencyPipe } from '@angular/common';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { Observable } from 'rxjs';
 import { Category, CategoryRequest } from '../../../core/models/category.model';
+import { monthName } from '../../../core/constants/months';
+import { MonthlyLimit, MonthlyLimitRequest } from '../../../core/models/monthly-limit.model';
 import { RECURRENCE_FREQUENCY_LABELS } from '../../../core/models/recurrence-frequency.model';
 import { RecurringExpense } from '../../../core/models/recurring-expense.model';
 import { RecurringExpenseRequest } from '../../../core/models/recurring-expense.model';
@@ -13,6 +16,7 @@ import {
 } from '../../../core/models/transaction-method.model';
 import { CategoryService } from '../../../core/services/category.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { MonthlyLimitService } from '../../../core/services/monthly-limit.service';
 import { RecurringExpenseService } from '../../../core/services/recurring-expense.service';
 import { RecurringIncomeService } from '../../../core/services/recurring-income.service';
 import { TransactionMethodService } from '../../../core/services/transaction-method.service';
@@ -25,10 +29,9 @@ import { Pagination } from '../../../shared/pagination/pagination';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { RecurringExpenseFormModal } from '../../recurring-expenses/recurring-expense-form-modal/recurring-expense-form-modal';
 import { IncomeFormModal } from '../../incomes/income-form-modal/income-form-modal';
+import { MonthlyLimitFormModal } from '../../monthly-limits/monthly-limit-form-modal/monthly-limit-form-modal';
 
-const MIN_PREVIEW_SIZE = 4;
-const TABLE_ROW_HEIGHT = 42;
-const PAGE_VERTICAL_OFFSET = 450;
+const PREVIEW_SIZE = 4;
 
 const STATUS_LABELS: Record<string, string> = {
   ACTIVE: 'Ativa',
@@ -54,7 +57,7 @@ interface RecurringRegistryItem {
 
 @Component({
   selector: 'app-cadastros-page',
-  imports: [LucideAngularModule, CategoryFormModal, TransactionMethodFormModal, Modal, Pagination, ConfirmDialog, RecurringExpenseFormModal, IncomeFormModal],
+  imports: [CurrencyPipe, LucideAngularModule, CategoryFormModal, TransactionMethodFormModal, Modal, Pagination, ConfirmDialog, RecurringExpenseFormModal, IncomeFormModal, MonthlyLimitFormModal],
   templateUrl: './cadastros-page.html',
   styleUrls: ['../../list-page.scss', './cadastros-page.scss'],
 })
@@ -63,14 +66,15 @@ export class CadastrosPage implements OnInit {
   private readonly transactionMethodService = inject(TransactionMethodService);
   private readonly recurringExpenseService = inject(RecurringExpenseService);
   private readonly recurringIncomeService = inject(RecurringIncomeService);
+  private readonly monthlyLimitService = inject(MonthlyLimitService);
   private readonly notificationService = inject(NotificationService);
 
   readonly typeLabels = TRANSACTION_METHOD_TYPE_LABELS;
   readonly frequencyLabels = RECURRENCE_FREQUENCY_LABELS;
   readonly statusLabels = STATUS_LABELS;
+  readonly monthName = monthName;
 
   readonly searchTerm = signal('');
-  readonly previewSize = signal(this.calculatePreviewSize());
 
   readonly categories = signal<Category[]>([]);
   readonly categoriesLoading = signal(true);
@@ -80,17 +84,23 @@ export class CadastrosPage implements OnInit {
   readonly recurringIncomes = signal<RecurringIncome[]>([]);
   readonly recurringLoading = signal(true);
   readonly recurringIncomeLoading = signal(true);
+  readonly monthlyLimits = signal<MonthlyLimit[]>([]);
+  readonly limitsLoading = signal(true);
 
   readonly filteredCategories = computed(() =>
-    this.filterByTerm(this.categories(), (item) => item.name).slice(0, this.previewSize()),
+    this.filterByTerm(this.categories(), (item) => item.name).slice(0, PREVIEW_SIZE),
   );
   readonly filteredMethods = computed(() =>
-    this.filterByTerm(this.transactionMethods(), (item) => item.name).slice(0, this.previewSize()),
+    this.filterByTerm(this.transactionMethods(), (item) => item.name).slice(0, PREVIEW_SIZE),
   );
   readonly filteredRecurring = computed(() =>
     this.sortRecurringByStatus(
       this.filterByTerm(this.allRecurringItems(), (item) => item.description),
-    ).slice(0, this.previewSize()),
+    ).slice(0, PREVIEW_SIZE),
+  );
+  readonly filteredLimits = computed(() =>
+    this.filterByTerm(this.monthlyLimits(), (item) => `${monthName(item.month)} ${item.year}`)
+      .slice(0, PREVIEW_SIZE),
   );
 
   readonly categoryModalOpen = signal(false);
@@ -101,7 +111,7 @@ export class CadastrosPage implements OnInit {
   readonly methodSaving = signal(false);
   readonly methodSaveError = signal<string | null>(null);
 
-  readonly listModal = signal<'categories' | 'methods' | 'recurring' | null>(null);
+  readonly listModal = signal<'categories' | 'methods' | 'recurring' | 'limits' | null>(null);
   readonly modalSearch = signal('');
   readonly modalStatus = signal('ALL');
   readonly modalType = signal('ALL');
@@ -116,6 +126,11 @@ export class CadastrosPage implements OnInit {
   readonly recurringIncomeModalOpen = signal(false);
   readonly recurringSaving = signal(false);
   readonly recurringSaveError = signal<string | null>(null);
+  readonly limitModalOpen = signal(false);
+  readonly editingLimit = signal<MonthlyLimit | null>(null);
+  readonly limitSaving = signal(false);
+  readonly limitSaveError = signal<string | null>(null);
+  readonly limitPendingDelete = signal<MonthlyLimit | null>(null);
 
   readonly modalCategories = computed(() =>
     this.filterModalItems(this.categories(), (item) => item.name).filter(
@@ -138,29 +153,31 @@ export class CadastrosPage implements OnInit {
       ),
     ),
   );
+  readonly modalLimits = computed(() =>
+    this.filterModalItems(this.monthlyLimits(), (item) => `${monthName(item.month)} ${item.year}`).filter(
+      (item) => this.modalStatus() === 'ALL' || String(item.active) === this.modalStatus(),
+    ),
+  );
   readonly modalTotalElements = computed(() => this.activeModalItems().length);
   readonly modalTotalPages = computed(() => Math.ceil(this.modalTotalElements() / this.modalPageSize()));
   readonly pagedModalCategories = computed(() => this.paginate(this.modalCategories()));
   readonly pagedModalMethods = computed(() => this.paginate(this.modalMethods()));
   readonly pagedModalRecurring = computed(() => this.paginate(this.modalRecurring()));
+  readonly pagedModalLimits = computed(() => this.paginate(this.modalLimits()));
 
   ngOnInit(): void {
     this.loadCategories();
     this.loadTransactionMethods();
     this.loadRecurringExpenses();
     this.loadRecurringIncomes();
-  }
-
-  @HostListener('window:resize')
-  onWindowResize(): void {
-    this.previewSize.set(this.calculatePreviewSize());
+    this.loadMonthlyLimits();
   }
 
   onSearch(term: string): void {
     this.searchTerm.set(term);
   }
 
-  openListModal(kind: 'categories' | 'methods' | 'recurring'): void {
+  openListModal(kind: 'categories' | 'methods' | 'recurring' | 'limits'): void {
     this.listModal.set(kind);
     this.modalSearch.set('');
     this.modalStatus.set('ALL');
@@ -224,6 +241,66 @@ export class CadastrosPage implements OnInit {
     this.recurringPendingPause.set(rule);
   }
 
+  openCreateLimit(): void {
+    this.closeListModal();
+    this.editingLimit.set(null);
+    this.limitSaveError.set(null);
+    this.limitModalOpen.set(true);
+  }
+
+  openEditLimit(limit: MonthlyLimit): void {
+    this.closeListModal();
+    this.openActionMenu.set(null);
+    this.editingLimit.set(limit);
+    this.limitSaveError.set(null);
+    this.limitModalOpen.set(true);
+  }
+
+  closeLimitModal(): void {
+    this.limitModalOpen.set(false);
+  }
+
+  saveLimit(request: MonthlyLimitRequest): void {
+    this.limitSaving.set(true);
+    const editing = this.editingLimit();
+    const operation = editing
+      ? this.monthlyLimitService.update(editing.id, request)
+      : this.monthlyLimitService.create(request);
+    operation.subscribe({
+      next: () => {
+        this.limitSaving.set(false);
+        this.limitModalOpen.set(false);
+        this.notificationService.success(editing ? 'Limite atualizado.' : 'Limite criado.');
+        this.loadMonthlyLimits();
+      },
+      error: (err: unknown) => {
+        this.limitSaving.set(false);
+        this.limitSaveError.set(getErrorDetail(err));
+      },
+    });
+  }
+
+  requestLimitDelete(limit: MonthlyLimit): void {
+    this.openActionMenu.set(null);
+    this.limitPendingDelete.set(limit);
+  }
+
+  confirmLimitDelete(): void {
+    const limit = this.limitPendingDelete();
+    if (!limit) return;
+    this.monthlyLimitService.delete(limit.id).subscribe({
+      next: () => {
+        this.limitPendingDelete.set(null);
+        this.notificationService.success('Limite excluído.');
+        this.loadMonthlyLimits();
+      },
+      error: (err: unknown) => {
+        this.limitPendingDelete.set(null);
+        this.notificationService.error(getErrorDetail(err));
+      },
+    });
+  }
+
   openRecurringTypeModal(): void {
     this.closeListModal();
     this.recurringTypeModalOpen.set(true);
@@ -262,6 +339,7 @@ export class CadastrosPage implements OnInit {
     this.categoryPendingDelete.set(null);
     this.methodPendingDelete.set(null);
     this.recurringPendingPause.set(null);
+    this.limitPendingDelete.set(null);
   }
 
   confirmCategoryDelete(): void {
@@ -430,6 +508,20 @@ export class CadastrosPage implements OnInit {
     });
   }
 
+  private loadMonthlyLimits(): void {
+    this.limitsLoading.set(true);
+    this.monthlyLimitService.list().subscribe({
+      next: (limits) => {
+        this.monthlyLimits.set([...limits].sort((a, b) => b.year - a.year || b.month - a.month));
+        this.limitsLoading.set(false);
+      },
+      error: () => {
+        this.notificationService.error('Não foi possível carregar os limites mensais.');
+        this.limitsLoading.set(false);
+      },
+    });
+  }
+
   private allRecurringItems(): RecurringRegistryItem[] {
     const expenses = this.recurringExpenses().map((item) => ({
       key: `expense-${item.id}`,
@@ -481,7 +573,8 @@ export class CadastrosPage implements OnInit {
   private activeModalItems(): unknown[] {
     if (this.listModal() === 'categories') return this.modalCategories();
     if (this.listModal() === 'methods') return this.modalMethods();
-    return this.modalRecurring();
+    if (this.listModal() === 'recurring') return this.modalRecurring();
+    return this.modalLimits();
   }
 
   private paginate<T>(items: T[]): T[] {
@@ -495,12 +588,4 @@ export class CadastrosPage implements OnInit {
     );
   }
 
-  private calculatePreviewSize(): number {
-    if (typeof window === 'undefined') {
-      return MIN_PREVIEW_SIZE;
-    }
-
-    const availableTableHeight = window.innerHeight - PAGE_VERTICAL_OFFSET;
-    return Math.max(MIN_PREVIEW_SIZE, Math.floor(availableTableHeight / TABLE_ROW_HEIGHT));
-  }
 }

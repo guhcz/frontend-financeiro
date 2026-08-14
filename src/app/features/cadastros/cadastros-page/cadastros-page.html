@@ -181,14 +181,57 @@
 
     <button type="button" class="card-footer-link" (click)="openListModal('recurring')">Ver todos os cadastros</button>
   </div>
+
+  <div class="card cadastros-card cadastros-card-large-text">
+    <div class="cadastros-card-header">
+      <div class="card-heading">
+        <span class="card-icon card-icon-blue"><lucide-icon name="gauge" [size]="24"></lucide-icon></span>
+        <div>
+          <h2>Limite mensal</h2>
+          <p>Defina e acompanhe seus limites de gastos.</p>
+        </div>
+      </div>
+      <button type="button" class="btn btn-primary" (click)="openCreateLimit()">
+        <lucide-icon name="plus" [size]="17"></lucide-icon>Novo limite
+      </button>
+    </div>
+
+    @if (limitsLoading()) {
+      <div class="list-loading">Carregando...</div>
+    } @else if (filteredLimits().length === 0) {
+      <div class="cadastros-empty-state">
+        <span class="empty-search-icon"><lucide-icon name="search" [size]="23"></lucide-icon></span>
+        <strong>{{ searchTerm().trim() ? 'Nenhum resultado encontrado' : 'Nenhum limite cadastrado' }}</strong>
+        <p>{{ searchTerm().trim() ? 'Não encontramos limites para “' + searchTerm().trim() + '”.' : 'Defina um limite mensal para controlar seus gastos.' }}</p>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Período</th><th>Limite</th><th>Status</th><th aria-label="Ações"></th></tr></thead>
+          <tbody>
+            @for (limit of filteredLimits(); track limit.id) {
+              <tr>
+                <td class="item-name">{{ monthName(limit.month) }} / {{ limit.year }}</td>
+                <td>{{ limit.amount | currency: 'BRL' }}</td>
+                <td><span class="status-badge" [class.status-inactive]="!limit.active">{{ limit.active ? 'Ativo' : 'Inativo' }}</span></td>
+                <td class="actions-cell"><div class="row-actions"><button type="button" class="row-menu" aria-label="Ações do limite" (click)="toggleActionMenu('limit-' + limit.id)"><lucide-icon name="more-horizontal" [size]="18"></lucide-icon></button>@if (openActionMenu() === 'limit-' + limit.id) {<div class="row-action-menu"><button type="button" (click)="openEditLimit(limit)">Editar</button><button type="button" class="danger-action" (click)="requestLimitDelete(limit)">Excluir</button></div>}</div></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <button type="button" class="card-footer-link" (click)="openListModal('limits')">Ver todos os limites</button>
+  </div>
 </div>
 
 @if (listModal(); as modalKind) {
   <app-modal
-    [title]="modalKind === 'categories' ? 'Categorias' : modalKind === 'methods' ? 'Formas de pagamento' : 'Recorrências'"
-    [subtitle]="modalKind === 'categories' ? 'Gerencie as categorias de receitas e despesas.' : modalKind === 'methods' ? 'Gerencie suas formas de pagamento.' : 'Gerencie receitas e despesas recorrentes.'"
-    [icon]="modalKind === 'categories' ? 'shapes' : modalKind === 'methods' ? 'wallet' : 'repeat-2'"
-    [iconTone]="modalKind === 'categories' ? 'violet' : modalKind === 'methods' ? 'green' : 'orange'"
+    [title]="modalKind === 'categories' ? 'Categorias' : modalKind === 'methods' ? 'Formas de pagamento' : modalKind === 'recurring' ? 'Recorrências' : 'Limites mensais'"
+    [subtitle]="modalKind === 'categories' ? 'Gerencie as categorias de receitas e despesas.' : modalKind === 'methods' ? 'Gerencie suas formas de pagamento.' : modalKind === 'recurring' ? 'Gerencie receitas e despesas recorrentes.' : 'Defina e acompanhe seus limites de gastos.'"
+    [icon]="modalKind === 'categories' ? 'shapes' : modalKind === 'methods' ? 'wallet' : modalKind === 'recurring' ? 'repeat-2' : 'gauge'"
+    [iconTone]="modalKind === 'categories' ? 'violet' : modalKind === 'methods' ? 'green' : modalKind === 'recurring' ? 'orange' : 'blue'"
     [wide]="true"
     (closed)="closeListModal()"
   >
@@ -229,9 +272,13 @@
         <button type="button" class="btn btn-primary registry-add" (click)="createFromList('methods')">
           <lucide-icon name="plus" [size]="17"></lucide-icon>Nova forma de pagamento
         </button>
-      } @else {
+      } @else if (modalKind === 'recurring') {
         <button type="button" class="btn btn-primary registry-add" (click)="openRecurringTypeModal()">
           <lucide-icon name="plus" [size]="17"></lucide-icon>Novo cadastro
+        </button>
+      } @else {
+        <button type="button" class="btn btn-primary registry-add" (click)="openCreateLimit()">
+          <lucide-icon name="plus" [size]="17"></lucide-icon>Novo limite
         </button>
       }
     </div>
@@ -248,10 +295,15 @@
           <tbody>@for (item of pagedModalMethods(); track item.id) {
             <tr><td class="item-name">{{ item.name }}</td><td>{{ typeLabels[item.type] }}</td><td>{{ item.card?.closingDay ?? '—' }}</td><td>{{ item.card?.dueDay ?? '—' }}</td><td><span class="status-badge" [class.status-inactive]="!item.active">{{ item.active ? 'Ativa' : 'Inativa' }}</span></td><td><div class="row-actions"><button class="row-menu" type="button" aria-label="Ações" (click)="toggleActionMenu('modal-method-' + item.id)"><lucide-icon name="more-horizontal" [size]="18"></lucide-icon></button>@if (openActionMenu() === 'modal-method-' + item.id) {<div class="row-action-menu"><button type="button" class="danger-action" (click)="requestMethodDelete(item)">Excluir</button></div>}</div></td></tr>
           }</tbody>
-        } @else {
+        } @else if (modalKind === 'recurring') {
           <thead><tr><th>Nome</th><th>Tipo</th><th>Frequência</th><th>Vencimento</th><th>Status</th><th>Ações</th></tr></thead>
           <tbody>@for (item of pagedModalRecurring(); track item.key) {
             <tr><td class="item-name">{{ item.description }}</td><td><span class="recurring-type-badge" [class.expense-type]="item.kind === 'expense'" [class.income-type]="item.kind === 'income'">{{ item.kind === 'expense' ? 'Despesa' : 'Receita' }}</span></td><td>{{ frequencyLabels[item.frequency] }}</td><td>{{ item.dueDay ?? '—' }}</td><td><span class="status-badge" [class.status-paused]="item.status === 'PAUSED'" [class.status-inactive]="item.status === 'ENDED'">{{ statusLabels[item.status] }}</span></td><td><div class="row-actions"><button class="row-menu" type="button" aria-label="Ações" (click)="toggleActionMenu('modal-recurring-' + item.key)"><lucide-icon name="more-horizontal" [size]="18"></lucide-icon></button>@if (openActionMenu() === 'modal-recurring-' + item.key && item.status === 'ACTIVE') {<div class="row-action-menu"><button type="button" class="danger-action" (click)="requestRecurringPause(item)">Desativar</button></div>}</div></td></tr>
+          }</tbody>
+        } @else {
+          <thead><tr><th>Período</th><th>Limite</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody>@for (item of pagedModalLimits(); track item.id) {
+            <tr><td class="item-name">{{ monthName(item.month) }} / {{ item.year }}</td><td>{{ item.amount | currency: 'BRL' }}</td><td><span class="status-badge" [class.status-inactive]="!item.active">{{ item.active ? 'Ativo' : 'Inativo' }}</span></td><td><div class="row-actions"><button class="row-menu" type="button" aria-label="Ações" (click)="toggleActionMenu('modal-limit-' + item.id)"><lucide-icon name="more-horizontal" [size]="18"></lucide-icon></button>@if (openActionMenu() === 'modal-limit-' + item.id) {<div class="row-action-menu"><button type="button" (click)="openEditLimit(item)">Editar</button><button type="button" class="danger-action" (click)="requestLimitDelete(item)">Excluir</button></div>}</div></td></tr>
           }</tbody>
         }
       </table>
@@ -327,6 +379,16 @@
   ></app-income-form-modal>
 }
 
+@if (limitModalOpen()) {
+  <app-monthly-limit-form-modal
+    [limit]="editingLimit()"
+    [saving]="limitSaving()"
+    [errorMessage]="limitSaveError()"
+    (save)="saveLimit($event)"
+    (closed)="closeLimitModal()"
+  ></app-monthly-limit-form-modal>
+}
+
 @if (categoryPendingDelete(); as category) {
   <app-confirm-dialog
     title="Excluir categoria?"
@@ -354,6 +416,16 @@
     confirmLabel="Desativar"
     variant="primary"
     (confirmed)="confirmRecurringPause()"
+    (cancelled)="cancelPendingAction()"
+  ></app-confirm-dialog>
+}
+
+@if (limitPendingDelete(); as limit) {
+  <app-confirm-dialog
+    title="Excluir limite mensal?"
+    [message]="'Tem certeza de que deseja excluir o limite de ' + monthName(limit.month) + '/' + limit.year + '? Esta ação não poderá ser desfeita.'"
+    confirmLabel="Excluir limite"
+    (confirmed)="confirmLimitDelete()"
     (cancelled)="cancelPendingAction()"
   ></app-confirm-dialog>
 }

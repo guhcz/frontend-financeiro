@@ -2,11 +2,11 @@ import { CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Category } from '../../../core/models/category.model';
 import { DashboardResponse } from '../../../core/models/dashboard.model';
 import { Expense, ExpenseRequest } from '../../../core/models/expense.model';
-import { MonthlyLimit, MonthlyLimitRequest } from '../../../core/models/monthly-limit.model';
+import { MonthlyLimit } from '../../../core/models/monthly-limit.model';
 import { RecurringExpenseRequest } from '../../../core/models/recurring-expense.model';
 import { TransactionMethod } from '../../../core/models/transaction-method.model';
 import { AuthService } from '../../../core/services/auth.service';
@@ -21,7 +21,6 @@ import { defaultPeriod } from '../../../core/utils/default-period.util';
 import { getErrorDetail } from '../../../core/utils/http-error.util';
 import { MonthPeriod, MonthSwitcher } from '../../../shared/month-switcher/month-switcher';
 import { ExpenseFormModal } from '../../expenses/expense-form-modal/expense-form-modal';
-import { MonthlyLimitFormModal } from '../../monthly-limits/monthly-limit-form-modal/monthly-limit-form-modal';
 import { DashboardCategoryBreakdown } from '../dashboard-category-breakdown/dashboard-category-breakdown';
 import { DashboardMonthlyChart } from '../dashboard-monthly-chart/dashboard-monthly-chart';
 import { DashboardOverview } from '../dashboard-overview/dashboard-overview';
@@ -50,7 +49,6 @@ const GENERIC_LOAD_ERROR = 'Não foi possível carregar o Dashboard. Tente novam
     DashboardMonthlyChart,
     DashboardCategoryBreakdown,
     ExpenseFormModal,
-    MonthlyLimitFormModal,
   ],
   templateUrl: './dashboard-page.html',
   styleUrls: ['../../list-page.scss', './dashboard-page.scss'],
@@ -64,6 +62,7 @@ export class DashboardPage implements OnInit {
   private readonly monthlyLimitService = inject(MonthlyLimitService);
   private readonly authService = inject(AuthService);
   private readonly notificationService = inject(NotificationService);
+  private readonly router = inject(Router);
 
   private readonly initialPeriod = defaultPeriod();
   readonly month = signal(this.initialPeriod.month);
@@ -83,9 +82,6 @@ export class DashboardPage implements OnInit {
   readonly saveError = signal<string | null>(null);
 
   readonly currentLimit = signal<MonthlyLimit | null>(null);
-  readonly limitModalOpen = signal(false);
-  readonly limitSaving = signal(false);
-  readonly limitError = signal<string | null>(null);
   readonly hasLimit = computed(() => this.currentLimit() != null);
 
   readonly todayExpensesTotal = computed(() => {
@@ -169,35 +165,7 @@ export class DashboardPage implements OnInit {
   }
 
   openLimitModal(): void {
-    this.limitError.set(null);
-    this.limitModalOpen.set(true);
-  }
-
-  closeLimitModal(): void {
-    this.limitModalOpen.set(false);
-  }
-
-  saveLimit(request: MonthlyLimitRequest): void {
-    this.limitSaving.set(true);
-    this.limitError.set(null);
-    const current = this.currentLimit();
-    const operation = current
-      ? this.monthlyLimitService.update(current.id, request)
-      : this.monthlyLimitService.create(request);
-
-    operation.subscribe({
-      next: () => {
-        this.limitSaving.set(false);
-        this.limitModalOpen.set(false);
-        this.notificationService.success(current ? 'Limite atualizado com sucesso.' : 'Limite definido com sucesso.');
-        this.loadLimit();
-        this.loadDashboard();
-      },
-      error: (err: unknown) => {
-        this.limitSaving.set(false);
-        this.limitError.set(getErrorDetail(err));
-      },
-    });
+    void this.router.navigate(['/cadastros']);
   }
 
   private loadDashboard(): void {

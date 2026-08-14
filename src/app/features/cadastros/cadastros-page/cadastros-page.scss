@@ -97,7 +97,7 @@
 
 .cadastros-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   align-items: start;
   gap: 20px;
 }
@@ -105,9 +105,9 @@
 .cadastros-card {
   display: flex;
   flex-direction: column;
-  min-height: 340px;
-  padding: 24px;
-  gap: 18px;
+  height: 350px;
+  padding: 16px;
+  gap: 14px;
   border-radius: 9px;
 }
 
@@ -147,6 +147,11 @@
 .card-icon-orange {
   color: #f59e0b;
   background: #fff4df;
+}
+
+.card-icon-blue {
+  color: #1761f5;
+  background: #eaf1ff;
 }
 
 .cadastros-card-header h2 {
