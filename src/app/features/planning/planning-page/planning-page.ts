@@ -1,8 +1,8 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
-import { Observable, forkJoin } from 'rxjs';
+import { Observable, forkJoin, map } from 'rxjs';
 import { Category } from '../../../core/models/category.model';
-import { CreditCard } from '../../../core/models/credit-card.model';
+import { TransactionMethod } from '../../../core/models/transaction-method.model';
 import { MonthlyLimit, MonthlyLimitRequest } from '../../../core/models/monthly-limit.model';
 import {
   MonthlyCardPlanningItem,
@@ -12,7 +12,7 @@ import { MonthlyPlanningItem, MonthlyPlanningRequest } from '../../../core/model
 import { CategoryExpense, ExpenseEvolutionPoint, PlanningSummary } from '../../../core/models/planning.model';
 import { Page } from '../../../core/models/page.model';
 import { CategoryService } from '../../../core/services/category.service';
-import { CreditCardService } from '../../../core/services/credit-card.service';
+import { TransactionMethodService } from '../../../core/services/transaction-method.service';
 import { MonthlyCardPlanningService } from '../../../core/services/monthly-card-planning.service';
 import { MonthlyLimitService } from '../../../core/services/monthly-limit.service';
 import { MonthlyPlanningService } from '../../../core/services/monthly-planning.service';
@@ -24,7 +24,6 @@ import { monthYearLabel } from '../../../core/utils/month-label.util';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { MonthPeriod, MonthSwitcher } from '../../../shared/month-switcher/month-switcher';
 import { MonthlyLimitFormModal } from '../../monthly-limits/monthly-limit-form-modal/monthly-limit-form-modal';
-import { CreditCardManageModal } from '../credit-card-manage-modal/credit-card-manage-modal';
 import { CreditCardPlanningFormModal } from '../credit-card-planning-form-modal/credit-card-planning-form-modal';
 import { CreditCardPlanningTable } from '../credit-card-planning-table/credit-card-planning-table';
 import { ExpenseEvolutionChart } from '../expense-evolution-chart/expense-evolution-chart';
@@ -57,7 +56,6 @@ function formatBRL(value: number): string {
     MonthlyLimitFormModal,
     CreditCardPlanningTable,
     CreditCardPlanningFormModal,
-    CreditCardManageModal,
     ExpensesByCategoryChart,
     ExpenseEvolutionChart,
     ConfirmDialog,
@@ -72,7 +70,7 @@ export class PlanningPage implements OnInit {
   private readonly monthlyPlanningService = inject(MonthlyPlanningService);
   private readonly monthlyLimitService = inject(MonthlyLimitService);
   private readonly categoryService = inject(CategoryService);
-  private readonly creditCardService = inject(CreditCardService);
+  private readonly transactionMethodService = inject(TransactionMethodService);
   private readonly monthlyCardPlanningService = inject(MonthlyCardPlanningService);
   private readonly notificationService = inject(NotificationService);
 
@@ -81,7 +79,7 @@ export class PlanningPage implements OnInit {
   readonly year = signal(this.initialPeriod.year);
 
   readonly categories = signal<Category[]>([]);
-  readonly creditCards = signal<CreditCard[]>([]);
+  readonly transactionMethods = signal<TransactionMethod[]>([]);
 
   readonly summary = signal<PlanningSummary | null>(null);
   readonly summaryLoading = signal(true);
@@ -130,8 +128,6 @@ export class PlanningPage implements OnInit {
 
   readonly cardPlanningPendingDelete = signal<MonthlyCardPlanningItem | null>(null);
 
-  readonly manageCardsOpen = signal(false);
-
   readonly copying = signal(false);
   readonly copyPreview = signal<CopyPreview | null>(null);
   readonly copyPending = computed(() => this.copyPreview() !== null);
@@ -164,7 +160,7 @@ export class PlanningPage implements OnInit {
       next: (categories) => this.categories.set(categories),
       error: () => this.notificationService.error('Não foi possível carregar as categorias.'),
     });
-    this.loadCreditCards();
+    this.loadTransactionMethods();
     this.loadAll();
   }
 
@@ -461,24 +457,14 @@ export class PlanningPage implements OnInit {
     });
   }
 
-  openManageCards(): void {
-    this.manageCardsOpen.set(true);
-  }
-
-  closeManageCards(): void {
-    this.manageCardsOpen.set(false);
-  }
-
-  onCreditCardsChanged(): void {
-    this.loadCreditCards();
-    this.loadCardTable();
-  }
-
-  private loadCreditCards(): void {
-    this.creditCardService.list().subscribe({
-      next: (cards) => this.creditCards.set(cards),
-      error: () => this.notificationService.error('Não foi possível carregar os cartões.'),
-    });
+  private loadTransactionMethods(): void {
+    this.transactionMethodService
+      .list()
+      .pipe(map((methods) => methods.filter((method) => method.type === 'CARD')))
+      .subscribe({
+        next: (methods) => this.transactionMethods.set(methods),
+        error: () => this.notificationService.error('Não foi possível carregar os cartões.'),
+      });
   }
 
   private loadCardTable(): void {

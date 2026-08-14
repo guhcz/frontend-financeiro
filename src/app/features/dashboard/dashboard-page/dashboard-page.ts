@@ -4,14 +4,14 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { RouterLink } from '@angular/router';
 import { Category } from '../../../core/models/category.model';
-import { CreditCard } from '../../../core/models/credit-card.model';
 import { DashboardResponse } from '../../../core/models/dashboard.model';
 import { Expense, ExpenseRequest } from '../../../core/models/expense.model';
 import { MonthlyLimit, MonthlyLimitRequest } from '../../../core/models/monthly-limit.model';
 import { RecurringExpenseRequest } from '../../../core/models/recurring-expense.model';
+import { TransactionMethod } from '../../../core/models/transaction-method.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { CategoryService } from '../../../core/services/category.service';
-import { CreditCardService } from '../../../core/services/credit-card.service';
+import { TransactionMethodService } from '../../../core/services/transaction-method.service';
 import { DashboardService } from '../../../core/services/dashboard.service';
 import { ExpenseService } from '../../../core/services/expense.service';
 import { MonthlyLimitService } from '../../../core/services/monthly-limit.service';
@@ -58,7 +58,7 @@ const GENERIC_LOAD_ERROR = 'Não foi possível carregar o Dashboard. Tente novam
 export class DashboardPage implements OnInit {
   private readonly dashboardService = inject(DashboardService);
   private readonly categoryService = inject(CategoryService);
-  private readonly creditCardService = inject(CreditCardService);
+  private readonly transactionMethodService = inject(TransactionMethodService);
   private readonly expenseService = inject(ExpenseService);
   private readonly recurringExpenseService = inject(RecurringExpenseService);
   private readonly monthlyLimitService = inject(MonthlyLimitService);
@@ -76,7 +76,7 @@ export class DashboardPage implements OnInit {
   readonly loadError = signal<string | null>(null);
 
   readonly categories = signal<Category[]>([]);
-  readonly creditCards = signal<CreditCard[]>([]);
+  readonly transactionMethods = signal<TransactionMethod[]>([]);
 
   readonly modalOpen = signal(false);
   readonly saving = signal(false);
@@ -100,9 +100,9 @@ export class DashboardPage implements OnInit {
       next: (categories) => this.categories.set(categories),
       error: () => this.notificationService.error('Não foi possível carregar as categorias.'),
     });
-    this.creditCardService.list().subscribe({
-      next: (cards) => this.creditCards.set(cards),
-      error: () => this.notificationService.error('Não foi possível carregar os cartões.'),
+    this.transactionMethodService.list().subscribe({
+      next: (methods) => this.transactionMethods.set(methods),
+      error: () => this.notificationService.error('Não foi possível carregar as formas de pagamento.'),
     });
 
     this.authService.getCurrentUser().subscribe({

@@ -1,8 +1,8 @@
-import { CreditCard } from './credit-card.model';
+import { TransactionMethod } from './transaction-method.model';
 
 export interface MonthlyCardPlanningItem {
   id: number;
-  creditCard: CreditCard;
+  transactionMethod: TransactionMethod;
   plannedAmount: number;
   spentAmount: number;
   remainingAmount: number;
@@ -11,7 +11,7 @@ export interface MonthlyCardPlanningItem {
 
 export interface MonthlyCardPlanning {
   id: number;
-  creditCard: CreditCard;
+  transactionMethod: TransactionMethod;
   month: number;
   year: number;
   amount: number;
@@ -19,7 +19,7 @@ export interface MonthlyCardPlanning {
 }
 
 export interface MonthlyCardPlanningRequest {
-  creditCardId: number;
+  transactionMethodId: number;
   month: number;
   year: number;
   amount: number;

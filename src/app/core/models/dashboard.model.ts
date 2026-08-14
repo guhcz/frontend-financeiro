@@ -1,6 +1,6 @@
 import { Category } from './category.model';
 import { CategoryExpense } from './planning.model';
-import { PaymentMethod } from './payment-method.model';
+import { TransactionMethod } from './transaction-method.model';
 
 export interface DashboardSummary {
   totalIncome: number | null;
@@ -16,7 +16,7 @@ export interface DashboardRecentExpense {
   description: string;
   amount: number;
   expenseDate: string;
-  paymentMethod: PaymentMethod;
+  transactionMethod: TransactionMethod;
   recurring: boolean;
   category: Category;
 }

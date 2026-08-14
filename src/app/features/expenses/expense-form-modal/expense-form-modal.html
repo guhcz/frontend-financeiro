@@ -57,21 +57,71 @@
       }
     </div>
 
-    <div class="form-group">
-      <label for="exp-amount">Valor</label>
-      <input
-        id="exp-amount"
-        type="text"
-        inputmode="decimal"
-        appCurrencyMask
-        formControlName="amount"
-        placeholder="R$ 0,00"
-        [class.is-invalid]="form.controls.amount.invalid && form.controls.amount.touched"
-      />
-      @if (form.controls.amount.invalid && form.controls.amount.touched) {
-        <span class="field-error">Informe um valor maior que zero.</span>
+    @if (expenseType() === 'fixed' && !isEditMode()) {
+      <div class="form-group">
+        <label>Como definir o valor?</label>
+        <div class="segmented-toggle">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            [class.active]="valueMode() === 'monthly'"
+            (click)="valueMode.set('monthly')"
+          >
+            Valor mensal
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            [class.active]="valueMode() === 'installments'"
+            (click)="valueMode.set('installments')"
+          >
+            Compra parcelada
+          </button>
+        </div>
+      </div>
+    }
+
+    @if (expenseType() !== 'fixed' || isEditMode() || valueMode() === 'monthly') {
+      <div class="form-group">
+        <label for="exp-amount">Valor</label>
+        <input
+          id="exp-amount"
+          type="text"
+          inputmode="decimal"
+          appCurrencyMask
+          formControlName="amount"
+          placeholder="R$ 0,00"
+          [class.is-invalid]="form.controls.amount.invalid && form.controls.amount.touched"
+        />
+        @if (form.controls.amount.invalid && form.controls.amount.touched) {
+          <span class="field-error">Informe um valor maior que zero.</span>
+        }
+      </div>
+    } @else {
+      <div class="form-group">
+        <label for="exp-total-amount">Valor total da compra</label>
+        <input
+          id="exp-total-amount"
+          type="text"
+          inputmode="decimal"
+          appCurrencyMask
+          formControlName="totalAmount"
+          placeholder="R$ 0,00"
+        />
+      </div>
+      <div class="form-group">
+        <label for="exp-installments">Número de parcelas</label>
+        <input id="exp-installments" type="number" min="1" max="60" formControlName="installments" placeholder="Ex.: 10" />
+      </div>
+      @if (installmentPreview(); as preview) {
+        <p class="field-hint">
+          Cada parcela: <strong>{{ preview.amountLabel }}</strong> · última parcela em {{ preview.lastMonthLabel }}
+        </p>
       }
-    </div>
+      @if (installmentError()) {
+        <span class="field-error">{{ installmentError() }}</span>
+      }
+    }
 
     @if (expenseType() === 'single' || isEditMode()) {
       <div class="form-group">
@@ -90,40 +140,51 @@
 
     <div class="form-group">
       <label for="exp-payment">Forma de pagamento</label>
-      <select
-        id="exp-payment"
-        formControlName="paymentMethod"
-        [class.is-invalid]="form.controls.paymentMethod.invalid && form.controls.paymentMethod.touched"
-      >
-        <option value="" disabled>Selecione</option>
-        @for (method of paymentMethods; track method) {
-          <option [value]="method">{{ paymentMethodLabels[method] }}</option>
+      @if (hasTransactionMethods()) {
+        <select
+          id="exp-payment"
+          formControlName="transactionMethodId"
+          [class.is-invalid]="form.controls.transactionMethodId.invalid && form.controls.transactionMethodId.touched"
+        >
+          <option [ngValue]="null" disabled>Selecione</option>
+          @if (cardMethods().length > 0) {
+            <optgroup label="Cartões">
+              @for (method of cardMethods(); track method.id) {
+                <option [ngValue]="method.id">{{ method.name }}</option>
+              }
+            </optgroup>
+          }
+          @if (otherMethods().length > 0) {
+            <optgroup label="Outros">
+              @for (method of otherMethods(); track method.id) {
+                <option [ngValue]="method.id">{{ method.name }}</option>
+              }
+            </optgroup>
+          }
+        </select>
+        @if (form.controls.transactionMethodId.invalid && form.controls.transactionMethodId.touched) {
+          <span class="field-error">Selecione uma forma de pagamento.</span>
         }
-      </select>
-      @if (form.controls.paymentMethod.invalid && form.controls.paymentMethod.touched) {
-        <span class="field-error">Selecione uma forma de pagamento.</span>
+      } @else {
+        <span class="field-hint">Você ainda não tem formas de pagamento cadastradas. Cadastre uma em Cadastros.</span>
       }
     </div>
 
-    @if (isCreditCard()) {
+    @if (isCardMethod()) {
       <div class="form-group">
-        <label for="exp-credit-card">Cartão de crédito</label>
-        @if (hasCreditCards()) {
-          <select
-            id="exp-credit-card"
-            formControlName="creditCardId"
-            [class.is-invalid]="form.controls.creditCardId.invalid && form.controls.creditCardId.touched"
-          >
-            <option [value]="null" disabled>Selecione um cartão</option>
-            @for (card of creditCards(); track card.id) {
-              <option [value]="card.id">{{ card.name }}</option>
-            }
-          </select>
-          @if (form.controls.creditCardId.invalid && form.controls.creditCardId.touched) {
-            <span class="field-error">Selecione um cartão.</span>
+        <label for="exp-card-mode">Modalidade</label>
+        <select
+          id="exp-card-mode"
+          formControlName="cardTransactionMode"
+          [class.is-invalid]="form.controls.cardTransactionMode.invalid && form.controls.cardTransactionMode.touched"
+        >
+          <option [ngValue]="null" disabled>Selecione</option>
+          @for (mode of cardTransactionModes; track mode) {
+            <option [ngValue]="mode">{{ cardTransactionModeLabels[mode] }}</option>
           }
-        } @else {
-          <span class="field-hint">Você ainda não tem cartões cadastrados. Cadastre um em Planejamento.</span>
+        </select>
+        @if (form.controls.cardTransactionMode.invalid && form.controls.cardTransactionMode.touched) {
+          <span class="field-error">Selecione a modalidade do cartão.</span>
         }
       </div>
     }
@@ -138,6 +199,7 @@
         [endYearControl]="form.controls.endYear"
         mode="create"
         [endDateError]="endDateError()"
+        [endDateManaged]="valueMode() === 'installments'"
       ></app-recurring-expense-fields>
     }
 

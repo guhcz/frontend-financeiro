@@ -1,0 +1,151 @@
+<div class="page-header">
+  <div>
+    <h1>Central de cadastros</h1>
+    <p>Gerencie categorias, formas de pagamento e recorrências em um único lugar.</p>
+  </div>
+  <div class="page-header-actions">
+    <input
+      type="search"
+      class="cadastros-search"
+      placeholder="Buscar cadastro"
+      [value]="searchTerm()"
+      (input)="onSearch($any($event.target).value)"
+    />
+  </div>
+</div>
+
+<div class="cadastros-grid">
+  <div class="card cadastros-card">
+    <div class="cadastros-card-header">
+      <div>
+        <h2>🏷️ Categorias</h2>
+        <p>Gerencie as categorias de receitas e despesas.</p>
+      </div>
+      <button type="button" class="btn btn-primary" (click)="openCreateCategory()">+ Nova categoria</button>
+    </div>
+
+    @if (categoriesLoading()) {
+      <div class="list-loading">Carregando...</div>
+    } @else if (filteredCategories().length === 0) {
+      <p class="field-hint">Nenhuma categoria encontrada.</p>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Cor</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (category of filteredCategories(); track category.id) {
+              <tr>
+                <td>{{ category.icon || '' }} {{ category.name }}</td>
+                <td><span class="color-swatch" [style.background]="category.color"></span></td>
+                <td>{{ category.active ? 'Ativa' : 'Inativa' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <a class="link-btn" routerLink="/categorias">Ver todas</a>
+  </div>
+
+  <div class="card cadastros-card">
+    <div class="cadastros-card-header">
+      <div>
+        <h2>💳 Formas de pagamento</h2>
+        <p>Cartões, Pix, dinheiro e outras formas que você utiliza.</p>
+      </div>
+      <button type="button" class="btn btn-primary" (click)="openCreateMethod()">+ Nova forma de pagamento</button>
+    </div>
+
+    @if (methodsLoading()) {
+      <div class="list-loading">Carregando...</div>
+    } @else if (filteredMethods().length === 0) {
+      <p class="field-hint">Nenhuma forma de pagamento encontrada.</p>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Tipo</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (method of filteredMethods(); track method.id) {
+              <tr>
+                <td>{{ method.name }}</td>
+                <td>{{ typeLabels[method.type] }}</td>
+                <td>{{ method.active ? 'Ativa' : 'Inativa' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <a class="link-btn" routerLink="/cadastros/formas-de-pagamento">Ver todas</a>
+  </div>
+
+  <div class="card cadastros-card">
+    <div class="cadastros-card-header">
+      <div>
+        <h2>🔁 Recorrências</h2>
+        <p>Despesas fixas deste mês (receitas recorrentes em breve).</p>
+      </div>
+    </div>
+
+    @if (recurringLoading()) {
+      <div class="list-loading">Carregando...</div>
+    } @else if (filteredRecurring().length === 0) {
+      <p class="field-hint">Nenhuma recorrência encontrada.</p>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Frequência</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (rule of filteredRecurring(); track rule.id) {
+              <tr>
+                <td>{{ rule.description }}</td>
+                <td>{{ frequencyLabels[rule.frequency] }}</td>
+                <td>{{ statusLabels[rule.status] }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <a class="link-btn" routerLink="/despesas-fixas">Ver todos os cadastros</a>
+  </div>
+</div>
+
+@if (categoryModalOpen()) {
+  <app-category-form-modal
+    [saving]="categorySaving()"
+    [errorMessage]="categorySaveError()"
+    (save)="saveCategory($event)"
+    (closed)="closeCategoryModal()"
+  ></app-category-form-modal>
+}
+
+@if (methodModalOpen()) {
+  <app-transaction-method-form-modal
+    [saving]="methodSaving()"
+    [errorMessage]="methodSaveError()"
+    (save)="saveMethod($event)"
+    (closed)="closeMethodModal()"
+  ></app-transaction-method-form-modal>
+}

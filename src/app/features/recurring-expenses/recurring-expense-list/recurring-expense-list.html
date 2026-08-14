@@ -47,7 +47,7 @@
               </td>
               <td>{{ rule.amount | currency: 'BRL' }}</td>
               <td>
-                <app-badge [label]="paymentMethodLabels[rule.paymentMethod]"></app-badge>
+                <app-badge [label]="rule.transactionMethod.name"></app-badge>
               </td>
               <td>{{ rule.dueDay ? 'Dia ' + rule.dueDay : '—' }}</td>
               <td>{{ rule.nextGenerationDate ? (rule.nextGenerationDate | date: 'dd/MM/yyyy') : '—' }}</td>
@@ -100,7 +100,7 @@
   <app-recurring-expense-form-modal
     [rule]="editingRule()"
     [categories]="categories()"
-    [creditCards]="creditCards()"
+    [transactionMethods]="transactionMethods()"
     [saving]="saving()"
     [errorMessage]="saveError()"
     (save)="save($event)"

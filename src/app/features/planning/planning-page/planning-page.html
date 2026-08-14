@@ -60,7 +60,6 @@
   [loading]="cardTableLoading()"
   [error]="cardTableError()"
   (add)="openCreateCardPlanning()"
-  (manageCards)="openManageCards()"
   (edit)="openEditCardPlanning($event)"
   (delete)="requestDeleteCardPlanning($event)"
   (pageChange)="onCardTablePageChange($event)"
@@ -130,14 +129,13 @@
 @if (cardPlanningModalOpen()) {
   <app-credit-card-planning-form-modal
     [planning]="editingCardPlanning()"
-    [creditCards]="creditCards()"
+    [transactionMethods]="transactionMethods()"
     [month]="month()"
     [year]="year()"
     [saving]="cardPlanningSaving()"
     [errorMessage]="cardPlanningSaveError()"
     (save)="saveCardPlanning($event)"
     (closed)="closeCardPlanningModal()"
-    (manageCards)="openManageCards()"
   ></app-credit-card-planning-form-modal>
 }
 
@@ -149,10 +147,6 @@
     (confirmed)="confirmDeleteCardPlanning()"
     (cancelled)="cancelDeleteCardPlanning()"
   ></app-confirm-dialog>
-}
-
-@if (manageCardsOpen()) {
-  <app-credit-card-manage-modal (closed)="closeManageCards()" (changed)="onCreditCardsChanged()"></app-credit-card-manage-modal>
 }
 
 @if (copyPending()) {

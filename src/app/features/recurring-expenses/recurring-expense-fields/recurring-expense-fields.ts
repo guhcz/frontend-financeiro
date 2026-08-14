@@ -19,6 +19,8 @@ export class RecurringExpenseFields {
   mode = input<'create' | 'edit'>('create');
   existingStartDateLabel = input<string | null>(null);
   endDateError = input<string | null>(null);
+  /** Hides the "Término" radio group when the parent is computing endDate itself (e.g. installment mode). */
+  endDateManaged = input<boolean>(false);
   dayFieldLabel = input<string>('Dia do vencimento');
   dayFieldHint = input<string>('Se o mês não tiver esse dia, a despesa será criada no último dia do mês.');
 

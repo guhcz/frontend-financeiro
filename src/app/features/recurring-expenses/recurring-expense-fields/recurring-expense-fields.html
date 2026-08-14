@@ -47,33 +47,35 @@
   </div>
 }
 
-<div class="form-group">
-  <label>Término</label>
-  <label class="radio-option">
-    <input type="radio" [formControl]="endTypeControl()" value="none" />
-    Sem data para terminar
-  </label>
-  <label class="radio-option">
-    <input type="radio" [formControl]="endTypeControl()" value="specific" />
-    Terminar em uma data específica
-  </label>
-  @if (endTypeControl().value === 'specific') {
-    <div class="month-year-inputs">
-      <select [formControl]="endMonthControl()" aria-label="Mês de término">
-        <option [ngValue]="null" disabled>Mês</option>
-        @for (month of months; track month.value) {
-          <option [ngValue]="month.value">{{ month.name }}</option>
-        }
-      </select>
-      <select [formControl]="endYearControl()" aria-label="Ano de término">
-        <option [ngValue]="null" disabled>Ano</option>
-        @for (year of years; track year) {
-          <option [ngValue]="year">{{ year }}</option>
-        }
-      </select>
-    </div>
-  }
-  @if (endDateError()) {
-    <span class="field-error">{{ endDateError() }}</span>
-  }
-</div>
+@if (!endDateManaged()) {
+  <div class="form-group">
+    <label>Término</label>
+    <label class="radio-option">
+      <input type="radio" [formControl]="endTypeControl()" value="none" />
+      Sem data para terminar
+    </label>
+    <label class="radio-option">
+      <input type="radio" [formControl]="endTypeControl()" value="specific" />
+      Terminar em uma data específica
+    </label>
+    @if (endTypeControl().value === 'specific') {
+      <div class="month-year-inputs">
+        <select [formControl]="endMonthControl()" aria-label="Mês de término">
+          <option [ngValue]="null" disabled>Mês</option>
+          @for (month of months; track month.value) {
+            <option [ngValue]="month.value">{{ month.name }}</option>
+          }
+        </select>
+        <select [formControl]="endYearControl()" aria-label="Ano de término">
+          <option [ngValue]="null" disabled>Ano</option>
+          @for (year of years; track year) {
+            <option [ngValue]="year">{{ year }}</option>
+          }
+        </select>
+      </div>
+    }
+    @if (endDateError()) {
+      <span class="field-error">{{ endDateError() }}</span>
+    }
+  </div>
+}

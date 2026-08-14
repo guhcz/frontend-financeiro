@@ -1,5 +1,6 @@
 import {
   ArrowRight,
+  Banknote,
   Calculator,
   Calendar,
   CalendarDays,
@@ -14,9 +15,11 @@ import {
   Folder,
   Gauge,
   House,
+  Landmark,
   Lightbulb,
   Pencil,
   Plus,
+  QrCode,
   ReceiptText,
   Repeat2,
   Shapes,
@@ -62,4 +65,7 @@ export const APP_LUCIDE_ICONS = {
   ArrowRight,
   Sparkles,
   CreditCard,
+  QrCode,
+  Banknote,
+  Landmark,
 };

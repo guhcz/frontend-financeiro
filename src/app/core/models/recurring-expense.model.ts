@@ -1,7 +1,6 @@
 import { Category } from './category.model';
-import { CreditCard } from './credit-card.model';
-import { PaymentMethod } from './payment-method.model';
 import { RecurrenceFrequency } from './recurrence-frequency.model';
+import { CardTransactionMode, TransactionMethod } from './transaction-method.model';
 
 export type RecurrenceStatus = 'ACTIVE' | 'PAUSED' | 'ENDED';
 
@@ -10,9 +9,9 @@ export interface RecurringExpense {
   category: Category;
   description: string;
   amount: number;
-  paymentMethod: PaymentMethod;
+  transactionMethod: TransactionMethod;
+  cardTransactionMode: CardTransactionMode | null;
   notes: string | null;
-  creditCard: CreditCard | null;
   frequency: RecurrenceFrequency;
   dueDay: number | null;
   startDate: string;
@@ -26,9 +25,9 @@ export interface RecurringExpenseRequest {
   categoryId: number;
   description: string;
   amount: number;
-  paymentMethod: PaymentMethod;
+  transactionMethodId: number;
+  cardTransactionMode: CardTransactionMode | null;
   notes: string | null;
-  creditCardId: number | null;
   frequency: RecurrenceFrequency;
   dueDay: number | null;
   startDate: string;
@@ -39,9 +38,9 @@ export interface RecurringExpenseUpdateRequest {
   categoryId: number;
   description: string;
   amount: number;
-  paymentMethod: PaymentMethod;
+  transactionMethodId: number;
+  cardTransactionMode: CardTransactionMode | null;
   notes: string | null;
-  creditCardId: number | null;
   dueDay: number | null;
   endDate: string | null;
 }

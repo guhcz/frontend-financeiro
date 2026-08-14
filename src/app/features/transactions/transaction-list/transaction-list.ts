@@ -2,18 +2,17 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Category } from '../../../core/models/category.model';
-import { CreditCard } from '../../../core/models/credit-card.model';
 import { Expense, ExpenseRequest } from '../../../core/models/expense.model';
 import { Income, IncomeRequest } from '../../../core/models/income.model';
 import { Page } from '../../../core/models/page.model';
-import { PAYMENT_METHOD_LABELS, PaymentMethod } from '../../../core/models/payment-method.model';
-import { RECEIPT_METHOD_LABELS, ReceiptMethod } from '../../../core/models/receipt-method.model';
+import { ReceiptMethod } from '../../../core/models/receipt-method.model';
 import { RecurringExpenseRequest } from '../../../core/models/recurring-expense.model';
 import { RecurringIncomeRequest } from '../../../core/models/recurring-income.model';
 import { RecurringUpdateScope } from '../../../core/models/recurring-update-scope.model';
+import { CARD_TRANSACTION_MODE_LABELS, TransactionMethod } from '../../../core/models/transaction-method.model';
 import { TransactionFilters, TransactionListItem, TransactionType } from '../../../core/models/transaction.model';
 import { CategoryService } from '../../../core/services/category.service';
-import { CreditCardService } from '../../../core/services/credit-card.service';
+import { TransactionMethodService } from '../../../core/services/transaction-method.service';
 import { ExpenseService } from '../../../core/services/expense.service';
 import { IncomeService } from '../../../core/services/income.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -34,8 +33,6 @@ import { RecurringEditScopeModal } from '../../expenses/recurring-edit-scope-mod
 import { IncomeFormModal } from '../../incomes/income-form-modal/income-form-modal';
 
 const DEFAULT_SIZE = 10;
-
-const METHOD_LABELS: Record<string, string> = { ...PAYMENT_METHOD_LABELS, ...RECEIPT_METHOD_LABELS };
 
 const TYPE_INFO: Record<TransactionType, { label: string; color: string }> = {
   INCOME: { label: 'Receita', color: '#16a34a' },
@@ -111,7 +108,7 @@ export class TransactionList implements OnInit {
   private readonly recurringExpenseService = inject(RecurringExpenseService);
   private readonly recurringIncomeService = inject(RecurringIncomeService);
   private readonly categoryService = inject(CategoryService);
-  private readonly creditCardService = inject(CreditCardService);
+  private readonly transactionMethodService = inject(TransactionMethodService);
   private readonly notificationService = inject(NotificationService);
 
   private readonly initialPeriod = defaultPeriod();
@@ -119,14 +116,14 @@ export class TransactionList implements OnInit {
   readonly year = signal(this.initialPeriod.year);
 
   readonly categories = signal<Category[]>([]);
-  readonly creditCards = signal<CreditCard[]>([]);
+  readonly transactionMethods = signal<TransactionMethod[]>([]);
   readonly pageData = signal<Page<TransactionListItem> | null>(null);
   readonly loading = signal(true);
   readonly listError = signal<string | null>(null);
   readonly filtersActive = signal(false);
   readonly filtersOpen = signal(false);
 
-  readonly methodLabels = METHOD_LABELS;
+  readonly cardTransactionModeLabels = CARD_TRANSACTION_MODE_LABELS;
   readonly typeInfo = TYPE_INFO;
   readonly monthYearLabel = monthYearLabel;
 
@@ -162,9 +159,9 @@ export class TransactionList implements OnInit {
       next: (categories) => this.categories.set(categories),
       error: () => this.notificationService.error('Não foi possível carregar as categorias.'),
     });
-    this.creditCardService.list().subscribe({
-      next: (cards) => this.creditCards.set(cards),
-      error: () => this.notificationService.error('Não foi possível carregar os cartões.'),
+    this.transactionMethodService.list().subscribe({
+      next: (methods) => this.transactionMethods.set(methods),
+      error: () => this.notificationService.error('Não foi possível carregar as formas de pagamento.'),
     });
     this.fetch();
   }
@@ -260,35 +257,15 @@ export class TransactionList implements OnInit {
     this.saveError.set(null);
     if (item.type === 'EXPENSE') {
       this.editingIncome.set(null);
-      if (item.method === 'CREDIT_CARD') {
-        // The unified transactions view doesn't join credit_cards, so a card expense needs the
-        // full record (with its real creditCard reference) to prefill the form correctly.
-        this.expenseService.getById(item.id).subscribe({
-          next: (expense) => {
-            this.editingExpense.set(expense);
-            this.activeModal.set('expense');
-          },
-          error: (err: unknown) => this.notificationService.error(getErrorDetail(err)),
-        });
-        return;
-      }
-      this.editingExpense.set({
-        id: item.id,
-        category: item.category,
-        description: item.description,
-        amount: item.amount,
-        expenseDate: item.date,
-        paymentMethod: item.method as PaymentMethod,
-        notes: item.notes ?? null,
-        active: true,
-        generatedAutomatically: item.generatedAutomatically,
-        recurring: item.recurring,
-        recurringExpenseId: null,
-        creditCard: null,
-        billingMonth: item.billingMonth ?? this.month(),
-        billingYear: item.billingYear ?? this.year(),
+      // The unified transactions view only carries the method's display name (not its id), so
+      // prefilling the form always needs the full record (with its real transactionMethod reference).
+      this.expenseService.getById(item.id).subscribe({
+        next: (expense) => {
+          this.editingExpense.set(expense);
+          this.activeModal.set('expense');
+        },
+        error: (err: unknown) => this.notificationService.error(getErrorDetail(err)),
       });
-      this.activeModal.set('expense');
     } else {
       this.editingExpense.set(null);
       this.editingIncome.set({

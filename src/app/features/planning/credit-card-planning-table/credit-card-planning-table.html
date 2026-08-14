@@ -11,10 +11,10 @@
     </button>
     <h2>Planejamento por cartão</h2>
     <div class="table-card-header-actions">
-      <button type="button" class="btn btn-secondary" (click)="manageCards.emit()">
+      <a class="btn btn-secondary" routerLink="/cadastros/formas-de-pagamento">
         <lucide-icon name="credit-card" [size]="16"></lucide-icon>
         Gerenciar cartões
-      </button>
+      </a>
       <button type="button" class="btn btn-primary" (click)="add.emit()">
         <lucide-icon name="plus" [size]="16"></lucide-icon>
         Planejar cartão
@@ -51,7 +51,7 @@
           <tbody>
             @for (item of page()!.content; track item.id) {
               <tr>
-                <td>{{ item.creditCard.name }}</td>
+                <td>{{ item.transactionMethod.name }}</td>
                 <td>{{ item.plannedAmount | currency: 'BRL' }}</td>
                 <td>{{ item.spentAmount | currency: 'BRL' }}</td>
                 <td

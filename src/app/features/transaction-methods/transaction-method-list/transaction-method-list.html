@@ -1,0 +1,102 @@
+<div class="page-header">
+  <div>
+    <h1>Formas de pagamento</h1>
+    <p>Gerencie suas formas de pagamento, incluindo cartões.</p>
+  </div>
+  <button type="button" class="btn btn-primary" (click)="openCreate()">+ Nova forma de pagamento</button>
+</div>
+
+@if (deleteError()) {
+  <div class="banner banner-error top-banner">
+    <span>⚠️</span>
+    <div>
+      <strong>Não é possível excluir</strong>
+      {{ deleteError() }}
+    </div>
+  </div>
+}
+
+<div class="card list-card">
+  @if (loading()) {
+    <div class="list-loading">Carregando formas de pagamento...</div>
+  } @else if (listError()) {
+    <div class="banner banner-error top-banner" style="margin: var(--space-4)">{{ listError() }}</div>
+  } @else if (pageData()?.content?.length === 0) {
+    <app-empty-state
+      icon="💳"
+      title="Você ainda não cadastrou formas de pagamento."
+      description="Cadastre Pix, dinheiro, cartões e outras formas que você utiliza."
+      actionLabel="Criar forma de pagamento"
+      (action)="openCreate()"
+    ></app-empty-state>
+  } @else if (pageData(); as page) {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Tipo</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (method of page.content; track method.id) {
+            <tr>
+              <td>{{ method.name }}</td>
+              <td class="type-cell">
+                <lucide-icon [name]="typeIcons[method.type]" [size]="16"></lucide-icon>
+                {{ typeLabels[method.type] }}
+              </td>
+              <td>{{ method.active ? 'Ativa' : 'Inativa' }}</td>
+              <td>
+                <button type="button" class="icon-btn" (click)="openEdit(method)" aria-label="Editar forma de pagamento">
+                  ✏️
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn danger"
+                  (click)="requestDelete(method)"
+                  aria-label="Excluir forma de pagamento"
+                >
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-pagination
+      [page]="page.number"
+      [totalPages]="page.totalPages"
+      [totalElements]="page.totalElements"
+      [size]="page.size"
+      [first]="page.first"
+      [last]="page.last"
+      itemLabel="formas de pagamento"
+      (pageChange)="onPageChange($event)"
+      (sizeChange)="onSizeChange($event)"
+    ></app-pagination>
+  }
+</div>
+
+@if (modalOpen()) {
+  <app-transaction-method-form-modal
+    [method]="editingMethod()"
+    [saving]="saving()"
+    [errorMessage]="saveError()"
+    (save)="save($event)"
+    (closed)="closeModal()"
+  ></app-transaction-method-form-modal>
+}
+
+@if (methodPendingDelete(); as method) {
+  <app-confirm-dialog
+    title="Excluir forma de pagamento"
+    [message]="'Tem certeza que deseja excluir \'' + method.name + '\'?'"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()"
+  ></app-confirm-dialog>
+}

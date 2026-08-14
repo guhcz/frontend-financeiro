@@ -55,6 +55,17 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/planning/planning-page/planning-page').then((m) => m.PlanningPage),
       },
+      {
+        path: 'cadastros',
+        loadComponent: () => import('./features/cadastros/cadastros-page/cadastros-page').then((m) => m.CadastrosPage),
+      },
+      {
+        path: 'cadastros/formas-de-pagamento',
+        loadComponent: () =>
+          import('./features/transaction-methods/transaction-method-list/transaction-method-list').then(
+            (m) => m.TransactionMethodList,
+          ),
+      },
     ],
   },
   { path: '**', redirectTo: 'dashboard' },

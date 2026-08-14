@@ -1,6 +1,5 @@
 import { Category } from './category.model';
-import { CreditCard } from './credit-card.model';
-import { PaymentMethod } from './payment-method.model';
+import { CardTransactionMode, TransactionMethod } from './transaction-method.model';
 
 export interface Expense {
   id: number;
@@ -8,13 +7,13 @@ export interface Expense {
   description: string;
   amount: number;
   expenseDate: string;
-  paymentMethod: PaymentMethod;
+  transactionMethod: TransactionMethod;
+  cardTransactionMode: CardTransactionMode | null;
   notes: string | null;
   active: boolean;
   generatedAutomatically: boolean;
   recurring: boolean;
   recurringExpenseId: number | null;
-  creditCard: CreditCard | null;
   billingMonth: number;
   billingYear: number;
 }
@@ -24,14 +23,14 @@ export interface ExpenseRequest {
   description: string;
   amount: number;
   expenseDate: string;
-  paymentMethod: PaymentMethod;
+  transactionMethodId: number;
+  cardTransactionMode: CardTransactionMode | null;
   notes: string | null;
-  creditCardId: number | null;
 }
 
 export interface ExpenseFilters {
   categoryId?: number;
-  paymentMethod?: PaymentMethod;
+  transactionMethodId?: number;
   startDate?: string;
   endDate?: string;
   description?: string;
