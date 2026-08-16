@@ -1,0 +1,96 @@
+<app-modal
+  title="Detalhes por forma de pagamento"
+  subtitle="Confira seus gastos detalhados por forma de pagamento no período selecionado."
+  [wide]="true"
+  icon="credit-card"
+  (closed)="closed.emit()"
+>
+  <form [formGroup]="filterForm" class="payment-modal-filters">
+    <div class="form-group payment-modal-search">
+      <label>Buscar por forma de pagamento</label>
+      <input type="text" formControlName="search" placeholder="Ex.: Nubank, Pix..." />
+    </div>
+
+    <div class="form-group">
+      <label>Tipo</label>
+      <select formControlName="type">
+        @for (opt of typeOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Ordenar</label>
+      <select formControlName="sort">
+        @for (opt of sortOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+  </form>
+
+  @if (error()) {
+    <div class="banner banner-error">{{ error() }}</div>
+  } @else if (loading() && rows().length === 0) {
+    <div class="payment-modal-loading">Carregando...</div>
+  } @else if (rows().length === 0) {
+    <div class="payment-modal-empty">
+      <p>Nenhuma forma de pagamento encontrada para os filtros selecionados.</p>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table class="payment-methods-table">
+        <thead>
+          <tr>
+            <th>Forma de pagamento</th>
+            <th>Tipo</th>
+            <th>Valor gasto</th>
+            <th>% do total</th>
+            <th>Nº de transações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.transactionMethodId + '-' + (row.cardMode ?? '')) {
+            <tr>
+              <td>
+                <strong>{{ row.name }}</strong>
+                @if (row.cardModeLabel) {
+                  <span class="payment-row-sub">{{ row.cardModeLabel }}</span>
+                }
+              </td>
+              <td>{{ row.typeLabel }}</td>
+              <td class="amount-cell">{{ row.amount | currency: 'BRL' }}</td>
+              <td>{{ row.percentage | number: '1.1-1' }}%</td>
+              <td>{{ row.transactionCount }}</td>
+            </tr>
+          }
+        </tbody>
+        @if (page(); as p) {
+          <tfoot>
+            <tr class="payment-methods-total-row">
+              <td colspan="2">Total no período</td>
+              <td class="amount-cell">{{ p.totalAmount | currency: 'BRL' }}</td>
+              <td>{{ footerPercentage() | number: '1.1-1' }}%</td>
+              <td>{{ p.totalTransactionCount }} transações</td>
+            </tr>
+          </tfoot>
+        }
+      </table>
+    </div>
+
+    @if (page(); as p) {
+      <app-pagination
+        [page]="p.number"
+        [totalPages]="p.totalPages"
+        [totalElements]="p.totalElements"
+        [size]="p.size"
+        [first]="p.number === 0"
+        [last]="p.number >= p.totalPages - 1"
+        itemLabel="registros"
+        (pageChange)="onPageChange($event)"
+        (sizeChange)="onSizeChange($event)"
+      ></app-pagination>
+    }
+  }
+</app-modal>

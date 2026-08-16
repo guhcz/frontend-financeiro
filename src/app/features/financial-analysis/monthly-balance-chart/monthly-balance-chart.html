@@ -1,0 +1,83 @@
+@if (loading() && points().length === 0) {
+  <div class="chart-loading">Carregando gráfico...</div>
+} @else if (!hasData()) {
+  <div class="chart-empty">
+    <p>Não há dados suficientes para calcular a evolução.</p>
+  </div>
+} @else {
+  <div class="balance-chart-wrap">
+    <svg
+      [attr.viewBox]="'0 0 ' + viewWidth + ' ' + viewHeight"
+      class="balance-svg"
+      role="img"
+      aria-label="Evolução do saldo mensal"
+    >
+      <defs>
+        <linearGradient id="balanceArea" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#22a965" stop-opacity="0.28"></stop>
+          <stop offset="100%" stop-color="#22a965" stop-opacity="0.03"></stop>
+        </linearGradient>
+      </defs>
+      @for (tick of yTicks(); track tick) {
+        <line
+          [attr.x1]="margin.left"
+          [attr.x2]="viewWidth - margin.right"
+          [attr.y1]="yForTick(tick)"
+          [attr.y2]="yForTick(tick)"
+          class="grid-line"
+        ></line>
+        <text [attr.x]="margin.left - 8" [attr.y]="yForTick(tick) + 4" class="axis-label y-label">
+          {{ tick | currency: 'BRL' : 'symbol' : '1.0-0' }}
+        </text>
+      }
+
+      @for (point of points(); track point.year + '-' + point.month) {
+        @if (point.showLabel) {
+          <text [attr.x]="point.x" [attr.y]="viewHeight - margin.bottom + 20" class="axis-label x-label" text-anchor="middle">
+            {{ point.label }}
+          </text>
+        }
+      }
+
+      <line
+        [attr.x1]="margin.left"
+        [attr.x2]="viewWidth - margin.right"
+        [attr.y1]="zeroY()"
+        [attr.y2]="zeroY()"
+        class="zero-line"
+      ></line>
+
+      <path [attr.d]="areaPath()" class="area-path"></path>
+      <path [attr.d]="linePath()" class="line-path" fill="none"></path>
+
+      @for (point of points(); track point.year + '-' + point.month; let i = $index) {
+        <circle
+          [attr.cx]="point.x"
+          [attr.cy]="point.y"
+          r="10"
+          class="hit-dot"
+          (pointerenter)="hoveredIndex.set(i)"
+          (pointerleave)="hoveredIndex.set(null)"
+        ></circle>
+        <circle
+          [attr.cx]="point.x"
+          [attr.cy]="point.y"
+          r="4"
+          class="balance-marker"
+          [class.negative]="point.balance < 0"
+        ></circle>
+      }
+    </svg>
+
+    @if (hoveredPoint(); as hp) {
+      <div class="balance-tooltip" [style.left.%]="hp.xPct" [style.top.%]="hp.yPct">
+        <strong>{{ hp.fullLabel }}</strong>
+        <span>{{ hp.balance | currency: 'BRL' }}</span>
+      </div>
+    }
+  </div>
+
+  @if (trendText(); as text) {
+    <div class="balance-trend-text"><span class="trend-icon">↗</span><span>{{ text }}</span></div>
+  }
+}

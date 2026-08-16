@@ -1,0 +1,28 @@
+@if (loading() && rows().length === 0) {
+  <div class="chart-loading">Carregando...</div>
+} @else if (rows().length === 0) {
+  <div class="chart-empty">
+    <p>Nenhuma despesa encontrada neste período.</p>
+  </div>
+} @else {
+  <div class="expense-table-wrap">
+    <table class="expense-table">
+      <thead><tr><th>Descrição</th><th>Categoria</th><th>Forma</th><th>Data</th><th>Valor</th></tr></thead>
+      <tbody>
+        @for (row of rows(); track row.id) {
+          <tr>
+            <td class="expense-description">{{ row.description }}</td>
+            <td><span class="category-chip" [style.--category-color]="row.categoryColor">{{ row.categoryName }}</span></td>
+            <td class="method-cell"><span class="method-dot" [style.background]="row.categoryColor"></span>{{ row.methodLabel }}</td>
+            <td>{{ row.date | date: 'dd/MM/yyyy' }}</td>
+            <td class="expense-amount">{{ row.amount | currency: 'BRL' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <button type="button" class="btn btn-secondary largest-expenses-view-all" (click)="viewAll.emit()">
+    Ver todas as movimentações
+  </button>
+}

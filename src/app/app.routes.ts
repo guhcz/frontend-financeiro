@@ -37,6 +37,13 @@ export const routes: Routes = [
           import('./features/planning/planning-page/planning-page').then((m) => m.PlanningPage),
       },
       {
+        path: 'analise-financeira',
+        loadComponent: () =>
+          import('./features/financial-analysis/financial-analysis-page/financial-analysis-page').then(
+            (m) => m.FinancialAnalysisPage,
+          ),
+      },
+      {
         path: 'cadastros',
         loadComponent: () => import('./features/cadastros/cadastros-page/cadastros-page').then((m) => m.CadastrosPage),
       },

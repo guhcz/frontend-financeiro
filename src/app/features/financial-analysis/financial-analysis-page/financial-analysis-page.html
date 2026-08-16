@@ -1,0 +1,114 @@
+<div class="page-header">
+  <div>
+    <h1>Análise financeira</h1>
+    <p>Acompanhe seus gastos, receitas e evolução financeira.</p>
+  </div>
+  <div class="page-header-actions">
+    <button type="button" class="btn btn-secondary" disabled title="Em breve">
+      <lucide-icon name="download" [size]="16"></lucide-icon>
+      Exportar
+    </button>
+  </div>
+</div>
+
+<app-period-filter
+  [startDate]="startDate()"
+  [endDate]="endDate()"
+  [activeShortcut]="activeShortcut()"
+  (applied)="onPeriodApplied($event)"
+></app-period-filter>
+
+@if (analysisError()) {
+  <div class="banner banner-error top-banner">
+    <lucide-icon name="triangle-alert" [size]="20"></lucide-icon>
+    <div>{{ analysisError() }}</div>
+  </div>
+} @else {
+  <div class="analysis-grid analysis-grid-row-1">
+    <div class="card analysis-card analysis-card-income">
+      <div class="analysis-card-header">
+        <div>
+          <h2>Receitas x despesas <span class="info-mark" title="Comparativo por competência financeira">i</span></h2>
+          <span class="analysis-card-subtitle">Valores por competência financeira</span>
+        </div>
+        <select class="analysis-select" aria-label="Periodicidade do gráfico">
+          <option>Mensal</option>
+        </select>
+      </div>
+      <app-income-expense-chart
+        [data]="analysis()?.incomeVsExpenses ?? []"
+        [loading]="analysisLoading()"
+      ></app-income-expense-chart>
+    </div>
+
+    <div class="card analysis-card">
+      <div class="analysis-card-header">
+        <h2>Gastos por categoria <span class="info-mark" title="Distribuição das despesas por categoria">i</span></h2>
+      </div>
+      <app-expenses-by-category-chart
+        [data]="analysis()?.expensesByCategory ?? []"
+        [loading]="analysisLoading()"
+      ></app-expenses-by-category-chart>
+      <button type="button" class="btn btn-secondary card-footer-action" (click)="goToRegistrations()">
+        Ver todas as categorias
+      </button>
+    </div>
+  </div>
+
+  <div class="analysis-grid analysis-grid-row-2">
+    <div class="card analysis-card">
+      <div class="analysis-card-header">
+        <h2>Gastos por forma de pagamento <span class="info-mark" title="Distribuição por forma de pagamento">i</span></h2>
+        <select class="analysis-select" aria-label="Ordenação das formas de pagamento">
+          <option>Por valor</option>
+        </select>
+      </div>
+      <app-expenses-by-payment-method-chart
+        [data]="analysis()?.expensesByPaymentMethod ?? []"
+        [loading]="analysisLoading()"
+        (viewDetails)="openPaymentMethodDetails()"
+      ></app-expenses-by-payment-method-chart>
+      <div class="analysis-note analysis-note-violet">
+        <span class="note-icon">i</span>
+        <span>Valores consideram o tipo de operação no caso de cartões. Crédito e débito são exibidos separadamente.</span>
+      </div>
+    </div>
+
+    <div class="card analysis-card">
+      <div class="analysis-card-header">
+        <h2>Evolução do saldo mensal <span class="info-mark" title="Evolução de receitas menos despesas">i</span></h2>
+        <select class="analysis-select" aria-label="Periodicidade da evolução">
+          <option>Mensal</option>
+        </select>
+      </div>
+      <app-monthly-balance-chart
+        [data]="analysis()?.monthlyBalanceEvolution ?? []"
+        [loading]="analysisLoading()"
+      ></app-monthly-balance-chart>
+    </div>
+
+    <div class="card analysis-card">
+      <div class="analysis-card-header">
+        <h2>Maiores despesas do período <span class="info-mark" title="Movimentações de maior valor no período">i</span></h2>
+      </div>
+      <app-largest-expenses-table
+        [data]="analysis()?.largestExpenses ?? []"
+        [loading]="analysisLoading()"
+        (viewAll)="goToTransactions()"
+      ></app-largest-expenses-table>
+    </div>
+  </div>
+
+  <p class="analysis-footnote">
+    Os valores exibidos consideram a competência financeira (mês de pagamento no caso de cartões de crédito).
+  </p>
+}
+
+@if (paymentMethodModalOpen()) {
+  <app-payment-method-details-modal
+    [startDate]="startDate()"
+    [endDate]="endDate()"
+    [totalPeriodAmount]="totalExpenseAmount()"
+    (closed)="closePaymentMethodDetails()"
+  ></app-payment-method-details-modal>
+}

@@ -65,29 +65,8 @@
   color: var(--color-primary);
 }
 
-.nav-item.disabled {
-  cursor: default;
-  opacity: 0.6;
-}
-
-.nav-item.disabled:hover {
-  background: transparent;
-  color: var(--color-text-muted);
-}
-
 .nav-icon {
   font-size: 16px;
-}
-
-.nav-tag {
-  margin-left: auto;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  background: var(--color-border);
-  color: var(--color-text-muted);
-  padding: 2px 6px;
-  border-radius: 999px;
 }
 
 .nav-item.logout {

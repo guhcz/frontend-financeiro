@@ -1,0 +1,49 @@
+@if (loading() && groups().length === 0) {
+  <div class="chart-loading">Carregando gráfico...</div>
+} @else if (!hasData()) {
+  <div class="chart-empty">
+    <p>Não há movimentações no período selecionado.</p>
+  </div>
+} @else {
+  <div class="chart-plot">
+    <div class="y-axis">
+      @for (tick of yTicks(); track tick) {
+        <span>{{ tick | currency: 'BRL' : 'symbol' : '1.0-0' }}</span>
+      }
+    </div>
+    <div class="chart-grid-lines" aria-hidden="true">
+      @for (tick of yTicks(); track tick) { <span></span> }
+    </div>
+    <div class="grouped-bars-row">
+    @for (group of groups(); track group.year + '-' + group.month; let i = $index) {
+      <div class="bar-group" (mouseenter)="hoveredIndex.set(i)" (mouseleave)="hoveredIndex.set(null)">
+        @if (hoveredIndex() === i) {
+          <div class="bar-tooltip">
+            <strong>{{ group.fullLabel }}</strong>
+            <span class="tooltip-row tooltip-income">Receitas: {{ group.incomeAmount | currency: 'BRL' }}</span>
+            <span class="tooltip-row tooltip-expense">Despesas: {{ group.expenseAmount | currency: 'BRL' }}</span>
+            <span class="tooltip-row" [class.tooltip-positive]="group.balance >= 0" [class.tooltip-negative]="group.balance < 0">
+              Saldo: {{ group.balance | currency: 'BRL' }}
+            </span>
+          </div>
+        }
+        <div class="bar-pair">
+          <div class="bar-track">
+            <span class="bar-value" [style.bottom.%]="group.incomeHeightPct">{{ group.incomeAmount | currency: 'BRL' : 'symbol' : '1.0-0' }}</span>
+            <div class="bar-fill bar-fill-income" [style.height.%]="group.incomeHeightPct"></div>
+          </div>
+          <div class="bar-track">
+            <span class="bar-value" [style.bottom.%]="group.expenseHeightPct">{{ group.expenseAmount | currency: 'BRL' : 'symbol' : '1.0-0' }}</span>
+            <div class="bar-fill bar-fill-expense" [style.height.%]="group.expenseHeightPct"></div>
+          </div>
+        </div>
+        <span class="bar-group-label">{{ group.showLabel ? group.label : '' }}</span>
+      </div>
+    }
+    </div>
+  </div>
+  <ul class="chart-legend">
+    <li><span class="legend-swatch legend-swatch-income"></span>Receitas</li>
+    <li><span class="legend-swatch legend-swatch-expense"></span>Despesas</li>
+  </ul>
+}

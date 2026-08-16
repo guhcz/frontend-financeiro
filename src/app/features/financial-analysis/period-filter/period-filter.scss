@@ -1,0 +1,90 @@
+.period-filter {
+  padding: 10px 0 12px;
+  margin-bottom: 12px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.period-filter-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.period-range {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.period-range-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-right: var(--space-1);
+}
+
+.period-range-input {
+  width: auto;
+  padding: 8px 10px;
+}
+
+.period-range-sep {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.period-shortcuts {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  padding-left: 18px;
+  margin-left: 6px;
+  border-left: 1px solid var(--color-border);
+}
+
+.period-shortcut-btn {
+  border: 1px solid var(--color-border);
+  background: #fff;
+  color: var(--color-text);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.period-shortcut-btn:hover {
+  background: var(--color-bg);
+}
+
+.period-shortcut-btn.active {
+  background: var(--color-violet);
+  border-color: var(--color-violet);
+  color: #fff;
+}
+
+.period-apply-btn {
+  margin-left: auto;
+  background: linear-gradient(135deg, #7347df, #642bd2);
+  border-color: #642bd2;
+}
+
+.period-filter-error {
+  margin-top: var(--space-3);
+}
+
+@media (max-width: 900px) {
+  .period-apply-btn {
+    margin-left: 0;
+    width: 100%;
+  }
+}
