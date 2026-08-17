@@ -1,0 +1,32 @@
+<div class="period-filter card">
+  <div class="period-filter-row">
+    <div class="period-range">
+      <span class="period-range-label">Período</span>
+      <input type="date" class="period-range-input" [value]="draftStart()" (input)="onStartInput($event)" />
+      <span class="period-range-sep">até</span>
+      <input type="date" class="period-range-input" [value]="draftEnd()" (input)="onEndInput($event)" />
+    </div>
+
+    <div class="period-shortcuts">
+      @for (shortcut of shortcuts; track shortcut.key) {
+        <button
+          type="button"
+          class="period-shortcut-btn"
+          [class.active]="activeShortcut() === shortcut.key"
+          (click)="applyShortcut(shortcut)"
+        >
+          {{ shortcut.label }}
+        </button>
+      }
+    </div>
+
+    <button type="button" class="btn btn-primary period-apply-btn" (click)="applyManual()">
+      <lucide-icon name="search" [size]="16"></lucide-icon>
+      Aplicar filtros
+    </button>
+  </div>
+
+  @if (validationError(); as err) {
+    <div class="banner banner-error period-filter-error">{{ err }}</div>
+  }
+</div>

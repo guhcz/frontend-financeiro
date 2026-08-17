@@ -1,0 +1,78 @@
+:host {
+  display: block;
+  margin-top: var(--space-5);
+}
+
+.table-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-5) 0;
+  margin-bottom: var(--space-4);
+}
+
+.table-card-header h2 {
+  flex: 1;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.table-card-header-actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.collapse-toggle lucide-icon {
+  transition: transform 0.15s ease;
+}
+
+.collapse-toggle lucide-icon.collapsed {
+  transform: rotate(-90deg);
+}
+
+.remaining-good {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.remaining-warning {
+  color: var(--color-warning);
+  font-weight: 600;
+}
+
+.remaining-danger {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.progress-cell {
+  min-width: 140px;
+}
+
+.progress-text {
+  display: block;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-text-exceeded {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.table-summary {
+  display: flex;
+  gap: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--color-border);
+  font-size: 13px;
+  color: var(--color-text-muted);
+  flex-wrap: wrap;
+}
+
+.table-summary strong {
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}

@@ -10,10 +10,13 @@ export interface TransactionListItem {
   amount: number;
   date: string;
   method: string;
+  cardTransactionMode: 'CREDIT' | 'DEBIT' | null;
   recurring: boolean;
   generatedAutomatically: boolean;
   notes?: string | null;
   category: Category;
+  billingMonth?: number | null;
+  billingYear?: number | null;
 }
 
 export interface TransactionFilters {
@@ -21,6 +24,8 @@ export interface TransactionFilters {
   categoryId?: number;
   startDate?: string;
   endDate?: string;
+  month?: number;
+  year?: number;
   description?: string;
   recurring?: boolean;
   page?: number;

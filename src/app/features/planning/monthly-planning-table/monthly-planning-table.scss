@@ -1,15 +1,23 @@
 .table-card-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-3);
   padding: var(--space-5) var(--space-5) 0;
   margin-bottom: var(--space-4);
 }
 
 .table-card-header h2 {
+  flex: 1;
   font-size: 18px;
   font-weight: 700;
+}
+
+.collapse-toggle lucide-icon {
+  transition: transform 0.15s ease;
+}
+
+.collapse-toggle lucide-icon.collapsed {
+  transform: rotate(-90deg);
 }
 
 .remaining-good {

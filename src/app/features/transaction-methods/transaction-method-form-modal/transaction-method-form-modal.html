@@ -1,0 +1,86 @@
+<app-modal [title]="title()" (closed)="closed.emit()">
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="form-group">
+      <label for="tm-name">Nome</label>
+      <input
+        id="tm-name"
+        type="text"
+        formControlName="name"
+        placeholder="Ex.: Nubank, Pix, Dinheiro"
+        [class.is-invalid]="form.controls.name.invalid && form.controls.name.touched"
+      />
+      @if (form.controls.name.invalid && form.controls.name.touched) {
+        <span class="field-error">Informe um nome.</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="tm-type">Tipo</label>
+      @if (isEditMode()) {
+        <p class="static-value">{{ typeLabels[method()!.type] }}</p>
+      } @else {
+        <select
+          id="tm-type"
+          formControlName="type"
+          [class.is-invalid]="form.controls.type.invalid && form.controls.type.touched"
+        >
+          <option value="" disabled>Selecione</option>
+          @for (type of types; track type) {
+            <option [value]="type">{{ typeLabels[type] }}</option>
+          }
+        </select>
+        @if (form.controls.type.invalid && form.controls.type.touched) {
+          <span class="field-error">Selecione um tipo.</span>
+        }
+      }
+    </div>
+
+    @if (isCardType()) {
+      <div class="form-row">
+        <div class="form-group">
+          <label for="tm-closing-day">Dia de fechamento</label>
+          <input
+            id="tm-closing-day"
+            type="number"
+            min="1"
+            max="31"
+            formControlName="closingDay"
+            [class.is-invalid]="form.controls.closingDay.invalid && form.controls.closingDay.touched"
+          />
+          @if (form.controls.closingDay.invalid && form.controls.closingDay.touched) {
+            <span class="field-error">Informe um dia entre 1 e 31.</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="tm-due-day">Dia de vencimento</label>
+          <input
+            id="tm-due-day"
+            type="number"
+            min="1"
+            max="31"
+            formControlName="dueDay"
+            [class.is-invalid]="form.controls.dueDay.invalid && form.controls.dueDay.touched"
+          />
+          @if (form.controls.dueDay.invalid && form.controls.dueDay.touched) {
+            <span class="field-error">Informe um dia entre 1 e 31.</span>
+          }
+        </div>
+      </div>
+    }
+
+    @if (errorMessage()) {
+      <div class="banner banner-error">
+        <span>⚠️</span>
+        <div>{{ errorMessage() }}</div>
+      </div>
+    }
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn-secondary" (click)="closed.emit()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="saving()">
+        {{ saving() ? 'Salvando...' : 'Salvar' }}
+      </button>
+    </div>
+  </form>
+</app-modal>

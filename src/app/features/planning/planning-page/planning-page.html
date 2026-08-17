@@ -54,6 +54,18 @@
   (sizeChange)="onTableSizeChange($event)"
 ></app-monthly-planning-table>
 
+<app-credit-card-planning-table
+  [page]="cardPlanningPage()"
+  [totalPlanned]="cardTotalPlanned()"
+  [loading]="cardTableLoading()"
+  [error]="cardTableError()"
+  (add)="openCreateCardPlanning()"
+  (edit)="openEditCardPlanning($event)"
+  (delete)="requestDeleteCardPlanning($event)"
+  (pageChange)="onCardTablePageChange($event)"
+  (sizeChange)="onCardTableSizeChange($event)"
+></app-credit-card-planning-table>
+
 <div class="charts-row">
   <div class="card chart-card">
     <h2>Gastos por categoria</h2>
@@ -111,6 +123,29 @@
     confirmLabel="Excluir"
     (confirmed)="confirmDeletePlanning()"
     (cancelled)="cancelDeletePlanning()"
+  ></app-confirm-dialog>
+}
+
+@if (cardPlanningModalOpen()) {
+  <app-credit-card-planning-form-modal
+    [planning]="editingCardPlanning()"
+    [transactionMethods]="transactionMethods()"
+    [month]="month()"
+    [year]="year()"
+    [saving]="cardPlanningSaving()"
+    [errorMessage]="cardPlanningSaveError()"
+    (save)="saveCardPlanning($event)"
+    (closed)="closeCardPlanningModal()"
+  ></app-credit-card-planning-form-modal>
+}
+
+@if (cardPlanningPendingDelete()) {
+  <app-confirm-dialog
+    title="Excluir planejamento de cartão?"
+    message="Este planejamento será removido, mas nenhuma despesa será excluída."
+    confirmLabel="Excluir"
+    (confirmed)="confirmDeleteCardPlanning()"
+    (cancelled)="cancelDeleteCardPlanning()"
   ></app-confirm-dialog>
 }
 

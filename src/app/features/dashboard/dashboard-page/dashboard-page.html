@@ -72,7 +72,7 @@
             <lucide-icon name="plus" [size]="20"></lucide-icon>
             Nova despesa
           </button>
-          <button type="button" class="quick-action" routerLink="/despesas-fixas">
+          <button type="button" class="quick-action" routerLink="/cadastros">
             <lucide-icon name="repeat-2" [size]="20"></lucide-icon>
             Nova despesa fixa
           </button>
@@ -80,11 +80,11 @@
             <lucide-icon name="chart-no-axes-combined" [size]="20"></lucide-icon>
             Planejamento
           </button>
-          <button type="button" class="quick-action" routerLink="/categorias">
+          <button type="button" class="quick-action" routerLink="/cadastros">
             <lucide-icon name="shapes" [size]="20"></lucide-icon>
             Categorias
           </button>
-          <button type="button" class="quick-action" (click)="openLimitModal()">
+          <button type="button" class="quick-action" routerLink="/cadastros">
             <lucide-icon name="wallet-cards" [size]="20"></lucide-icon>
             {{ hasLimit() ? 'Editar limite' : 'Limite mensal' }}
           </button>
@@ -149,23 +149,13 @@
 @if (modalOpen()) {
   <app-expense-form-modal
     [categories]="categories()"
+    [transactionMethods]="transactionMethods()"
+    [defaultMonth]="month()"
+    [defaultYear]="year()"
     [saving]="saving()"
     [errorMessage]="saveError()"
     (save)="saveExpense($event)"
     (saveRecurring)="saveRecurringExpense($event)"
     (closed)="closeModal()"
   ></app-expense-form-modal>
-}
-
-@if (limitModalOpen()) {
-  <app-monthly-limit-form-modal
-    [limit]="currentLimit()"
-    [saving]="limitSaving()"
-    [errorMessage]="limitError()"
-    [periodLocked]="true"
-    [defaultMonth]="month()"
-    [defaultYear]="year()"
-    (save)="saveLimit($event)"
-    (closed)="closeLimitModal()"
-  ></app-monthly-limit-form-modal>
 }

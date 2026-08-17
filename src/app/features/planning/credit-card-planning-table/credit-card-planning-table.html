@@ -1,0 +1,106 @@
+<div class="card list-card">
+  <div class="table-card-header">
+    <button
+      type="button"
+      class="icon-btn collapse-toggle"
+      (click)="toggleCollapsed()"
+      [attr.aria-label]="collapsed() ? 'Expandir planejamento por cartão' : 'Recolher planejamento por cartão'"
+      [attr.aria-expanded]="!collapsed()"
+    >
+      <lucide-icon name="chevron-down" [size]="18" [class.collapsed]="collapsed()"></lucide-icon>
+    </button>
+    <h2>Planejamento por cartão</h2>
+    <div class="table-card-header-actions">
+      <a class="btn btn-secondary" routerLink="/cadastros/formas-de-pagamento">
+        <lucide-icon name="credit-card" [size]="16"></lucide-icon>
+        Gerenciar cartões
+      </a>
+      <button type="button" class="btn btn-primary" (click)="add.emit()">
+        <lucide-icon name="plus" [size]="16"></lucide-icon>
+        Planejar cartão
+      </button>
+    </div>
+  </div>
+
+  @if (!collapsed()) {
+    @if (loading()) {
+      <div class="list-loading">Carregando planejamento...</div>
+    } @else if (error()) {
+      <div class="banner banner-error top-banner" style="margin: var(--space-4)">{{ error() }}</div>
+    } @else if (!page() || page()!.content.length === 0) {
+      <app-empty-state
+        lucideIcon="credit-card"
+        title="Você ainda não definiu um planejamento para seus cartões neste mês."
+        description="Defina quanto pretende gastar em cada cartão para acompanhar suas próximas faturas."
+        actionLabel="+ Planejar cartão"
+        (action)="add.emit()"
+      ></app-empty-state>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Cartão</th>
+              <th>Planejado</th>
+              <th>Utilizado</th>
+              <th>Restante</th>
+              <th>Progresso</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of page()!.content; track item.id) {
+              <tr>
+                <td>{{ item.transactionMethod.name }}</td>
+                <td>{{ item.plannedAmount | currency: 'BRL' }}</td>
+                <td>{{ item.spentAmount | currency: 'BRL' }}</td>
+                <td
+                  [class.remaining-good]="remainingState(item) === 'good'"
+                  [class.remaining-warning]="remainingState(item) === 'warning'"
+                  [class.remaining-danger]="remainingState(item) === 'danger'"
+                >
+                  {{ item.remainingAmount | currency: 'BRL' }}
+                </td>
+                <td class="progress-cell">
+                  <span class="progress-text" [class.progress-text-exceeded]="item.percentageUsed > 100">
+                    {{ item.percentageUsed | number: '1.0-0' }}%
+                  </span>
+                  <app-progress-bar [percentage]="item.percentageUsed" size="sm"></app-progress-bar>
+                </td>
+                <td>
+                  <button type="button" class="icon-btn" (click)="edit.emit(item)" aria-label="Editar planejamento">
+                    <lucide-icon name="pencil" [size]="16"></lucide-icon>
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-btn danger"
+                    (click)="delete.emit(item)"
+                    aria-label="Excluir planejamento"
+                  >
+                    <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-summary">
+        <span>Total planejado em cartões: <strong>{{ totalPlanned() ?? 0 | currency: 'BRL' }}</strong></span>
+      </div>
+
+      <app-pagination
+        [page]="page()!.number"
+        [totalPages]="page()!.totalPages"
+        [totalElements]="page()!.totalElements"
+        [size]="page()!.size"
+        [first]="page()!.first"
+        [last]="page()!.last"
+        itemLabel="cartões"
+        (pageChange)="pageChange.emit($event)"
+        (sizeChange)="sizeChange.emit($event)"
+      ></app-pagination>
+    }
+  }
+</div>

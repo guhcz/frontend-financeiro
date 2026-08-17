@@ -1,39 +1,59 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { Category, CategoryFilters, CategoryRequest } from '../../../core/models/category.model';
+import { LucideAngularModule } from 'lucide-angular';
 import { Page } from '../../../core/models/page.model';
-import { CategoryService } from '../../../core/services/category.service';
+import {
+  TRANSACTION_METHOD_TYPE_LABELS,
+  TransactionMethod,
+  TransactionMethodCreateRequest,
+  TransactionMethodFilters,
+  TransactionMethodType,
+} from '../../../core/models/transaction-method.model';
+import { TransactionMethodService } from '../../../core/services/transaction-method.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { getErrorDetail } from '../../../core/utils/http-error.util';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { Pagination } from '../../../shared/pagination/pagination';
-import { CategoryFormModal } from '../category-form-modal/category-form-modal';
+import { TransactionMethodFormModal } from '../transaction-method-form-modal/transaction-method-form-modal';
 
 const DEFAULT_SIZE = 10;
 
+const TYPE_ICONS: Record<TransactionMethodType, string> = {
+  PIX: 'qr-code',
+  CASH: 'banknote',
+  CARD: 'credit-card',
+  BANK_TRANSFER: 'landmark',
+  BOLETO: 'landmark',
+  DEPOSIT: 'landmark',
+  OTHER: 'wallet-cards',
+};
+
 @Component({
-  selector: 'app-category-list',
-  imports: [EmptyState, ConfirmDialog, CategoryFormModal, Pagination],
-  templateUrl: './category-list.html',
-  styleUrls: ['../../list-page.scss', './category-list.scss'],
+  selector: 'app-transaction-method-list',
+  imports: [EmptyState, ConfirmDialog, TransactionMethodFormModal, Pagination, LucideAngularModule],
+  templateUrl: './transaction-method-list.html',
+  styleUrls: ['../../list-page.scss', './transaction-method-list.scss'],
 })
-export class CategoryList implements OnInit {
-  private readonly categoryService = inject(CategoryService);
+export class TransactionMethodList implements OnInit {
+  private readonly transactionMethodService = inject(TransactionMethodService);
   private readonly notificationService = inject(NotificationService);
 
-  readonly pageData = signal<Page<Category> | null>(null);
+  readonly typeLabels = TRANSACTION_METHOD_TYPE_LABELS;
+  readonly typeIcons = TYPE_ICONS;
+
+  readonly pageData = signal<Page<TransactionMethod> | null>(null);
   readonly loading = signal(true);
   readonly listError = signal<string | null>(null);
 
   readonly modalOpen = signal(false);
-  readonly editingCategory = signal<Category | null>(null);
+  readonly editingMethod = signal<TransactionMethod | null>(null);
   readonly saveError = signal<string | null>(null);
   readonly saving = signal(false);
 
-  readonly categoryPendingDelete = signal<Category | null>(null);
+  readonly methodPendingDelete = signal<TransactionMethod | null>(null);
   readonly deleteError = signal<string | null>(null);
 
-  private filters: CategoryFilters = { page: 0, size: DEFAULT_SIZE };
+  private filters: TransactionMethodFilters = { page: 0, size: DEFAULT_SIZE };
 
   ngOnInit(): void {
     this.load();
@@ -42,7 +62,7 @@ export class CategoryList implements OnInit {
   load(): void {
     this.loading.set(true);
     this.listError.set(null);
-    this.categoryService.listPage(this.filters).subscribe({
+    this.transactionMethodService.listPage(this.filters).subscribe({
       next: (page) => {
         this.pageData.set(page);
         this.loading.set(false);
@@ -65,13 +85,13 @@ export class CategoryList implements OnInit {
   }
 
   openCreate(): void {
-    this.editingCategory.set(null);
+    this.editingMethod.set(null);
     this.saveError.set(null);
     this.modalOpen.set(true);
   }
 
-  openEdit(category: Category): void {
-    this.editingCategory.set(category);
+  openEdit(method: TransactionMethod): void {
+    this.editingMethod.set(method);
     this.saveError.set(null);
     this.modalOpen.set(true);
   }
@@ -80,20 +100,20 @@ export class CategoryList implements OnInit {
     this.modalOpen.set(false);
   }
 
-  save(request: CategoryRequest): void {
+  save(request: TransactionMethodCreateRequest): void {
     this.saving.set(true);
     this.saveError.set(null);
-    const editing = this.editingCategory();
+    const editing = this.editingMethod();
 
     const operation = editing
-      ? this.categoryService.update(editing.id, request)
-      : this.categoryService.create(request);
+      ? this.transactionMethodService.update(editing.id, request)
+      : this.transactionMethodService.create(request);
 
     operation.subscribe({
       next: () => {
         this.saving.set(false);
         this.modalOpen.set(false);
-        this.notificationService.success(editing ? 'Categoria atualizada.' : 'Categoria criada.');
+        this.notificationService.success(editing ? 'Forma de pagamento atualizada.' : 'Forma de pagamento criada.');
         this.load();
       },
       error: (err: unknown) => {
@@ -103,24 +123,24 @@ export class CategoryList implements OnInit {
     });
   }
 
-  requestDelete(category: Category): void {
+  requestDelete(method: TransactionMethod): void {
     this.deleteError.set(null);
-    this.categoryPendingDelete.set(category);
+    this.methodPendingDelete.set(method);
   }
 
   cancelDelete(): void {
-    this.categoryPendingDelete.set(null);
+    this.methodPendingDelete.set(null);
   }
 
   confirmDelete(): void {
-    const category = this.categoryPendingDelete();
-    if (!category) {
+    const method = this.methodPendingDelete();
+    if (!method) {
       return;
     }
-    this.categoryService.delete(category.id).subscribe({
+    this.transactionMethodService.delete(method.id).subscribe({
       next: () => {
-        this.categoryPendingDelete.set(null);
-        this.notificationService.success('Categoria excluída.');
+        this.methodPendingDelete.set(null);
+        this.notificationService.success('Forma de pagamento excluída.');
         const page = this.pageData();
         if (page && page.content.length === 1 && this.filters.page && this.filters.page > 0) {
           this.filters = { ...this.filters, page: this.filters.page - 1 };
@@ -128,7 +148,7 @@ export class CategoryList implements OnInit {
         this.load();
       },
       error: (err: unknown) => {
-        this.categoryPendingDelete.set(null);
+        this.methodPendingDelete.set(null);
         this.deleteError.set(getErrorDetail(err));
       },
     });

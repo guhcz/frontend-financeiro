@@ -132,7 +132,9 @@
                 <app-badge [label]="typeInfo[item.type].label" [color]="typeInfo[item.type].color"></app-badge>
               </td>
               <td class="col-method">
-                <app-badge [label]="methodLabels[item.method] || item.method"></app-badge>
+                <app-badge
+                  [label]="item.cardTransactionMode ? item.method + ' • ' + cardTransactionModeLabels[item.cardTransactionMode] : item.method"
+                ></app-badge>
               </td>
               <td class="col-recurring">
                 @if (item.recurring) {
@@ -185,6 +187,9 @@
   <app-expense-form-modal
     [expense]="editingExpense()"
     [categories]="categories()"
+    [transactionMethods]="transactionMethods()"
+    [defaultMonth]="month()"
+    [defaultYear]="year()"
     [saving]="saving()"
     [errorMessage]="saveError()"
     (save)="saveExpense($event)"
@@ -197,6 +202,8 @@
   <app-income-form-modal
     [income]="editingIncome()"
     [categories]="categories()"
+    [defaultMonth]="month()"
+    [defaultYear]="year()"
     [saving]="saving()"
     [errorMessage]="saveError()"
     (save)="saveIncome($event)"

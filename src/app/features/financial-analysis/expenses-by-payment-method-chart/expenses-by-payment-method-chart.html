@@ -1,0 +1,24 @@
+@if (loading() && bars().length === 0) {
+  <div class="chart-loading">Carregando gráfico...</div>
+} @else if (bars().length === 0) {
+  <div class="chart-empty">
+    <p>Não há despesas para exibir.</p>
+  </div>
+} @else {
+  <ul class="payment-bars">
+    @for (bar of bars(); track bar.key) {
+      <li class="payment-bar-row">
+        <span class="payment-bar-name">{{ bar.label }}</span>
+        <div class="payment-bar-track">
+          <div class="payment-bar-fill" [style.width.%]="bar.widthPct" [style.background]="bar.color"></div>
+        </div>
+        <span class="payment-bar-value">{{ bar.amount | currency: 'BRL' }}</span>
+        <span class="payment-bar-percentage">{{ bar.percentage | number: '1.1-1' }}%</span>
+      </li>
+    }
+  </ul>
+
+  <button type="button" class="btn btn-secondary payment-details-btn" (click)="viewDetails.emit()">
+    Ver detalhes por forma de pagamento
+  </button>
+}

@@ -19,7 +19,7 @@
       }
     </div>
 
-    @if (!isEditMode()) {
+    @if (!isEditMode() && !defaultRecurring()) {
       <div class="form-group">
         <label>Tipo da receita</label>
         <div class="segmented-toggle">

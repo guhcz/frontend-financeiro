@@ -4,7 +4,7 @@ import { Category } from '../../../core/models/category.model';
 import { Income, IncomeRequest } from '../../../core/models/income.model';
 import { RECEIPT_METHODS, RECEIPT_METHOD_LABELS } from '../../../core/models/receipt-method.model';
 import { RecurringIncomeRequest } from '../../../core/models/recurring-income.model';
-import { firstDayOfMonth, lastDayOfMonth } from '../../../core/utils/recurrence-date.util';
+import { defaultDateInMonth, firstDayOfMonth, lastDayOfMonth } from '../../../core/utils/recurrence-date.util';
 import { RecurringExpenseFields } from '../../recurring-expenses/recurring-expense-fields/recurring-expense-fields';
 import { CurrencyMaskDirective } from '../../../shared/currency-mask/currency-mask.directive';
 import { Modal } from '../../../shared/modal/modal';
@@ -24,8 +24,11 @@ export class IncomeFormModal implements OnInit {
 
   income = input<Income | null>(null);
   categories = input.required<Category[]>();
+  defaultMonth = input<number | null>(null);
+  defaultYear = input<number | null>(null);
   saving = input(false);
   errorMessage = input<string | null>(null);
+  defaultRecurring = input(false);
 
   save = output<IncomeRequest>();
   saveRecurring = output<RecurringIncomeRequest>();
@@ -39,7 +42,9 @@ export class IncomeFormModal implements OnInit {
   readonly endDateError = signal<string | null>(null);
 
   readonly isEditMode = computed(() => !!this.income());
-  readonly title = computed(() => (this.isEditMode() ? 'Editar receita' : 'Nova receita'));
+  readonly title = computed(() =>
+    this.isEditMode() ? 'Editar receita' : this.incomeType() === 'recurring' ? 'Nova receita fixa' : 'Nova receita',
+  );
   readonly hasCategories = computed(() => this.categories().length > 0);
 
   private readonly now = new Date();
@@ -60,8 +65,16 @@ export class IncomeFormModal implements OnInit {
   });
 
   ngOnInit(): void {
+    if (this.defaultRecurring()) {
+      this.incomeType.set('recurring');
+    }
     const income = this.income();
     if (!income) {
+      const month = this.defaultMonth();
+      const year = this.defaultYear();
+      if (month != null && year != null) {
+        this.form.controls.incomeDate.setValue(defaultDateInMonth(year, month));
+      }
       return;
     }
     this.form.patchValue({

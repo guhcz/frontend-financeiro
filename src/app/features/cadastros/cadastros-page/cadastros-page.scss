@@ -1,0 +1,322 @@
+.cadastros-hero {
+  margin-bottom: var(--space-5);
+}
+
+.page-header {
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.page-heading h1 {
+  color: var(--color-text);
+  font-size: 30px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.page-heading p {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-control {
+  height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 3%);
+}
+
+.search-control {
+  width: 260px;
+}
+
+.search-control .cadastros-search {
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-text);
+}
+
+.organization-card {
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 12px 14px 12px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  box-shadow: 0 2px 5px rgb(15 23 42 / 4%);
+}
+
+.organization-message {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.organization-icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  display: grid;
+  place-items: center;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  border-radius: 50%;
+}
+
+.organization-message h2 {
+  margin-bottom: 6px;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.organization-message p {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.cadastros-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: 1fr;
+  align-items: stretch;
+  gap: 16px;
+}
+
+.cadastros-card {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 14px;
+  border-radius: 9px;
+}
+
+.cadastros-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card-heading {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.card-icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+}
+
+.card-icon-violet {
+  color: var(--color-violet);
+  background: var(--color-violet-light);
+}
+
+.card-icon-green {
+  color: var(--color-success);
+  background: var(--color-success-light);
+}
+
+.card-icon-orange {
+  color: var(--color-warning);
+  background: var(--color-warning-light);
+}
+
+.card-icon-blue {
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.cadastros-card-header h2 {
+  margin: 0 0 4px;
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.cadastros-card-header p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.cadastros-card-header .btn {
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.cadastros-card .table-wrap {
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  overflow: visible;
+}
+
+.cadastros-card table {
+  table-layout: auto;
+  font-size: 13px;
+}
+
+.cadastros-card thead {
+  background: var(--color-surface-muted);
+}
+
+.cadastros-card thead th {
+  height: 38px;
+  padding: 9px 14px;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.cadastros-card tbody td {
+  height: 42px;
+  padding: 9px 14px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.cadastros-card .item-name {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.color-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 9px;
+  color: var(--color-success);
+  background: var(--color-success-light);
+  border: 1px solid color-mix(in srgb, var(--color-success) 28%, transparent);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status-badge::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  background: currentColor;
+  border-radius: 50%;
+}
+
+.status-badge.status-paused {
+  color: var(--color-warning);
+  background: var(--color-warning-light);
+  border-color: color-mix(in srgb, var(--color-warning) 28%, transparent);
+}
+
+.status-badge.status-inactive {
+  color: var(--color-text-muted);
+  background: var(--color-surface-muted);
+  border-color: var(--color-border);
+}
+
+.actions-cell {
+  width: 34px;
+  text-align: right;
+}
+
+.row-menu {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.card-footer-link {
+  align-self: center;
+  margin-top: auto;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+  line-height: 1.4;
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+@media (max-width: 900px) {
+  .page-header,
+  .organization-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .page-header-actions,
+  .search-control {
+    width: 100%;
+  }
+
+  .cadastros-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+@media (max-width: 560px) {
+  .page-header-actions {
+    flex-direction: column;
+  }
+
+  .page-heading h1 {
+    font-size: 26px;
+  }
+
+  .cadastros-card-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .cadastros-card-header .btn {
+    align-self: flex-start;
+  }
+}

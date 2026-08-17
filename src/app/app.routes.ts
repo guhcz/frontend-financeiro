@@ -32,28 +32,27 @@ export const routes: Routes = [
       },
       { path: 'despesas', redirectTo: 'movimentacoes' },
       {
-        path: 'despesas-fixas',
-        loadComponent: () =>
-          import('./features/recurring-expenses/recurring-expense-list/recurring-expense-list').then(
-            (m) => m.RecurringExpenseList,
-          ),
-      },
-      {
-        path: 'categorias',
-        loadComponent: () =>
-          import('./features/categories/category-list/category-list').then((m) => m.CategoryList),
-      },
-      {
-        path: 'limite-mensal',
-        loadComponent: () =>
-          import('./features/monthly-limits/monthly-limit-list/monthly-limit-list').then(
-            (m) => m.MonthlyLimitList,
-          ),
-      },
-      {
         path: 'planejamento',
         loadComponent: () =>
           import('./features/planning/planning-page/planning-page').then((m) => m.PlanningPage),
+      },
+      {
+        path: 'analise-financeira',
+        loadComponent: () =>
+          import('./features/financial-analysis/financial-analysis-page/financial-analysis-page').then(
+            (m) => m.FinancialAnalysisPage,
+          ),
+      },
+      {
+        path: 'cadastros',
+        loadComponent: () => import('./features/cadastros/cadastros-page/cadastros-page').then((m) => m.CadastrosPage),
+      },
+      {
+        path: 'cadastros/formas-de-pagamento',
+        loadComponent: () =>
+          import('./features/transaction-methods/transaction-method-list/transaction-method-list').then(
+            (m) => m.TransactionMethodList,
+          ),
       },
     ],
   },

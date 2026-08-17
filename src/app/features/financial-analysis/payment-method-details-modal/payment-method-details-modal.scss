@@ -1,0 +1,49 @@
+.payment-modal-filters {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.payment-modal-search {
+  min-width: 0;
+}
+
+.payment-modal-loading,
+.payment-modal-empty {
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.payment-methods-table th,
+.payment-methods-table td {
+  padding: var(--space-3) var(--space-2);
+}
+
+.payment-row-sub {
+  display: block;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.amount-cell {
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.payment-methods-total-row td {
+  border-top: 2px solid var(--color-border);
+  border-bottom: none;
+  font-weight: 700;
+  color: var(--color-text);
+  padding-top: var(--space-3);
+}
+
+@media (max-width: 700px) {
+  .payment-modal-filters {
+    grid-template-columns: 1fr;
+  }
+}

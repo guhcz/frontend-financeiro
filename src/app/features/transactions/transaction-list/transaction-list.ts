@@ -5,21 +5,23 @@ import { Category } from '../../../core/models/category.model';
 import { Expense, ExpenseRequest } from '../../../core/models/expense.model';
 import { Income, IncomeRequest } from '../../../core/models/income.model';
 import { Page } from '../../../core/models/page.model';
-import { PAYMENT_METHOD_LABELS, PaymentMethod } from '../../../core/models/payment-method.model';
-import { RECEIPT_METHOD_LABELS, ReceiptMethod } from '../../../core/models/receipt-method.model';
+import { ReceiptMethod } from '../../../core/models/receipt-method.model';
 import { RecurringExpenseRequest } from '../../../core/models/recurring-expense.model';
 import { RecurringIncomeRequest } from '../../../core/models/recurring-income.model';
 import { RecurringUpdateScope } from '../../../core/models/recurring-update-scope.model';
+import { CARD_TRANSACTION_MODE_LABELS, TransactionMethod } from '../../../core/models/transaction-method.model';
 import { TransactionFilters, TransactionListItem, TransactionType } from '../../../core/models/transaction.model';
 import { CategoryService } from '../../../core/services/category.service';
+import { TransactionMethodService } from '../../../core/services/transaction-method.service';
 import { ExpenseService } from '../../../core/services/expense.service';
 import { IncomeService } from '../../../core/services/income.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { RecurringExpenseService } from '../../../core/services/recurring-expense.service';
 import { RecurringIncomeService } from '../../../core/services/recurring-income.service';
 import { TransactionService } from '../../../core/services/transaction.service';
+import { defaultPeriod } from '../../../core/utils/default-period.util';
 import { getErrorDetail } from '../../../core/utils/http-error.util';
-import { firstDayOfMonth, lastDayOfMonth } from '../../../core/utils/recurrence-date.util';
+import { monthYearLabel } from '../../../core/utils/month-label.util';
 import { Badge } from '../../../shared/badge/badge';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
@@ -31,8 +33,6 @@ import { RecurringEditScopeModal } from '../../expenses/recurring-edit-scope-mod
 import { IncomeFormModal } from '../../incomes/income-form-modal/income-form-modal';
 
 const DEFAULT_SIZE = 10;
-
-const METHOD_LABELS: Record<string, string> = { ...PAYMENT_METHOD_LABELS, ...RECEIPT_METHOD_LABELS };
 
 const TYPE_INFO: Record<TransactionType, { label: string; color: string }> = {
   INCOME: { label: 'Receita', color: '#16a34a' },
@@ -108,21 +108,24 @@ export class TransactionList implements OnInit {
   private readonly recurringExpenseService = inject(RecurringExpenseService);
   private readonly recurringIncomeService = inject(RecurringIncomeService);
   private readonly categoryService = inject(CategoryService);
+  private readonly transactionMethodService = inject(TransactionMethodService);
   private readonly notificationService = inject(NotificationService);
 
-  private readonly today = new Date();
-  readonly month = signal(this.today.getMonth() + 1);
-  readonly year = signal(this.today.getFullYear());
+  private readonly initialPeriod = defaultPeriod();
+  readonly month = signal(this.initialPeriod.month);
+  readonly year = signal(this.initialPeriod.year);
 
   readonly categories = signal<Category[]>([]);
+  readonly transactionMethods = signal<TransactionMethod[]>([]);
   readonly pageData = signal<Page<TransactionListItem> | null>(null);
   readonly loading = signal(true);
   readonly listError = signal<string | null>(null);
   readonly filtersActive = signal(false);
   readonly filtersOpen = signal(false);
 
-  readonly methodLabels = METHOD_LABELS;
+  readonly cardTransactionModeLabels = CARD_TRANSACTION_MODE_LABELS;
   readonly typeInfo = TYPE_INFO;
+  readonly monthYearLabel = monthYearLabel;
 
   readonly activeModal = signal<ActiveModal>(null);
   readonly editingExpense = signal<Expense | null>(null);
@@ -156,6 +159,10 @@ export class TransactionList implements OnInit {
       next: (categories) => this.categories.set(categories),
       error: () => this.notificationService.error('Não foi possível carregar as categorias.'),
     });
+    this.transactionMethodService.list().subscribe({
+      next: (methods) => this.transactionMethods.set(methods),
+      error: () => this.notificationService.error('Não foi possível carregar as formas de pagamento.'),
+    });
     this.fetch();
   }
 
@@ -171,8 +178,8 @@ export class TransactionList implements OnInit {
     this.listError.set(null);
     const request: TransactionFilters = {
       ...this.filters,
-      startDate: firstDayOfMonth(this.year(), this.month()),
-      endDate: lastDayOfMonth(this.year(), this.month()),
+      month: this.month(),
+      year: this.year(),
     };
     this.transactionService.getTransactions(request).subscribe({
       next: (page) => {
@@ -250,20 +257,15 @@ export class TransactionList implements OnInit {
     this.saveError.set(null);
     if (item.type === 'EXPENSE') {
       this.editingIncome.set(null);
-      this.editingExpense.set({
-        id: item.id,
-        category: item.category,
-        description: item.description,
-        amount: item.amount,
-        expenseDate: item.date,
-        paymentMethod: item.method as PaymentMethod,
-        notes: item.notes ?? null,
-        active: true,
-        generatedAutomatically: item.generatedAutomatically,
-        recurring: item.recurring,
-        recurringExpenseId: null,
+      // The unified transactions view only carries the method's display name (not its id), so
+      // prefilling the form always needs the full record (with its real transactionMethod reference).
+      this.expenseService.getById(item.id).subscribe({
+        next: (expense) => {
+          this.editingExpense.set(expense);
+          this.activeModal.set('expense');
+        },
+        error: (err: unknown) => this.notificationService.error(getErrorDetail(err)),
       });
-      this.activeModal.set('expense');
     } else {
       this.editingExpense.set(null);
       this.editingIncome.set({
@@ -364,10 +366,12 @@ export class TransactionList implements OnInit {
       : this.expenseService.create(request);
 
     operation.subscribe({
-      next: () => {
+      next: (expense) => {
         this.saving.set(false);
         this.activeModal.set(null);
-        this.notificationService.success(this.expenseSaveMessage(!!editingId, scope));
+        this.notificationService.success(
+          this.expenseSaveMessage(!!editingId, scope, expense.billingMonth, expense.billingYear),
+        );
         this.fetch();
       },
       error: (err: unknown) => {
@@ -385,10 +389,17 @@ export class TransactionList implements OnInit {
       : this.incomeService.createIncome(request);
 
     operation.subscribe({
-      next: () => {
+      next: (income) => {
         this.saving.set(false);
         this.activeModal.set(null);
-        this.notificationService.success(this.incomeSaveMessage(!!editingId, scope));
+        // Competence is always the month after the record's own date (see backend
+        // CompetenceResolver); incomes don't carry a precomputed billing month, so it's derived
+        // here purely for the toast message.
+        const incomeDate = new Date(`${income.incomeDate}T00:00:00`);
+        const competenceDate = new Date(incomeDate.getFullYear(), incomeDate.getMonth() + 1, 1);
+        this.notificationService.success(
+          this.incomeSaveMessage(!!editingId, scope, competenceDate.getMonth() + 1, competenceDate.getFullYear()),
+        );
         this.fetch();
       },
       error: (err: unknown) => {
@@ -398,22 +409,33 @@ export class TransactionList implements OnInit {
     });
   }
 
-  private expenseSaveMessage(isEdit: boolean, scope: RecurringUpdateScope): string {
+  /** Appends "em <mês>/<ano>" whenever the saved item's competence differs from the month
+   * currently being viewed -- the list stays on the current month (per design), so this is the
+   * user's only signal that the record landed somewhere else and they need to switch months to see it. */
+  private competenceSuffix(competenceMonth: number, competenceYear: number): string {
+    return competenceMonth === this.month() && competenceYear === this.year()
+      ? ''
+      : ` (em ${monthYearLabel(competenceMonth, competenceYear)})`;
+  }
+
+  private expenseSaveMessage(isEdit: boolean, scope: RecurringUpdateScope, billingMonth: number, billingYear: number): string {
+    const suffix = this.competenceSuffix(billingMonth, billingYear);
     if (!isEdit) {
-      return 'Despesa criada com sucesso.';
+      return `Despesa criada com sucesso${suffix}.`;
     }
     return scope === 'THIS_AND_FUTURE'
       ? 'A alteração será aplicada às próximas despesas.'
-      : 'Despesa atualizada com sucesso.';
+      : `Despesa atualizada com sucesso${suffix}.`;
   }
 
-  private incomeSaveMessage(isEdit: boolean, scope: RecurringUpdateScope): string {
+  private incomeSaveMessage(isEdit: boolean, scope: RecurringUpdateScope, incomeMonth: number, incomeYear: number): string {
+    const suffix = this.competenceSuffix(incomeMonth, incomeYear);
     if (!isEdit) {
-      return 'Receita criada com sucesso.';
+      return `Receita criada com sucesso${suffix}.`;
     }
     return scope === 'THIS_AND_FUTURE'
       ? 'A alteração será aplicada às próximas receitas.'
-      : 'Receita atualizada com sucesso.';
+      : `Receita atualizada com sucesso${suffix}.`;
   }
 
   requestDelete(item: TransactionListItem): void {
