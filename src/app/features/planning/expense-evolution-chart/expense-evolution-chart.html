@@ -68,7 +68,12 @@
 
       @if (lastPoint(); as last) {
         <circle [attr.cx]="last.x" [attr.cy]="last.y" r="5" class="end-marker"></circle>
-        <text [attr.x]="last.x" [attr.y]="last.y - 12" text-anchor="end" class="end-label">
+        <text
+          [attr.x]="endLabelX(last)"
+          [attr.y]="endLabelY(last)"
+          [attr.text-anchor]="endLabelAnchor(last)"
+          class="end-label"
+        >
           {{ last.accumulatedAmount | currency: 'BRL' }}
         </text>
       }

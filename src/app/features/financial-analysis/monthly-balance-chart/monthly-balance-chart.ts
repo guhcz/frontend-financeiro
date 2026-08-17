@@ -4,7 +4,7 @@ import { MonthlyBalancePoint } from '../../../core/models/financial-analysis.mod
 import { monthShortLabel, monthYearLabel } from '../../../core/utils/month-label.util';
 
 const VIEW_WIDTH = 640;
-const VIEW_HEIGHT = 180;
+const VIEW_HEIGHT = 320;
 const MARGIN = { top: 16, right: 16, bottom: 32, left: 64 };
 const PLOT_WIDTH = VIEW_WIDTH - MARGIN.left - MARGIN.right;
 const PLOT_HEIGHT = VIEW_HEIGHT - MARGIN.top - MARGIN.bottom;
@@ -42,6 +42,7 @@ function niceStep(rough: number): number {
 export class MonthlyBalanceChart {
   data = input.required<MonthlyBalancePoint[]>();
   loading = input(false);
+  period = input<'monthly' | 'yearly'>('monthly');
 
   readonly viewWidth = VIEW_WIDTH;
   readonly viewHeight = VIEW_HEIGHT;
@@ -49,7 +50,26 @@ export class MonthlyBalanceChart {
 
   readonly hoveredIndex = signal<number | null>(null);
 
-  private readonly sorted = computed(() => [...this.data()].sort((a, b) => a.year - b.year || a.month - b.month));
+  private readonly sorted = computed(() => {
+    const items = [...this.data()].sort((a, b) => a.year - b.year || a.month - b.month);
+    if (this.period() === 'monthly') return items;
+
+    const byYear = new Map<number, MonthlyBalancePoint>();
+    for (const item of items) {
+      const current = byYear.get(item.year) ?? {
+        month: 0,
+        year: item.year,
+        incomeAmount: 0,
+        expenseAmount: 0,
+        balance: 0,
+      };
+      current.incomeAmount += item.incomeAmount;
+      current.expenseAmount += item.expenseAmount;
+      current.balance += item.balance;
+      byYear.set(item.year, current);
+    }
+    return [...byYear.values()].sort((a, b) => a.year - b.year);
+  });
 
   private readonly niceMax = computed(() => {
     const balances = this.sorted().map((d) => d.balance);
@@ -80,8 +100,8 @@ export class MonthlyBalanceChart {
       return {
         month: item.month,
         year: item.year,
-        label: monthShortLabel(item.month, item.year),
-        fullLabel: monthYearLabel(item.month, item.year),
+        label: this.period() === 'yearly' ? String(item.year) : monthShortLabel(item.month, item.year),
+        fullLabel: this.period() === 'yearly' ? String(item.year) : monthYearLabel(item.month, item.year),
         balance: item.balance,
         x,
         y,
@@ -123,8 +143,8 @@ export class MonthlyBalanceChart {
     }
     const pct = Math.abs((diff / Math.abs(first.balance)) * 100);
     const direction = diff > 0 ? 'aumentou' : 'diminuiu';
-    const firstLabel = monthShortLabel(first.month, first.year).toLowerCase();
-    const secondLabel = monthShortLabel(second.month, second.year).toLowerCase();
+    const firstLabel = this.period() === 'yearly' ? String(first.year) : monthShortLabel(first.month, first.year).toLowerCase();
+    const secondLabel = this.period() === 'yearly' ? String(second.year) : monthShortLabel(second.month, second.year).toLowerCase();
     return `Seu saldo ${direction} ${pct.toFixed(0)}% de ${firstLabel} para ${secondLabel}.`;
   });
 

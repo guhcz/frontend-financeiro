@@ -1,24 +1,28 @@
 .shell {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 .sidebar {
-  width: 240px;
+  width: 232px;
+  height: 100%;
   flex-shrink: 0;
   background: var(--color-surface);
   border-right: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
-  padding: var(--space-5) var(--space-3);
+  padding: 24px 12px 16px;
+  overflow: hidden;
 }
 
 .brand {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 0 var(--space-2);
-  margin-bottom: var(--space-6);
+  padding: 0 10px;
+  margin-bottom: 26px;
 }
 
 .brand-icon {
@@ -34,7 +38,7 @@
 .nav {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 7px;
   flex: 1;
 }
 
@@ -42,13 +46,14 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: 10px var(--space-3);
-  border-radius: var(--radius-sm);
+  min-height: 42px;
+  padding: 10px 13px;
+  border-radius: 8px;
   color: var(--color-text-muted);
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
-  border: none;
+  border: 1px solid transparent;
   background: transparent;
   cursor: pointer;
   width: 100%;
@@ -62,20 +67,40 @@
 
 .nav-item.active {
   background: var(--color-primary-light);
+  border-color: #76a7ff;
   color: var(--color-primary);
+  box-shadow: 0 1px 3px rgb(37 99 235 / 8%);
 }
 
-.nav-icon {
-  font-size: 16px;
+.nav-item lucide-icon {
+  flex: 0 0 18px;
 }
 
-.nav-item.logout {
-  margin-top: var(--space-4);
+.sidebar-footer { margin-top: auto; }
+.preferences { margin-bottom: 12px; }
+.sidebar-divider { height: 1px; margin: 0 8px 12px; background: var(--color-border); }
+.user-profile { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px; border: 0; border-radius: 8px; background: transparent; text-align: left; cursor: pointer; }
+.user-profile:hover, .user-profile.open { background: var(--color-bg); }
+.user-avatar { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; flex: 0 0 36px; border-radius: 50%; background: linear-gradient(135deg, #7548f5, #4f2bdd); color: #fff; font-size: 14px; font-weight: 700; }
+.user-copy { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 2px; }
+.user-copy strong, .user-copy span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-copy strong { color: var(--color-text); font-size: 12px; }
+.user-copy span { color: var(--color-text-muted); font-size: 10px; }
+.user-chevron { color: var(--color-text-muted); transition: transform 0.18s ease; }
+.user-chevron.open { transform: rotate(180deg); }
+.logout-card { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 12px 15px; border: 1px solid var(--color-border); border-radius: 9px; background: var(--color-surface); color: var(--color-text); font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow-md); }
+.logout-card lucide-icon { color: #ef4444; }
+.logout-card:hover { background: #fff7f7; border-color: #fecaca; }
+
+.preferences:hover {
+  background: var(--color-bg);
 }
 
 .content {
   flex: 1;
+  height: 100%;
   padding: var(--space-6);
   max-width: 100%;
+  overflow-y: auto;
   overflow-x: hidden;
 }

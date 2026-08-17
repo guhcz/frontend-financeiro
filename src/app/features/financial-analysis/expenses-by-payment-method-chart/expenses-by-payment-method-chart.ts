@@ -12,7 +12,7 @@ interface PaymentMethodBar {
   color: string;
 }
 
-const BAR_COLORS = ['#7650dd', '#fb4267', '#ff8a33', '#49bf8b', '#3a94e8', '#9ca3af'];
+const BAR_COLORS = ['#8b5cf6', '#fb4267', '#ff8a33', '#49bf8b', '#3a94e8', '#9ca3af'];
 
 @Component({
   selector: 'app-expenses-by-payment-method-chart',

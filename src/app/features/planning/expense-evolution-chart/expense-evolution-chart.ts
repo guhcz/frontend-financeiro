@@ -60,10 +60,27 @@ export class ExpenseEvolutionChart {
 
   readonly hoveredIndex = signal<number | null>(null);
 
+  private readonly normalizedData = computed<ExpenseEvolutionPoint[]>(() => {
+    const sorted = [...this.data()].sort((a, b) => a.date.localeCompare(b.date));
+    let accumulated = 0;
+    return sorted.map((item) => {
+      const dailyAmount = Number(item.dailyAmount);
+      const apiAccumulated = Number(item.accumulatedAmount);
+
+      if (Number.isFinite(dailyAmount) && dailyAmount > 0) {
+        accumulated += dailyAmount;
+      } else if (Number.isFinite(apiAccumulated)) {
+        accumulated = Math.max(accumulated, apiAccumulated);
+      }
+
+      return { ...item, accumulatedAmount: accumulated };
+    });
+  });
+
   private readonly daysInMonth = computed(() => computeDaysInMonth(this.month(), this.year()));
 
   private readonly niceMax = computed(() => {
-    const values = this.data().map((d) => d.accumulatedAmount);
+    const values = this.normalizedData().map((d) => d.accumulatedAmount);
     const rawMax = Math.max(...values, this.monthlyLimit() ?? 0, 1);
     return niceStep(rawMax / 4) * 4;
   });
@@ -84,8 +101,11 @@ export class ExpenseEvolutionChart {
   readonly points = computed<ChartPoint[]>(() => {
     const total = this.daysInMonth();
     const max = this.niceMax();
-    return this.data().map((item) => {
-      const day = Number(item.date.slice(8, 10));
+    let previousDay = 0;
+    return this.normalizedData().map((item) => {
+      const originalDay = Number(item.date.slice(8, 10));
+      const day = clamp(Math.max(originalDay, previousDay + 1), 1, total);
+      previousDay = day;
       const x = this.xForDay(day, total);
       const y = this.yForValue(item.accumulatedAmount, max);
       return {
@@ -157,6 +177,18 @@ export class ExpenseEvolutionChart {
 
   xForTick(day: number): number {
     return this.xForDay(day, this.daysInMonth());
+  }
+
+  endLabelX(point: ChartPoint): number {
+    return point.x <= MARGIN.left + 48 ? point.x + 8 : point.x;
+  }
+
+  endLabelAnchor(point: ChartPoint): 'start' | 'end' {
+    return point.x <= MARGIN.left + 48 ? 'start' : 'end';
+  }
+
+  endLabelY(point: ChartPoint): number {
+    return Math.max(point.y - 10, MARGIN.top + 10);
   }
 
   private xForDay(day: number, totalDays: number): number {

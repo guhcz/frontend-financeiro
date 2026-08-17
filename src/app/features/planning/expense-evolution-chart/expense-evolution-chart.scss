@@ -114,8 +114,9 @@
 .evolution-tooltip {
   position: absolute;
   transform: translate(-50%, -130%);
-  background: var(--color-text);
+  background: #111827;
   color: #fff;
+  border: 1px solid #374151;
   padding: 6px 10px;
   border-radius: var(--radius-sm);
   font-size: 12px;
@@ -129,4 +130,8 @@
 
 .evolution-tooltip strong {
   font-size: 13px;
+}
+
+.evolution-tooltip span {
+  color: #d1d5db;
 }

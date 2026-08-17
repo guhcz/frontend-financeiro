@@ -1,0 +1,61 @@
+<app-modal
+  title="Gastos por categoria"
+  subtitle="Confira seus gastos detalhados por categoria no período selecionado."
+  [wide]="true"
+  icon="chart-pie"
+  (closed)="closed.emit()"
+>
+  <div class="category-modal-toolbar">
+    <input type="search" placeholder="Buscar por categoria..." [value]="search()" (input)="onSearch($event)" />
+    <select aria-label="Ordenar categorias" [value]="sort()" (change)="onSort($event)">
+      <option value="amount-desc">Ordenar: Maior valor</option>
+      <option value="amount-asc">Ordenar: Menor valor</option>
+      <option value="name-asc">Ordenar: Nome (A-Z)</option>
+    </select>
+    <div class="category-total-card">
+      <span>Total de despesas</span>
+      <strong>{{ totalAmount() | currency: 'BRL' }}</strong>
+    </div>
+  </div>
+
+  @if (rows().length === 0) {
+    <div class="category-modal-empty">Nenhuma categoria encontrada para a busca informada.</div>
+  } @else {
+    <div class="table-wrap">
+      <table class="category-details-table">
+        <thead>
+          <tr><th>Categoria</th><th>Valor gasto</th><th>% do total</th></tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.category.id) {
+            <tr>
+              <td>
+                <span class="category-name-cell">
+                  <span class="category-color" [style.background]="row.category.color"></span>
+                  <strong>{{ row.category.name }}</strong>
+                </span>
+              </td>
+              <td class="amount-cell">{{ row.amount | currency: 'BRL' }}</td>
+              <td><span class="percentage-pill">{{ row.percentage | number: '1.1-1' }}%</span></td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr><td>Total</td><td class="amount-cell">{{ totalAmount() | currency: 'BRL' }}</td><td>100,0%</td></tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <app-pagination
+      [page]="page()"
+      [totalPages]="totalPages()"
+      [totalElements]="filtered().length"
+      [size]="size()"
+      [first]="page() === 0"
+      [last]="page() >= totalPages() - 1"
+      itemLabel="categorias"
+      (pageChange)="onPageChange($event)"
+      (sizeChange)="onSizeChange($event)"
+    ></app-pagination>
+  }
+</app-modal>

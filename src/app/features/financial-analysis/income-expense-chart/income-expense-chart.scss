@@ -22,9 +22,9 @@
   gap: var(--space-4);
   list-style: none;
   justify-content: center;
-  margin: 8px 0 0;
+  margin: 6px 0 0;
   padding: 0;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--color-text-muted);
 }
 
@@ -49,7 +49,7 @@
   background: #fa4368;
 }
 
-.chart-plot { position: relative; height: 190px; padding-left: 46px; }
+.chart-plot { position: relative; height: 196px; padding-left: 46px; }
 .y-axis { position: absolute; inset: 0 auto 24px 0; width: 42px; display: flex; flex-direction: column; justify-content: space-between; color: var(--color-text-muted); font-size: 9px; font-variant-numeric: tabular-nums; }
 .chart-grid-lines { position: absolute; inset: 0 0 24px 46px; display: flex; flex-direction: column; justify-content: space-between; pointer-events: none; }
 .chart-grid-lines span { display: block; border-top: 1px solid #e7eaf0; }
@@ -61,7 +61,7 @@
   gap: var(--space-2);
   position: relative;
   height: 100%;
-  padding: 12px 6px 0;
+  padding: 14px 10px 0;
 }
 
 .bar-group {
@@ -111,9 +111,9 @@
 .bar-value { position: absolute; left: 50%; transform: translate(-50%, -4px); color: #334155; font-size: 9px; font-weight: 600; white-space: nowrap; }
 
 .bar-group-label {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--color-text-muted);
-  font-weight: 600;
+  font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

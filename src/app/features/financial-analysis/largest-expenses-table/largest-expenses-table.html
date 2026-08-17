@@ -13,7 +13,9 @@
           <tr>
             <td class="expense-description">{{ row.description }}</td>
             <td><span class="category-chip" [style.--category-color]="row.categoryColor">{{ row.categoryName }}</span></td>
-            <td class="method-cell"><span class="method-dot" [style.background]="row.categoryColor"></span>{{ row.methodLabel }}</td>
+            <td class="method-cell">
+              <span class="method-content"><span class="method-dot" [style.background]="row.categoryColor"></span>{{ row.methodLabel }}</span>
+            </td>
             <td>{{ row.date | date: 'dd/MM/yyyy' }}</td>
             <td class="expense-amount">{{ row.amount | currency: 'BRL' }}</td>
           </tr>

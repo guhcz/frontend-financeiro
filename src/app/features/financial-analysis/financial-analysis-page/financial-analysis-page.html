@@ -3,12 +3,6 @@
     <h1>Análise financeira</h1>
     <p>Acompanhe seus gastos, receitas e evolução financeira.</p>
   </div>
-  <div class="page-header-actions">
-    <button type="button" class="btn btn-secondary" disabled title="Em breve">
-      <lucide-icon name="download" [size]="16"></lucide-icon>
-      Exportar
-    </button>
-  </div>
 </div>
 
 <app-period-filter
@@ -31,13 +25,20 @@
           <h2>Receitas x despesas <span class="info-mark" title="Comparativo por competência financeira">i</span></h2>
           <span class="analysis-card-subtitle">Valores por competência financeira</span>
         </div>
-        <select class="analysis-select" aria-label="Periodicidade do gráfico">
-          <option>Mensal</option>
+        <select
+          class="analysis-select"
+          aria-label="Periodicidade do gráfico"
+          [value]="incomeExpensePeriod()"
+          (change)="onIncomeExpensePeriodChange($event)"
+        >
+          <option value="monthly">Mensal</option>
+          <option value="yearly">Anual</option>
         </select>
       </div>
       <app-income-expense-chart
         [data]="analysis()?.incomeVsExpenses ?? []"
         [loading]="analysisLoading()"
+        [period]="incomeExpensePeriod()"
       ></app-income-expense-chart>
     </div>
 
@@ -49,7 +50,7 @@
         [data]="analysis()?.expensesByCategory ?? []"
         [loading]="analysisLoading()"
       ></app-expenses-by-category-chart>
-      <button type="button" class="btn btn-secondary card-footer-action" (click)="goToRegistrations()">
+      <button type="button" class="btn btn-secondary card-footer-action" (click)="openCategoryDetails()">
         Ver todas as categorias
       </button>
     </div>
@@ -77,13 +78,20 @@
     <div class="card analysis-card">
       <div class="analysis-card-header">
         <h2>Evolução do saldo mensal <span class="info-mark" title="Evolução de receitas menos despesas">i</span></h2>
-        <select class="analysis-select" aria-label="Periodicidade da evolução">
-          <option>Mensal</option>
+        <select
+          class="analysis-select"
+          aria-label="Periodicidade da evolução"
+          [value]="balancePeriod()"
+          (change)="onBalancePeriodChange($event)"
+        >
+          <option value="monthly">Mensal</option>
+          <option value="yearly">Anual</option>
         </select>
       </div>
       <app-monthly-balance-chart
         [data]="analysis()?.monthlyBalanceEvolution ?? []"
         [loading]="analysisLoading()"
+        [period]="balancePeriod()"
       ></app-monthly-balance-chart>
     </div>
 
@@ -111,4 +119,11 @@
     [totalPeriodAmount]="totalExpenseAmount()"
     (closed)="closePaymentMethodDetails()"
   ></app-payment-method-details-modal>
+}
+
+@if (categoryModalOpen()) {
+  <app-category-details-modal
+    [data]="analysis()?.expensesByCategory ?? []"
+    (closed)="closeCategoryDetails()"
+  ></app-category-details-modal>
 }

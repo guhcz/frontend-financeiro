@@ -11,6 +11,7 @@ import { IncomeExpenseChart } from '../income-expense-chart/income-expense-chart
 import { LargestExpensesTable } from '../largest-expenses-table/largest-expenses-table';
 import { MonthlyBalanceChart } from '../monthly-balance-chart/monthly-balance-chart';
 import { PaymentMethodDetailsModal } from '../payment-method-details-modal/payment-method-details-modal';
+import { CategoryDetailsModal } from '../category-details-modal/category-details-modal';
 import { PeriodFilter, PeriodRange, PeriodShortcutKey, shortcutRange } from '../period-filter/period-filter';
 
 const DEFAULT_SHORTCUT_MONTHS_BACK = 2;
@@ -26,6 +27,7 @@ const DEFAULT_SHORTCUT_MONTHS_BACK = 2;
     MonthlyBalanceChart,
     LargestExpensesTable,
     PaymentMethodDetailsModal,
+    CategoryDetailsModal,
   ],
   templateUrl: './financial-analysis-page.html',
   styleUrls: ['../../list-page.scss', './financial-analysis-page.scss'],
@@ -38,6 +40,8 @@ export class FinancialAnalysisPage implements OnInit {
   readonly startDate = signal(this.defaultRange.startDate);
   readonly endDate = signal(this.defaultRange.endDate);
   readonly activeShortcut = signal<PeriodShortcutKey | null>('3m');
+  readonly incomeExpensePeriod = signal<'monthly' | 'yearly'>('monthly');
+  readonly balancePeriod = signal<'monthly' | 'yearly'>('monthly');
 
   readonly analysis = signal<FinancialAnalysisResponse | null>(null);
   readonly analysisLoading = signal(true);
@@ -48,6 +52,7 @@ export class FinancialAnalysisPage implements OnInit {
   );
 
   readonly paymentMethodModalOpen = signal(false);
+  readonly categoryModalOpen = signal(false);
 
   ngOnInit(): void {
     this.loadAnalysis();
@@ -66,6 +71,24 @@ export class FinancialAnalysisPage implements OnInit {
 
   closePaymentMethodDetails(): void {
     this.paymentMethodModalOpen.set(false);
+  }
+
+  openCategoryDetails(): void {
+    this.categoryModalOpen.set(true);
+  }
+
+  closeCategoryDetails(): void {
+    this.categoryModalOpen.set(false);
+  }
+
+  onIncomeExpensePeriodChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.incomeExpensePeriod.set(value === 'yearly' ? 'yearly' : 'monthly');
+  }
+
+  onBalancePeriodChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.balancePeriod.set(value === 'yearly' ? 'yearly' : 'monthly');
   }
 
   goToTransactions(): void {

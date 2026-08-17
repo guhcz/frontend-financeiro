@@ -110,6 +110,7 @@
 .expense-table th:nth-child(5) { width: 15%; text-align: right; }
 .expense-description { font-weight: 600; }
 .category-chip { display: inline-block; max-width: 100%; padding: 3px 6px; border-radius: 4px; background: color-mix(in srgb, var(--category-color) 14%, white); color: var(--category-color); overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
-.method-cell { display: flex; align-items: center; gap: 5px; }
+.method-cell { display: table-cell; }
+.method-content { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; }
 .method-dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 10px; }
 .expense-amount { font-weight: 700; text-align: right; }

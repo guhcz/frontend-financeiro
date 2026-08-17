@@ -7,34 +7,65 @@
 
     <nav class="nav">
       <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
-        <span class="nav-icon">🏠</span>
+        <lucide-icon name="house" [size]="18"></lucide-icon>
         Dashboard
       </a>
       <a routerLink="/movimentacoes" routerLinkActive="active" class="nav-item">
-        <span class="nav-icon">🧾</span>
+        <lucide-icon name="receipt-text" [size]="18"></lucide-icon>
         Movimentações
       </a>
       <a routerLink="/planejamento" routerLinkActive="active" class="nav-item">
-        <span class="nav-icon">🗓️</span>
+        <lucide-icon name="calendar-days" [size]="18"></lucide-icon>
         Planejamento
       </a>
       <a routerLink="/cadastros" routerLinkActive="active" class="nav-item">
-        <span class="nav-icon">🗂️</span>
+        <lucide-icon name="folder" [size]="18"></lucide-icon>
         Cadastros
       </a>
       <a routerLink="/analise-financeira" routerLinkActive="active" class="nav-item">
-        <span class="nav-icon">📈</span>
+        <lucide-icon name="chart-no-axes-combined" [size]="18"></lucide-icon>
         Gráficos
       </a>
     </nav>
 
-    <button type="button" class="nav-item logout" (click)="logout()">
-      <span class="nav-icon">🚪</span>
-      Sair
-    </button>
+    <div class="sidebar-footer">
+      <button type="button" class="nav-item preferences" [class.active]="preferencesOpen()" (click)="openPreferences()">
+        <lucide-icon name="settings" [size]="18"></lucide-icon>
+        Preferências
+      </button>
+
+      <div class="sidebar-divider"></div>
+
+      <button
+        type="button"
+        class="user-profile"
+        [class.open]="userMenuOpen()"
+        [attr.aria-expanded]="userMenuOpen()"
+        aria-label="Abrir opções do usuário"
+        (click)="toggleUserMenu()"
+      >
+        <span class="user-avatar">{{ userInitial() }}</span>
+        <div class="user-copy">
+          <strong>{{ currentUser()?.name || 'Usuário' }}</strong>
+          <span>{{ currentUser()?.email || 'Conta conectada' }}</span>
+        </div>
+        <lucide-icon name="chevron-down" [size]="16" class="user-chevron" [class.open]="userMenuOpen()"></lucide-icon>
+      </button>
+
+      @if (userMenuOpen()) {
+        <button type="button" class="logout-card" (click)="logout()">
+          <lucide-icon name="log-out" [size]="18"></lucide-icon>
+          Sair
+        </button>
+      }
+    </div>
   </aside>
 
   <main class="content">
     <router-outlet></router-outlet>
   </main>
+
+  @if (preferencesOpen()) {
+    <app-preferences-modal (closed)="closePreferences()"></app-preferences-modal>
+  }
 </div>

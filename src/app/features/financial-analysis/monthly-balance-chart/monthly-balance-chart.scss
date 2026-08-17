@@ -20,11 +20,14 @@
 .balance-chart-wrap {
   position: relative;
   width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
 }
 
 .balance-svg {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
 }
 
@@ -77,8 +80,9 @@
 .balance-tooltip {
   position: absolute;
   transform: translate(-50%, -130%);
-  background: var(--color-text);
+  background: #111827;
   color: #fff;
+  border: 1px solid #374151;
   padding: 6px 10px;
   border-radius: var(--radius-sm);
   font-size: 12px;
@@ -94,6 +98,10 @@
   font-size: 13px;
 }
 
+.balance-tooltip span {
+  color: #d1d5db;
+}
+
 .balance-trend-text {
   display: flex;
   align-items: center;
@@ -104,7 +112,7 @@
   border-radius: 8px;
   background: #f1fbf5;
   font-size: 11px;
-  color: #395348;
+  color: var(--color-text-muted);
 }
 
-.trend-icon { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #e0f7e9; color: #159356; font-size: 16px; font-weight: 700; }
+.trend-icon { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: color-mix(in srgb, var(--color-success) 18%, var(--color-surface)); color: var(--color-success); font-size: 16px; font-weight: 700; }

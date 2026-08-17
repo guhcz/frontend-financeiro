@@ -1,0 +1,12 @@
+.category-modal-toolbar { display: grid; grid-template-columns: 1.5fr 1fr auto; gap: var(--space-3); align-items: stretch; margin-bottom: var(--space-4); }
+.category-total-card { display: flex; min-width: 150px; flex-direction: column; justify-content: center; padding: 8px 14px; border-radius: var(--radius-sm); background: var(--color-danger-light); color: var(--color-danger); }
+.category-total-card span { font-size: 11px; color: inherit; opacity: 0.82; }
+.category-total-card strong { font-size: 16px; }
+.category-modal-empty { padding: var(--space-6); text-align: center; color: var(--color-text-muted); }
+.category-details-table th, .category-details-table td { padding: 11px 10px; }
+.category-name-cell { display: inline-flex; align-items: center; gap: 9px; }
+.category-color { width: 20px; height: 20px; border-radius: 50%; box-shadow: inset 0 0 0 5px rgb(255 255 255 / 75%); }
+.amount-cell { font-weight: 600; white-space: nowrap; }
+.percentage-pill { display: inline-block; min-width: 52px; padding: 3px 7px; border-radius: 999px; background: #f1f5f9; text-align: center; }
+.category-details-table tfoot td { border-top: 2px solid var(--color-border); border-bottom: 0; font-weight: 700; }
+@media (max-width: 700px) { .category-modal-toolbar { grid-template-columns: 1fr; } }

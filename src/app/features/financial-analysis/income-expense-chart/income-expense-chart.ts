@@ -27,11 +27,12 @@ const MAX_VISIBLE_LABELS = 6;
 export class IncomeExpenseChart {
   data = input.required<IncomeVsExpensesPoint[]>();
   loading = input(false);
+  period = input<'monthly' | 'yearly'>('monthly');
 
   readonly hoveredIndex = signal<number | null>(null);
 
   readonly maxAmount = computed(() =>
-    Math.max(...this.data().flatMap((item) => [item.incomeAmount, item.expenseAmount]), 1),
+    Math.max(...this.groupedData().flatMap((item) => [item.incomeAmount, item.expenseAmount]), 1),
   );
 
   readonly yTicks = computed(() => {
@@ -41,15 +42,34 @@ export class IncomeExpenseChart {
 
   private readonly sorted = computed(() => [...this.data()].sort((a, b) => a.year - b.year || a.month - b.month));
 
-  readonly groups = computed<ChartGroup[]>(() => {
+  private readonly groupedData = computed(() => {
     const items = this.sorted();
+    if (this.period() === 'monthly') return items;
+
+    const byYear = new Map<number, IncomeVsExpensesPoint>();
+    for (const item of items) {
+      const current = byYear.get(item.year) ?? {
+        month: 0,
+        year: item.year,
+        incomeAmount: 0,
+        expenseAmount: 0,
+      };
+      current.incomeAmount += item.incomeAmount;
+      current.expenseAmount += item.expenseAmount;
+      byYear.set(item.year, current);
+    }
+    return [...byYear.values()].sort((a, b) => a.year - b.year);
+  });
+
+  readonly groups = computed<ChartGroup[]>(() => {
+    const items = this.groupedData();
     const max = this.maxAmount();
     const labelStep = Math.max(1, Math.ceil(items.length / MAX_VISIBLE_LABELS));
     return items.map((item, i) => ({
       month: item.month,
       year: item.year,
-      label: monthShortLabel(item.month, item.year),
-      fullLabel: monthYearLabel(item.month, item.year),
+      label: this.period() === 'yearly' ? String(item.year) : monthShortLabel(item.month, item.year),
+      fullLabel: this.period() === 'yearly' ? String(item.year) : monthYearLabel(item.month, item.year),
       incomeAmount: item.incomeAmount,
       expenseAmount: item.expenseAmount,
       balance: item.incomeAmount - item.expenseAmount,
