@@ -10,6 +10,7 @@ import {
 } from '../../../core/models/transaction-method.model';
 import {
   calculateInstallmentAmount,
+  defaultDateInMonth,
   firstDayOfMonth,
   lastDayOfMonth,
   lastInstallmentMonth,
@@ -235,6 +236,8 @@ export class ExpenseFormModal implements OnInit {
       dueDay: value.dueDay ? Number(value.dueDay) : null,
       startDate,
       endDate,
+      firstOccurrenceDate: defaultDateInMonth(value.startYear, value.startMonth),
+      installmentCount: isInstallments ? Number(value.installments) : null,
     });
   }
 }

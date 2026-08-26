@@ -19,7 +19,7 @@
 
 .dashboard-grid {
   display: grid;
-  align-items: start;
+  align-items: stretch;
   grid-template-columns: 1.3fr 1fr 1fr;
   gap: var(--space-4);
 }
@@ -29,6 +29,23 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+.dashboard-col > .dashboard-card:last-child {
+  flex: 1;
+}
+
+.dashboard-col:nth-child(3) > .dashboard-card:first-child {
+  flex: 1;
+}
+
+.dashboard-col:nth-child(3) > .dashboard-card:last-child {
+  flex: 0 0 auto;
+}
+
+.dashboard-col:nth-child(3) > .dashboard-card:first-child .quick-actions {
+  flex: 1;
+  grid-template-rows: repeat(3, minmax(74px, 1fr));
 }
 
 .dashboard-card {
@@ -75,6 +92,10 @@
   transition:
     background-color 0.15s ease,
     border-color 0.15s ease;
+}
+
+.quick-action:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
 }
 
 .quick-action:hover {
@@ -153,45 +174,6 @@
   flex-shrink: 0;
 }
 
-.goals-card {
-  align-items: flex-start;
-  background: linear-gradient(135deg, var(--color-violet-light), var(--color-primary-light));
-  border: 1px dashed var(--color-border);
-}
-
-.goals-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.goals-icon {
-  color: var(--color-violet);
-  margin: var(--space-2) 0;
-}
-
-.goals-card p {
-  font-size: 13px;
-  color: var(--color-text);
-  margin-bottom: 4px;
-}
-
-.goals-subtext {
-  color: var(--color-text-muted) !important;
-  font-size: 12px !important;
-}
-
-.badge-soon {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--color-violet);
-  background: var(--color-surface);
-  padding: 3px 10px;
-  border-radius: 999px;
-  flex-shrink: 0;
-}
-
 @media (max-width: 1200px) {
   .dashboard-grid {
     grid-template-columns: 1fr 1fr;
@@ -213,5 +195,16 @@
 
   .quick-actions {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .page-header-actions {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .page-header-actions .btn,
+  .page-header-actions app-month-switcher {
+    width: 100%;
   }
 }

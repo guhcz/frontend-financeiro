@@ -98,9 +98,99 @@
 
 .content {
   flex: 1;
+  min-width: 0;
   height: 100%;
   padding: var(--space-6);
   max-width: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+@media (max-width: 1180px) {
+  .sidebar {
+    width: 72px;
+    padding-inline: 8px;
+  }
+
+  .brand {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .brand-name,
+  .nav-label,
+  .user-copy,
+  .user-chevron {
+    display: none;
+  }
+
+  .nav-item,
+  .user-profile {
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .logout-card {
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .content {
+    padding: var(--space-5);
+  }
+}
+
+@media (max-width: 700px) {
+  .shell {
+    display: block;
+  }
+
+  .sidebar {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 50;
+    width: 100%;
+    height: 64px;
+    padding: 7px 8px max(7px, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--color-border);
+    border-right: 0;
+    overflow: visible;
+  }
+
+  .brand,
+  .sidebar-divider,
+  .user-profile,
+  .logout-card {
+    display: none;
+  }
+
+  .nav {
+    flex: 5 1 0;
+    flex-direction: row;
+    gap: 4px;
+  }
+
+  .sidebar-footer {
+    display: contents;
+  }
+
+  .nav-item,
+  .preferences {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    min-height: 48px;
+    margin: 0;
+  }
+
+
+  .preferences {
+    flex: 1 1 0;
+  }
+
+  .content {
+    width: 100%;
+    height: 100dvh;
+    padding: var(--space-4) var(--space-3) 84px;
+  }
 }

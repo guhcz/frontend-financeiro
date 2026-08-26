@@ -17,6 +17,8 @@ export interface TransactionListItem {
   category: Category;
   billingMonth?: number | null;
   billingYear?: number | null;
+  installmentNumber?: number | null;
+  installmentCount?: number | null;
 }
 
 export interface TransactionFilters {

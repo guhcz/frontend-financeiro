@@ -11,6 +11,7 @@ export class Modal {
   title = input.required<string>();
   subtitle = input<string | null>(null);
   wide = input(false);
+  topAligned = input(false);
   icon = input<string | null>(null);
   iconTone = input<'violet' | 'green' | 'orange' | 'blue'>('violet');
   closed = output<void>();

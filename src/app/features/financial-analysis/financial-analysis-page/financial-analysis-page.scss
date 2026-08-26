@@ -152,9 +152,24 @@
   }
 }
 
+@media (max-width: 1000px) {
+  .analysis-grid-row-1,
+  .analysis-grid-row-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 720px) {
   .analysis-grid-row-1,
   .analysis-grid-row-2 {
     grid-template-columns: 1fr;
+  }
+
+  .analysis-card-header {
+    flex-wrap: wrap;
+  }
+
+  .analysis-card-income .analysis-card-header h2 {
+    white-space: normal;
   }
 }

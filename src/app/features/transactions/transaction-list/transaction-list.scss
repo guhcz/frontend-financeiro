@@ -62,6 +62,18 @@
   white-space: nowrap;
 }
 
+.installment-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+.installment-info > span {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
 td .icon-btn {
   margin-right: var(--space-1);
 }
@@ -73,9 +85,16 @@ td .icon-btn {
   padding-bottom: var(--space-6);
 }
 
-@media (max-width: 900px) {
-  .col-method,
-  .col-recurring {
+@media (max-width: 1100px) {
+  .col-method {
     display: none;
   }
+}
+
+@media (max-width: 700px) {
+  .filters-card { padding: var(--space-4); }
+  .filters-grid .form-group { min-width: 100%; }
+  .filters-actions { flex-direction: column-reverse; }
+  .filters-actions .btn { width: 100%; }
+  .empty-state-actions { flex-direction: column; padding-inline: var(--space-4); }
 }

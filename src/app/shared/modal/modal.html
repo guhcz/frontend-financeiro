@@ -1,4 +1,4 @@
-<div class="modal-overlay" (click)="onOverlayClick($event)">
+<div class="modal-overlay" [class.modal-overlay-top]="topAligned()" (click)="onOverlayClick($event)">
   <div class="modal-panel" [class.modal-panel-wide]="wide()" role="dialog" aria-modal="true">
     <header class="modal-header">
       <div class="modal-title-group">
