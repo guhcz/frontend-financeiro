@@ -47,8 +47,8 @@
         <h2>Gastos por categoria <span class="info-mark" title="Distribuição das despesas por categoria">i</span></h2>
       </div>
       <app-expenses-by-category-chart
-        [data]="analysis()?.expensesByCategory ?? []"
-        [loading]="analysisLoading()"
+        [data]="expensesByCategory()"
+        [loading]="categoryExpensesLoading()"
       ></app-expenses-by-category-chart>
       <button type="button" class="btn btn-secondary card-footer-action" (click)="openCategoryDetails()">
         Ver todas as categorias
@@ -123,7 +123,7 @@
 
 @if (categoryModalOpen()) {
   <app-category-details-modal
-    [data]="analysis()?.expensesByCategory ?? []"
+    [data]="expensesByCategory()"
     (closed)="closeCategoryDetails()"
   ></app-category-details-modal>
 }

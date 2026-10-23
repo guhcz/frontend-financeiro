@@ -53,3 +53,8 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 700px) {
+  .page-header-actions { align-items: stretch; flex-direction: column; width: 100%; }
+  .page-header-actions .btn, .page-header-actions app-month-switcher { width: 100%; }
+}

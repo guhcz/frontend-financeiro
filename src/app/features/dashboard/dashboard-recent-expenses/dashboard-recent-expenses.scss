@@ -50,19 +50,33 @@
 
 .expense-main {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
   flex: 1;
   min-width: 0;
 }
 
+.expense-main app-badge {
+  flex-shrink: 0;
+}
+
 .expense-description {
+  min-width: 0;
   font-size: 14px;
   font-weight: 600;
   color: var(--color-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+@media (max-width: 420px) {
+  .expense-main {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
 }
 
 .expense-meta {

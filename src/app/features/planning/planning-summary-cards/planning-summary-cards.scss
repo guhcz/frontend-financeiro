@@ -116,8 +116,13 @@
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
   .summary-cards {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+@media (max-width: 560px) {
+  .summary-cards { grid-template-columns: 1fr; }
+  .summary-card { padding: var(--space-4); }
 }

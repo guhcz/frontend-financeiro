@@ -9,6 +9,11 @@
   z-index: 100;
 }
 
+.modal-overlay-top {
+  align-items: flex-start;
+  padding-top: clamp(24px, 6vh, 56px);
+}
+
 .modal-panel {
   background: var(--color-surface);
   border-radius: var(--radius-lg);

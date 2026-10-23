@@ -137,7 +137,16 @@
                 ></app-badge>
               </td>
               <td class="col-recurring">
-                @if (item.recurring) {
+                @if (item.installmentCount && item.installmentNumber) {
+                  <div class="installment-info">
+                    <app-badge
+                      label="Parcelada"
+                      color="#7c3aed"
+                      [title]="'Compra parcelada em ' + item.installmentCount + ' vezes.'"
+                    ></app-badge>
+                    <span>Parcela {{ item.installmentNumber }} de {{ item.installmentCount }}</span>
+                  </div>
+                } @else if (item.recurring) {
                   <app-badge
                     label="Recorrente"
                     color="#2563eb"

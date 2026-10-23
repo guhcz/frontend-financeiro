@@ -16,6 +16,7 @@ export interface RecurringExpense {
   dueDay: number | null;
   startDate: string;
   endDate: string | null;
+  installmentCount: number | null;
   nextGenerationDate: string | null;
   active: boolean;
   status: RecurrenceStatus;
@@ -32,6 +33,8 @@ export interface RecurringExpenseRequest {
   dueDay: number | null;
   startDate: string;
   endDate: string | null;
+  firstOccurrenceDate: string | null;
+  installmentCount: number | null;
 }
 
 export interface RecurringExpenseUpdateRequest {

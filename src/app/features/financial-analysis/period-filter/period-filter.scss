@@ -83,8 +83,26 @@
 }
 
 @media (max-width: 900px) {
+  .period-range,
+  .period-shortcuts {
+    width: 100%;
+  }
+
+  .period-shortcuts {
+    padding-left: 0;
+    margin-left: 0;
+    border-left: 0;
+  }
+
   .period-apply-btn {
     margin-left: 0;
     width: 100%;
   }
+}
+
+@media (max-width: 560px) {
+  .period-range { flex-wrap: wrap; }
+  .period-range-label { width: 100%; }
+  .period-range-input { flex: 1 1 130px; }
+  .period-shortcut-btn { flex: 1 1 calc(50% - var(--space-2)); }
 }

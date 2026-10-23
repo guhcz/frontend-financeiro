@@ -58,3 +58,19 @@
   width: auto;
   padding: 6px 8px;
 }
+
+@media (max-width: 620px) {
+  .pagination {
+    justify-content: center;
+    padding: var(--space-3);
+  }
+
+  .pagination-summary,
+  .pagination-size {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .pagination-controls { order: 3; }
+}

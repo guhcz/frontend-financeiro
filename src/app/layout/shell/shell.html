@@ -6,32 +6,32 @@
     </div>
 
     <nav class="nav">
-      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" aria-label="Dashboard" title="Dashboard">
         <lucide-icon name="house" [size]="18"></lucide-icon>
-        Dashboard
+        <span class="nav-label">Dashboard</span>
       </a>
-      <a routerLink="/movimentacoes" routerLinkActive="active" class="nav-item">
+      <a routerLink="/movimentacoes" routerLinkActive="active" class="nav-item" aria-label="Movimentações" title="Movimentações">
         <lucide-icon name="receipt-text" [size]="18"></lucide-icon>
-        Movimentações
+        <span class="nav-label">Movimentações</span>
       </a>
-      <a routerLink="/planejamento" routerLinkActive="active" class="nav-item">
+      <a routerLink="/planejamento" routerLinkActive="active" class="nav-item" aria-label="Planejamento" title="Planejamento">
         <lucide-icon name="calendar-days" [size]="18"></lucide-icon>
-        Planejamento
+        <span class="nav-label">Planejamento</span>
       </a>
-      <a routerLink="/cadastros" routerLinkActive="active" class="nav-item">
+      <a routerLink="/cadastros" routerLinkActive="active" class="nav-item" aria-label="Cadastros" title="Cadastros">
         <lucide-icon name="folder" [size]="18"></lucide-icon>
-        Cadastros
+        <span class="nav-label">Cadastros</span>
       </a>
-      <a routerLink="/analise-financeira" routerLinkActive="active" class="nav-item">
+      <a routerLink="/analise-financeira" routerLinkActive="active" class="nav-item" aria-label="Gráficos" title="Gráficos">
         <lucide-icon name="chart-no-axes-combined" [size]="18"></lucide-icon>
-        Gráficos
+        <span class="nav-label">Gráficos</span>
       </a>
     </nav>
 
     <div class="sidebar-footer">
-      <button type="button" class="nav-item preferences" [class.active]="preferencesOpen()" (click)="openPreferences()">
+      <button type="button" class="nav-item preferences" [class.active]="preferencesOpen()" aria-label="Preferências" title="Preferências" (click)="openPreferences()">
         <lucide-icon name="settings" [size]="18"></lucide-icon>
-        Preferências
+        <span class="nav-label">Preferências</span>
       </button>
 
       <div class="sidebar-divider"></div>
@@ -55,7 +55,7 @@
       @if (userMenuOpen()) {
         <button type="button" class="logout-card" (click)="logout()">
           <lucide-icon name="log-out" [size]="18"></lucide-icon>
-          Sair
+          <span class="nav-label">Sair</span>
         </button>
       }
     </div>
